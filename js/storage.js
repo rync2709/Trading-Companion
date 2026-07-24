@@ -4,7 +4,8 @@
   const KEYS = {
     draft: "tradingCompanionDraftV1",
     history: "tradingCompanionHistoryV1",
-    weeklyReviews: "tradingCompanionWeeklyReviewsV1"
+    weeklyReviews: "tradingCompanionWeeklyReviewsV1",
+    sessionPlans: "tradingCompanionSessionPlansV1"
   };
   const VALIDATION_TARGET = 20;
   const JOURNAL_EMOTIONS = ["calm", "neutral", "fearful", "angry", "overconfident"];
@@ -284,6 +285,87 @@
     return next;
   }
 
+  function normalizeSessionPlan(plan, dateKey) {
+    const source = plan && typeof plan === "object" ? plan : {};
+    const bias = ["bullish", "bearish", "neutral"].includes(source.bias) ?
+      source.bias : "";
+    const newsStatus = ["clear", "high-impact"].includes(source.newsStatus) ?
+      source.newsStatus : "not-reviewed";
+    const normalizeText = function (value) {
+      return typeof value === "string" ? value.trim().slice(0, 2000) : "";
+    };
+    return {
+      dateKey: typeof dateKey === "string" ? dateKey : "",
+      bias,
+      htfNarrative: normalizeText(source.htfNarrative),
+      keyPois: normalizeText(source.keyPois),
+      liquidityTargets: normalizeText(source.liquidityTargets),
+      londonPlan: normalizeText(source.londonPlan),
+      newYorkPlan: normalizeText(source.newYorkPlan),
+      newsStatus,
+      newsNote: normalizeText(source.newsNote),
+      noTradeConditions: normalizeText(source.noTradeConditions),
+      updatedAt: typeof source.updatedAt === "string" ? source.updatedAt : null
+    };
+  }
+
+  function loadSessionPlans() {
+    const saved = parse(localStorage.getItem(KEYS.sessionPlans), {});
+    if (!saved || typeof saved !== "object" || Array.isArray(saved)) return {};
+    return Object.keys(saved).reduce(function (plans, dateKey) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) return plans;
+      plans[dateKey] = normalizeSessionPlan(saved[dateKey], dateKey);
+      return plans;
+    }, {});
+  }
+
+  function loadSessionPlan(dateKey) {
+    if (typeof dateKey !== "string") return normalizeSessionPlan(null, "");
+    const plans = loadSessionPlans();
+    return normalizeSessionPlan(plans[dateKey], dateKey);
+  }
+
+  function saveSessionPlan(dateKey, plan) {
+    if (typeof dateKey !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
+      return null;
+    }
+    const plans = loadSessionPlans();
+    const next = normalizeSessionPlan({
+      ...plan,
+      updatedAt: new Date().toISOString()
+    }, dateKey);
+    plans[dateKey] = next;
+    localStorage.setItem(KEYS.sessionPlans, JSON.stringify(plans));
+    return next;
+  }
+
+  function clearSessionPlan(dateKey) {
+    if (typeof dateKey !== "string") return false;
+    const plans = loadSessionPlans();
+    if (!Object.prototype.hasOwnProperty.call(plans, dateKey)) return false;
+    delete plans[dateKey];
+    localStorage.setItem(KEYS.sessionPlans, JSON.stringify(plans));
+    return true;
+  }
+
+  function hasMeaningfulSessionPlan(plan) {
+    if (!plan || typeof plan !== "object") return false;
+    return Boolean(
+      plan.bias ||
+      plan.newsStatus === "clear" ||
+      plan.newsStatus === "high-impact" ||
+      [
+        "htfNarrative",
+        "keyPois",
+        "liquidityTargets",
+        "londonPlan",
+        "newYorkPlan",
+        "newsNote",
+        "noTradeConditions"
+      ].some((field) => Boolean(plan[field]))
+    );
+  }
+
   function saveJournalReview(id, review) {
     const source = review && typeof review === "object" ? review : {};
     const url = typeof source.tradingViewUrl === "string" ? source.tradingViewUrl.trim() : "";
@@ -495,6 +577,12 @@
     loadWeeklyReviews,
     loadWeeklyReview,
     saveWeeklyReview,
+    normalizeSessionPlan,
+    loadSessionPlans,
+    loadSessionPlan,
+    saveSessionPlan,
+    clearSessionPlan,
+    hasMeaningfulSessionPlan,
     saveJournalReview,
     saveJournalScreenshot,
     calculateRealizedRr,

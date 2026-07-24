@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0e1112">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Trading Companion">
+  <title>Session Planner | Trading Companion</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css?v=0.6.0">
+  <link rel="stylesheet" href="css/planner.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html" aria-label="Trading Companion Dashboard">
+        <img src="assets/app-icon.svg" alt="">
+        <span class="brand-copy">
+          <span class="brand-name">Trading Companion</span>
+          <span class="brand-phase">Trading OS · Phase 6</span>
+        </span>
+      </a>
+
+      <nav class="topnav" aria-label="เมนูหลัก">
+        <a class="nav-link" href="index.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-home"></use></svg>
+          Dashboard
+        </a>
+        <a class="nav-link" href="trade.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-plus"></use></svg>
+          New Trade
+        </a>
+        <a class="nav-link" href="journal.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+          Journal
+        </a>
+        <a class="nav-link" href="stats.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-chart"></use></svg>
+          Statistics
+        </a>
+        <a class="nav-link" href="database.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-database"></use></svg>
+          Database
+        </a>
+        <a class="nav-link" href="weekly.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calendar-check"></use></svg>
+          Weekly Review
+        </a>
+        <a class="nav-link" href="planner.html" aria-current="page">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-clock"></use></svg>
+          Session Planner
+        </a>
+        <details class="topnav-more">
+          <summary class="nav-link" title="More tools">
+            <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-more"></use></svg>
+            <span class="sr-only">More tools</span>
+          </summary>
+          <div class="topnav-more-menu">
+            <a class="nav-link" href="checklist.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-list-checks"></use></svg>
+              Classic Checklist
+            </a>
+          </div>
+        </details>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <header class="planner-heading">
+      <div class="page-heading">
+        <p class="eyebrow">Pre-market preparation</p>
+        <h1>Session Planner</h1>
+        <p class="lede">กำหนด Narrative, Liquidity และเงื่อนไขที่ต้องรอก่อนตลาดเปิด</p>
+      </div>
+      <div class="planner-date-controls" aria-label="เลือกวันที่วางแผน">
+        <button class="button button-quiet planner-icon-button" id="previousPlanDay" type="button" title="วันก่อน">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-arrow-left"></use></svg>
+          <span class="sr-only">วันก่อน</span>
+        </button>
+        <strong class="planner-date-label" id="plannerDateLabel">--</strong>
+        <button class="button button-quiet planner-icon-button" id="nextPlanDay" type="button" title="วันถัดไป">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-arrow-right"></use></svg>
+          <span class="sr-only">วันถัดไป</span>
+        </button>
+        <button class="button planner-today-button" id="currentPlanDay" type="button">วันนี้</button>
+      </div>
+    </header>
+
+    <section class="planner-status-bar" id="plannerStatusBar" data-state="waiting" aria-live="polite">
+      <span class="status-dot"></span>
+      <span id="plannerStatusText">กำลังอ่าน Daily Plan</span>
+    </section>
+
+    <div class="planner-layout">
+      <form class="planner-form" id="sessionPlanForm">
+        <section class="panel planner-section" aria-labelledby="narrativeHeading">
+          <div class="planner-section-heading">
+            <span>01</span>
+            <div>
+              <h2 id="narrativeHeading">Market Narrative</h2>
+              <p>กำหนดภาพใหญ่ก่อนมองหา Setup</p>
+            </div>
+          </div>
+
+          <fieldset class="planner-fieldset">
+            <legend>Today's Bias</legend>
+            <div class="segmented-control planner-bias-control">
+              <label>
+                <input type="radio" name="bias" value="bullish">
+                <span>Bullish</span>
+              </label>
+              <label>
+                <input type="radio" name="bias" value="bearish">
+                <span>Bearish</span>
+              </label>
+              <label>
+                <input type="radio" name="bias" value="neutral">
+                <span>Neutral</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <label class="planner-field">
+            <span>HTF Narrative</span>
+            <textarea id="htfNarrative" rows="4" maxlength="2000" placeholder="4H / 1H กำลังส่งราคาไปทางไหน และเพราะอะไร"></textarea>
+          </label>
+
+          <div class="planner-field-grid">
+            <label class="planner-field">
+              <span>Key POIs</span>
+              <textarea id="keyPois" rows="4" maxlength="2000" placeholder="ระบุ HTF OB, FVG, Breaker หรือระดับสำคัญ"></textarea>
+            </label>
+            <label class="planner-field">
+              <span>Liquidity Targets</span>
+              <textarea id="liquidityTargets" rows="4" maxlength="2000" placeholder="PDH, PDL, Asia High/Low หรือ External Liquidity"></textarea>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel planner-section" aria-labelledby="sessionPlansHeading">
+          <div class="planner-section-heading">
+            <span>02</span>
+            <div>
+              <h2 id="sessionPlansHeading">Session Execution</h2>
+              <p>เขียนสิ่งที่จะรอ ไม่ใช่สิ่งที่อยากให้ตลาดทำ</p>
+            </div>
+          </div>
+
+          <div class="planner-field-grid">
+            <label class="planner-field">
+              <span>London Plan</span>
+              <textarea id="londonPlan" rows="6" maxlength="2000" placeholder="ตัวอย่าง: รอ Sweep Asia Low ที่ HTF POI แล้วค่อยหา Bullish CISD"></textarea>
+            </label>
+            <label class="planner-field">
+              <span>New York Plan</span>
+              <textarea id="newYorkPlan" rows="6" maxlength="2000" placeholder="ตัวอย่าง: เทรดเฉพาะเมื่อ London สร้าง Liquidity และมี MSS ยืนยัน"></textarea>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel planner-section" aria-labelledby="guardrailsHeading">
+          <div class="planner-section-heading">
+            <span>03</span>
+            <div>
+              <h2 id="guardrailsHeading">Risk Guardrails</h2>
+              <p>ระบุเหตุผลที่จะไม่เทรดไว้ล่วงหน้า</p>
+            </div>
+          </div>
+
+          <fieldset class="planner-fieldset">
+            <legend>News Status</legend>
+            <div class="segmented-control planner-news-control">
+              <label>
+                <input type="radio" name="newsStatus" value="clear">
+                <span>Clear</span>
+              </label>
+              <label>
+                <input type="radio" name="newsStatus" value="high-impact">
+                <span>High Impact</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="planner-field-grid">
+            <label class="planner-field">
+              <span>News Note</span>
+              <textarea id="newsNote" rows="4" maxlength="2000" placeholder="เวลาและเหตุการณ์ที่ต้องหลีกเลี่ยง"></textarea>
+            </label>
+            <label class="planner-field">
+              <span>No Trade Conditions</span>
+              <textarea id="noTradeConditions" rows="4" maxlength="2000" placeholder="เช่น กลาง Range, HTF ขัดกัน, ไม่มี Sweep หรือ RR ไม่ถึงเกณฑ์"></textarea>
+            </label>
+          </div>
+        </section>
+
+        <div class="planner-form-actions">
+          <div>
+            <span class="planner-save-state" id="plannerSaveState" aria-live="polite">ยังไม่ได้บันทึก</span>
+            <small id="plannerUpdatedAt">บันทึกไว้ในอุปกรณ์นี้</small>
+          </div>
+          <div class="planner-action-buttons">
+            <button class="button button-quiet" id="clearSessionPlan" type="button">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-rotate"></use></svg>
+              ล้างแผนวันนี้
+            </button>
+            <button class="button button-primary" type="submit">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-save"></use></svg>
+              บันทึก Session Plan
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <aside class="panel planner-summary" aria-labelledby="planReadinessHeading">
+        <span class="status-pill" id="planReadinessState" data-state="waiting">
+          <span class="status-dot"></span>
+          <span class="pill-copy">PLAN EMPTY</span>
+        </span>
+        <h2 id="planReadinessHeading">Plan Readiness</h2>
+        <strong class="planner-progress-count" id="plannerProgressCount">0 / 7</strong>
+        <p id="plannerNextRequirement">เริ่มจากกำหนด Today's Bias</p>
+        <div class="progress-track" aria-hidden="true">
+          <div class="progress-value" id="plannerProgressValue"></div>
+        </div>
+
+        <ul class="planner-requirements" id="plannerRequirements"></ul>
+
+        <div class="planner-session-preview">
+          <span>Current session</span>
+          <strong id="plannerCurrentSession">--</strong>
+          <small id="plannerSessionNote">เวลาอ้างอิงกรุงเทพฯ</small>
+          <p id="plannerActivePlan">ยังไม่มีแผนสำหรับ Session นี้</p>
+        </div>
+
+        <p class="planner-disclaimer">PLAN READY หมายถึงเตรียมข้อมูลครบ ไม่ใช่สัญญาณให้เข้าเทรด</p>
+      </aside>
+    </div>
+  </main>
+
+  <nav class="mobile-nav" aria-label="เมนูมือถือ">
+    <a class="nav-link" href="index.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-home"></use></svg>
+      Dashboard
+    </a>
+    <a class="nav-link" href="trade.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-plus"></use></svg>
+      New Trade
+    </a>
+    <a class="nav-link" href="journal.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+      Journal
+    </a>
+    <a class="nav-link" href="stats.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-chart"></use></svg>
+      Statistics
+    </a>
+    <details class="mobile-more">
+      <summary class="nav-link" aria-current="page">
+        <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-more"></use></svg>
+        More
+      </summary>
+      <div class="mobile-more-menu">
+        <a class="nav-link" href="database.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-database"></use></svg>
+          Database
+        </a>
+        <a class="nav-link" href="weekly.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calendar-check"></use></svg>
+          Weekly Review
+        </a>
+        <a class="nav-link" href="planner.html" aria-current="page">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-clock"></use></svg>
+          Session Planner
+        </a>
+        <a class="nav-link" href="checklist.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-list-checks"></use></svg>
+          Classic Checklist
+        </a>
+      </div>
+    </details>
+  </nav>
+
+  <script src="js/storage.js?v=0.6.0"></script>
+  <script src="js/app.js"></script>
+  <script src="js/planner.js"></script>
+</body>
+</html>

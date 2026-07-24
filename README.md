@@ -2,16 +2,16 @@
 
 Trading Companion is the web application for the Trading OS decision framework. It is built from the original ICT/SMC Trade Entry Checklist.
 
-Trading Companion now combines the guided decision workflow, Trade Journal, performance statistics, searchable Trade Database, and the first Weekly Review workflow. Real-use validation continues across the earlier phases while Phase 5 is developed.
+Trading Companion now combines the guided decision workflow, Trade Journal, performance statistics, searchable Trade Database, Weekly Review, and the first daily Session Planner. Real-use validation continues across the earlier phases while Phase 6 is developed.
 
 ## Current Status
 
 - Product name: Trading Companion
 - Decision framework: Trading OS
 - Repository name: Trading-Companion
-- Phase: 5 - Weekly Review (in progress)
+- Phase: 6 - Session Planner (in progress)
 - Phase 1 validation: collecting 20 real-use outcomes
-- Version: v0.5.0
+- Version: v0.6.0
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -84,6 +84,20 @@ The first Phase 5 milestone includes:
 - Dashboard reminder showing whether the current review is open, due, or saved
 - Mobile More menu for Database, Weekly Review, and Classic Checklist
 
+## Phase 6 Milestone
+
+The first Phase 6 milestone includes:
+
+- Daily Session Plans separated by Asia/Bangkok calendar date
+- Bullish, Bearish, and Neutral daily bias
+- HTF Narrative, Key POIs, and Liquidity Targets
+- Separate London and New York execution plans
+- News status, News Note, and No Trade Conditions
+- Explainable seven-item plan-readiness checklist
+- PLAN EMPTY, PLAN DRAFT, and PLAN READY states
+- Current-session plan preview using Bangkok time
+- Dashboard reminder linked to the current Daily Plan
+
 ## Repository Structure
 
 ```text
@@ -94,6 +108,7 @@ The first Phase 5 milestone includes:
 |-- stats.html
 |-- database.html
 |-- weekly.html
+|-- planner.html
 |-- checklist.html
 |-- manifest.json
 |-- sw.js
@@ -117,4 +132,4 @@ The first Phase 5 milestone includes:
 
 ## Data Note
 
-Drafts, assessment history, Weekly Reviews, and Screenshots are stored only in the browser on the current device. Screenshots use IndexedDB so image files do not consume the smaller checklist storage area. Trading Companion does not place orders and does not send trade data to a server.
+Drafts, assessment history, Weekly Reviews, Daily Session Plans, and Screenshots are stored only in the browser on the current device. Screenshots use IndexedDB so image files do not consume the smaller checklist storage area. Trading Companion does not place orders and does not send trade data to a server.

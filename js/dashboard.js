@@ -264,6 +264,8 @@
       item.lifecycle && item.lifecycle.decision === "entered"
     ).length;
     const session = currentSession();
+    const sessionPlan = storage.loadSessionPlan(today);
+    const sessionPlanEvaluation = window.TradingPlanner.evaluatePlan(sessionPlan);
     const weekStart = currentWeekStart();
     const weekEndDate = new Date(`${weekStart}T12:00:00Z`);
     weekEndDate.setUTCDate(weekEndDate.getUTCDate() + 6);
@@ -280,6 +282,29 @@
     document.getElementById("openCount").textContent = String(openPositions.length);
     document.getElementById("sessionName").textContent = session[0];
     document.getElementById("sessionNote").textContent = session[1];
+
+    const plannerPromptState = document.getElementById("plannerPromptState");
+    const plannerPromptMessage = document.getElementById("plannerPromptMessage");
+    const plannerPromptAction = document.getElementById("plannerPromptAction");
+    if (sessionPlanEvaluation.state === "ready") {
+      plannerPromptState.dataset.state = "ready";
+      plannerPromptState.querySelector(".pill-copy").textContent = "PLAN READY";
+      plannerPromptMessage.textContent =
+        `${window.TradingPlanner.BIAS_LABELS[sessionPlan.bias]} Bias · Pre-market plan ครบ 7 ข้อ`;
+      plannerPromptAction.querySelector("span").textContent = "ดู Session Plan";
+    } else if (sessionPlanEvaluation.state === "draft") {
+      plannerPromptState.dataset.state = "developing";
+      plannerPromptState.querySelector(".pill-copy").textContent = "PLAN DRAFT";
+      plannerPromptMessage.textContent =
+        `${sessionPlanEvaluation.complete} / ${sessionPlanEvaluation.total} ข้อ · ถัดไป: ${sessionPlanEvaluation.nextRequirement}`;
+      plannerPromptAction.querySelector("span").textContent = "ทำ Session Plan ต่อ";
+    } else {
+      plannerPromptState.dataset.state = "waiting";
+      plannerPromptState.querySelector(".pill-copy").textContent = "OPEN FOR PLANNING";
+      plannerPromptMessage.textContent =
+        "ยังไม่มี Daily Plan กำหนด Bias, POI และ No Trade Conditions ก่อนตลาดเปิด";
+      plannerPromptAction.querySelector("span").textContent = "เริ่ม Session Plan";
+    }
 
     const weeklyPromptState = document.getElementById("weeklyPromptState");
     const weeklyPromptMessage = document.getElementById("weeklyPromptMessage");

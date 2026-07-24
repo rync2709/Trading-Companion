@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.5.0
+Version: v0.6.0
 Status: Master product roadmap
 
 ## Product Direction
@@ -315,6 +315,21 @@ Expected behavior:
 ## Phase 6 - Session Planner
 
 Goal: plan the trading day before the market opens.
+
+Status: In progress.
+
+First milestone:
+
+- [x] Save a separate Session Plan for each Asia/Bangkok calendar date.
+- [x] Add Bullish, Bearish, and Neutral daily bias.
+- [x] Add HTF Narrative, Key POIs, and Liquidity Targets.
+- [x] Add separate London and New York execution plans.
+- [x] Add News Status, News Note, and No Trade Conditions.
+- [x] Add an explainable seven-item readiness checklist.
+- [x] Add PLAN EMPTY, PLAN DRAFT, and PLAN READY states.
+- [x] Preview the relevant Session Plan using Bangkok time.
+- [x] Add current-day plan status to the Dashboard.
+- [ ] Validate the Session Planner through repeated pre-market use.
 
 Planned fields:
 

@@ -2,6 +2,26 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## v0.6.0 - 2026-07-24
+
+### Added
+
+- Added Daily Session Plans separated by Asia/Bangkok calendar date.
+- Added Bullish, Bearish, and Neutral bias with HTF Narrative.
+- Added Key POIs, Liquidity Targets, and separate London and New York plans.
+- Added News Status, News Note, and No Trade Conditions.
+- Added an explainable seven-item plan-readiness checklist.
+- Added PLAN EMPTY, PLAN DRAFT, and PLAN READY states.
+- Added a current-session plan preview and Dashboard reminder.
+- Added Session Planner to desktop and mobile navigation.
+
+### Changed
+
+- Started Phase 6 while real-use validation continues for earlier phases.
+- Updated the PWA cache for the Session Planner release.
+- Expanded the tablet navigation breakpoint to keep the desktop header readable.
+- Moved the Classic Checklist into a desktop More menu as the primary navigation grows.
+
 ## v0.5.0 - 2026-07-24
 
 ### Added
