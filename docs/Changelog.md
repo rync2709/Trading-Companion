@@ -2,6 +2,22 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## v0.3.0 - 2026-07-24
+
+### Added
+
+- Added the first Statistics page with 30-day, 90-day, and all-time ranges.
+- Added Closed Trades, Win Rate, Average RR, Expectancy, Average Hold, and R Coverage.
+- Added an Equity Curve based on cumulative Realized R.
+- Added Win, Loss, and Break Even distribution.
+- Added Session and Setup performance breakdowns.
+- Added Statistics navigation on desktop and mobile.
+
+### Changed
+
+- Started Phase 3 while Phase 1 and Phase 2 real-use validation continue.
+- Updated the PWA cache to include Statistics assets for offline use.
+
 ## v0.2.2 - 2026-07-24
 
 ### Added

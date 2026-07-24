@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.2.2
+Version: v0.3.0
 Status: Master product roadmap
 
 ## Product Direction
@@ -193,6 +193,19 @@ Setup examples:
 ## Phase 3 - Statistics
 
 Goal: turn journal data into useful performance feedback.
+
+Status: In progress.
+
+First milestone:
+
+- [x] Add 30-day, 90-day, and all-time statistics ranges.
+- [x] Add Closed Trades, Win Rate, Average RR, Expectancy, Average Hold, and R Coverage.
+- [x] Add an Equity Curve based on cumulative Realized R.
+- [x] Add Win, Loss, and Break Even distribution.
+- [x] Add Session and Setup performance breakdowns.
+- [x] Keep incomplete Actual Exit data visible without treating it as zero R.
+- [ ] Add the monthly performance calendar.
+- [ ] Validate statistics against a larger real-trade sample.
 
 Dashboard metrics:
 
