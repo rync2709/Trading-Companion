@@ -3,6 +3,7 @@
 
   const KEYS = {
     draft: "tradingCompanionDraftV1",
+    assistant: "tradingCompanionAssistantV1",
     history: "tradingCompanionHistoryV1",
     weeklyReviews: "tradingCompanionWeeklyReviewsV1",
     sessionPlans: "tradingCompanionSessionPlansV1",
@@ -85,6 +86,55 @@
 
   function clearDraft() {
     localStorage.removeItem(KEYS.draft);
+  }
+
+  function normalizeAssistantSession(session) {
+    const source = session && typeof session === "object" ? session : {};
+    const currentIndex = Number(source.currentIndex);
+    const answerLog = Array.isArray(source.answerLog) ? source.answerLog
+      .filter(function (entry) {
+        return entry &&
+          typeof entry.questionId === "string" &&
+          typeof entry.value === "string" &&
+          typeof entry.label === "string";
+      })
+      .slice(0, 50)
+      .map(function (entry) {
+        return {
+          questionId: entry.questionId,
+          value: entry.value,
+          label: entry.label
+        };
+      }) : [];
+
+    return {
+      draft: normalizeDraft(source.draft),
+      currentIndex: Number.isFinite(currentIndex) ?
+        Math.max(0, Math.min(Math.floor(currentIndex), 49)) : 0,
+      answerLog,
+      completed: Boolean(source.completed),
+      haltReason: ["negative", "unknown", "complete"].includes(source.haltReason) ?
+        source.haltReason : "",
+      updatedAt: typeof source.updatedAt === "string" ? source.updatedAt : null
+    };
+  }
+
+  function loadAssistantSession() {
+    const saved = parse(localStorage.getItem(KEYS.assistant), null);
+    return saved ? normalizeAssistantSession(saved) : null;
+  }
+
+  function saveAssistantSession(session) {
+    const next = normalizeAssistantSession({
+      ...session,
+      updatedAt: new Date().toISOString()
+    });
+    localStorage.setItem(KEYS.assistant, JSON.stringify(next));
+    return next;
+  }
+
+  function clearAssistantSession() {
+    localStorage.removeItem(KEYS.assistant);
   }
 
   function hasMeaningfulDraft(draft) {
@@ -712,6 +762,10 @@
     loadDraft,
     saveDraft,
     clearDraft,
+    normalizeAssistantSession,
+    loadAssistantSession,
+    saveAssistantSession,
+    clearAssistantSession,
     hasMeaningfulDraft,
     loadHistory,
     isValidationEligible,

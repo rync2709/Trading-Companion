@@ -1,4 +1,4 @@
-const CACHE = 'trading-companion-v0.8.3';
+const CACHE = 'trading-companion-v0.9.0';
 const ASSETS = [
   './',
   './index.html',
@@ -9,6 +9,7 @@ const ASSETS = [
   './weekly.html',
   './planner.html',
   './watchlist.html',
+  './assistant.html',
   './tools.html',
   './checklist.html',
   './manifest.json',
@@ -26,14 +27,17 @@ const ASSETS = [
   './css/weekly.css',
   './css/planner.css',
   './css/watchlist.css',
+  './css/assistant.css?v=0.9.0',
   './css/tools.css?v=0.8.1',
   './js/app.js',
   './js/storage.js',
   './js/storage.js?v=0.8.0',
   './js/storage.js?v=0.8.2',
   './js/storage.js?v=0.8.3',
+  './js/storage.js?v=0.9.0',
   './js/media.js',
   './js/logic.js',
+  './js/logic.js?v=0.9.0',
   './js/dashboard.js?v=0.8.3',
   './js/trade.js',
   './js/journal.js?v=0.8.2',
@@ -42,6 +46,7 @@ const ASSETS = [
   './js/weekly.js',
   './js/planner.js',
   './js/watchlist.js',
+  './js/assistant.js?v=0.9.0',
   './js/tools.js?v=0.8.1'
 ];
 

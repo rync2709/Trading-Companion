@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0e1112">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Trading Companion">
+  <title>Decision Assistant | Trading Companion</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css?v=0.8.0">
+  <link rel="stylesheet" href="css/assistant.css?v=0.9.0">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html" aria-label="Trading Companion Dashboard">
+        <img src="assets/app-icon.svg" alt="">
+        <span class="brand-copy">
+          <span class="brand-name">Trading Companion</span>
+          <span class="brand-phase">Trading OS · Phase 9</span>
+        </span>
+      </a>
+
+      <nav class="topnav" aria-label="เมนูหลัก">
+        <a class="nav-link" href="index.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-home"></use></svg>
+          Dashboard
+        </a>
+        <a class="nav-link" href="trade.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-plus"></use></svg>
+          New Trade
+        </a>
+        <a class="nav-link" href="journal.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+          Journal
+        </a>
+        <a class="nav-link" href="stats.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-chart"></use></svg>
+          Statistics
+        </a>
+        <a class="nav-link" href="database.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-database"></use></svg>
+          Database
+        </a>
+        <a class="nav-link" href="weekly.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calendar-check"></use></svg>
+          Weekly Review
+        </a>
+        <a class="nav-link" href="planner.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-clock"></use></svg>
+          Session Planner
+        </a>
+        <details class="topnav-more">
+          <summary class="nav-link" aria-current="page" title="More tools">
+            <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-more"></use></svg>
+            <span class="sr-only">More tools</span>
+          </summary>
+          <div class="topnav-more-menu">
+            <a class="nav-link" href="watchlist.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-eye"></use></svg>
+              Watchlist
+            </a>
+            <a class="nav-link" href="assistant.html" aria-current="page">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-sparkles"></use></svg>
+              Decision Assistant
+            </a>
+            <a class="nav-link" href="tools.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calculator"></use></svg>
+              Advanced Tools
+            </a>
+            <a class="nav-link" href="checklist.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-list-checks"></use></svg>
+              Classic Checklist
+            </a>
+          </div>
+        </details>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-shell" id="decisionAssistant">
+    <header class="page-heading">
+      <p class="eyebrow">Phase 9 · Local rule engine</p>
+      <h1>Decision Assistant</h1>
+      <p class="lede">Should I trade? ตรวจ Context ตามลำดับก่อนตัดสินใจ</p>
+    </header>
+
+    <section class="panel assistant-context" aria-label="Trade context">
+      <label class="assistant-field">
+        <span>Pair</span>
+        <select id="assistantInstrument">
+          <option value="XAUUSD">XAUUSD</option>
+          <option value="BTCUSD">BTCUSD</option>
+          <option value="ETHUSD">ETHUSD</option>
+          <option value="NAS100">NAS100</option>
+          <option value="EURUSD">EURUSD</option>
+        </select>
+      </label>
+      <label class="assistant-field">
+        <span>Session</span>
+        <select id="assistantSession">
+          <option value="auto">Auto</option>
+          <option value="asia">Asia</option>
+          <option value="london">London</option>
+          <option value="new-york">New York</option>
+        </select>
+      </label>
+      <div class="assistant-context-state">
+        <span>Session state</span>
+        <strong id="assistantSaveState">กำลังโหลดข้อมูลในเครื่อง</strong>
+      </div>
+      <button class="button button-quiet" id="assistantReset" type="button">
+        <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-rotate"></use></svg>
+        เริ่มใหม่
+      </button>
+    </section>
+
+    <section class="assistant-layout" aria-label="Decision Assistant workspace">
+      <article class="panel assistant-chat">
+        <header class="assistant-chat-header">
+          <div class="assistant-chat-title">
+            <span class="assistant-chat-icon">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-sparkles"></use></svg>
+            </span>
+            <div>
+              <p class="eyebrow">Guided decision</p>
+              <h2>Rulebook Conversation</h2>
+            </div>
+          </div>
+          <span>Local rule engine</span>
+        </header>
+
+        <div class="assistant-stages" id="assistantStages" aria-label="Decision stages"></div>
+        <div class="assistant-thread" id="assistantThread" aria-live="polite"></div>
+
+        <div class="assistant-question">
+          <span class="assistant-question-stage" id="assistantQuestionStage"></span>
+          <p class="assistant-question-help" id="assistantQuestionHelp"></p>
+          <div class="assistant-choices" id="assistantChoices"></div>
+          <div class="assistant-question-footer">
+            <button class="button button-quiet" id="assistantBack" type="button">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-arrow-left"></use></svg>
+              แก้คำตอบก่อนหน้า
+            </button>
+            <div class="assistant-complete-actions" id="assistantCompleteActions" hidden>
+              <button class="button button-quiet" id="assistantRevise" type="button">
+                <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-arrow-left"></use></svg>
+                กลับไปแก้คำตอบ
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <aside class="panel assistant-result" aria-live="polite">
+        <div class="assistant-result-main">
+          <span class="status-pill" id="assistantVerdictStatus" data-state="waiting">
+            <span class="status-dot"></span>
+            <span class="pill-copy">WAIT</span>
+          </span>
+          <h2 id="assistantVerdictTitle">ยังไม่พร้อมเข้าเทรด</h2>
+          <p id="assistantVerdictSummary">ตอบคำถามตาม Rulebook เพื่อประเมินแผน</p>
+        </div>
+
+        <div class="assistant-result-metrics">
+          <div class="assistant-metric">
+            <span>Grade</span>
+            <strong id="assistantGrade">--</strong>
+          </div>
+          <div class="assistant-metric">
+            <span>Score</span>
+            <strong id="assistantScore">0 / 100</strong>
+          </div>
+          <div class="assistant-metric">
+            <span>Answered</span>
+            <strong id="assistantAnswered">0 / 23</strong>
+          </div>
+        </div>
+
+        <div class="assistant-progress-track" aria-hidden="true">
+          <div class="assistant-progress-value" id="assistantProgress"></div>
+        </div>
+
+        <div class="assistant-next">
+          <span>Next Action</span>
+          <strong id="assistantNextAction">กำหนด HTF Bias</strong>
+        </div>
+
+        <div class="assistant-blockers">
+          <h3>Blocking Conditions</h3>
+          <ul id="assistantBlockers">
+            <li>ยังไม่พบ Blocking condition</li>
+          </ul>
+        </div>
+
+        <div class="assistant-result-actions">
+          <button class="button button-primary" id="assistantTransfer" type="button" disabled>
+            <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-arrow-right"></use></svg>
+            ใช้คำตอบใน New Trade
+          </button>
+          <p class="assistant-local-note">
+            <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-shield"></use></svg>
+            คำตอบถูกประเมินและบันทึกไว้ในอุปกรณ์นี้ ไม่มีการส่งข้อมูลไปบริการ AI ภายนอก
+          </p>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <nav class="mobile-nav" aria-label="เมนูมือถือ">
+    <a class="nav-link" href="index.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-home"></use></svg>
+      Dashboard
+    </a>
+    <a class="nav-link" href="trade.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-plus"></use></svg>
+      New Trade
+    </a>
+    <a class="nav-link" href="journal.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+      Journal
+    </a>
+    <a class="nav-link" href="stats.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-chart"></use></svg>
+      Statistics
+    </a>
+    <details class="mobile-more">
+      <summary class="nav-link" aria-current="page">
+        <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-more"></use></svg>
+        More
+      </summary>
+      <div class="mobile-more-menu">
+        <a class="nav-link" href="database.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-database"></use></svg>
+          Database
+        </a>
+        <a class="nav-link" href="weekly.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calendar-check"></use></svg>
+          Weekly Review
+        </a>
+        <a class="nav-link" href="planner.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-clock"></use></svg>
+          Session Planner
+        </a>
+        <a class="nav-link" href="watchlist.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-eye"></use></svg>
+          Watchlist
+        </a>
+        <a class="nav-link" href="assistant.html" aria-current="page">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-sparkles"></use></svg>
+          Decision Assistant
+        </a>
+        <a class="nav-link" href="tools.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calculator"></use></svg>
+          Advanced Tools
+        </a>
+        <a class="nav-link" href="checklist.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-list-checks"></use></svg>
+          Classic Checklist
+        </a>
+      </div>
+    </details>
+  </nav>
+
+  <script src="js/storage.js?v=0.9.0"></script>
+  <script src="js/logic.js?v=0.9.0"></script>
+  <script src="js/app.js"></script>
+  <script src="js/assistant.js?v=0.9.0"></script>
+</body>
+</html>

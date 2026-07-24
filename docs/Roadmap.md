@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.8.3
+Version: v0.9.0
 Status: Master product roadmap
 
 ## Product Direction
@@ -415,6 +415,21 @@ Planned tools:
 
 Goal: create a guided assistant that challenges weak trade ideas.
 
+Status: In progress.
+
+First milestone:
+
+- [x] Add a local Rulebook conversation across HTF, POI, Setup, Confirmation, and Entry.
+- [x] Ask 23 ordered questions mapped to the shared Decision Engine.
+- [x] Stop early when context is unclear or a required condition fails.
+- [x] Show explainable WAIT, NO TRADE, and READY verdicts.
+- [x] Show live Grade, Score, progress, blocking conditions, and Next Action.
+- [x] Save the current assistant session locally and support answer revision.
+- [x] Transfer assistant answers into the New Trade Wizard.
+- [x] Keep the first milestone independent from external AI APIs.
+- [ ] Validate the question order and wording through repeated real-use sessions.
+- [ ] Decide whether a future AI explanation layer adds value without replacing deterministic rules.
+
 Example interaction:
 
 ```text
@@ -590,5 +605,5 @@ Expected outputs:
 | v0.8.1 | Automatic fiat reference rates |
 | v0.8.2 | Journal trade deletion |
 | v0.8.3 | NO TRADE and SKIP assessment deletion |
-| v0.9.0 | AI decision assistant prototype |
+| v0.9.0 | Local Decision Assistant prototype |
 | v1.0.0 | Trading OS MVP |

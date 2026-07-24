@@ -2,16 +2,16 @@
 
 Trading Companion is the web application for the Trading OS decision framework. It is built from the original ICT/SMC Trade Entry Checklist.
 
-Trading Companion now combines the guided decision workflow, Trade Journal, performance statistics, searchable Trade Database, Weekly Review, daily Session Planner, manual context Watchlist, and practical risk tools. Real-use validation continues across the earlier phases while Phase 8 is developed.
+Trading Companion now combines the guided decision workflow, Trade Journal, performance statistics, searchable Trade Database, Weekly Review, daily Session Planner, manual context Watchlist, practical risk tools, and a Rulebook-based Decision Assistant. Real-use validation continues across the earlier phases while Phase 9 is developed.
 
 ## Current Status
 
 - Product name: Trading Companion
 - Decision framework: Trading OS
 - Repository name: Trading-Companion
-- Phase: 8 - Advanced Tools (in progress)
+- Phase: 9 - Decision Assistant (in progress)
 - Phase 1 validation: collecting 20 real-use outcomes
-- Version: v0.8.3
+- Version: v0.9.0
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -125,6 +125,19 @@ The first Phase 8 milestone includes:
 - Fixed Bangkok Session Timer matching the existing Session Planner schedule
 - Input validation and explicit broker contract-specification warning
 
+## Phase 9 Milestone
+
+The first Phase 9 milestone includes:
+
+- Local Rulebook conversation across HTF, POI, Setup, Confirmation, and Entry
+- 23 ordered questions mapped directly to the shared Decision Engine
+- Early stop when context is unclear or a required condition fails
+- Explainable WAIT, NO TRADE, and READY verdicts
+- Live Grade, Score, progress, blocking conditions, and Next Action
+- Automatic local session saving with answer revision and reset
+- One-step transfer from Decision Assistant to the New Trade Wizard
+- No external AI API and no trade-data transmission
+
 ## Repository Structure
 
 ```text
@@ -137,6 +150,7 @@ The first Phase 8 milestone includes:
 |-- weekly.html
 |-- planner.html
 |-- watchlist.html
+|-- assistant.html
 |-- tools.html
 |-- checklist.html
 |-- manifest.json
@@ -161,4 +175,4 @@ The first Phase 8 milestone includes:
 
 ## Data Note
 
-Drafts, assessment history, Weekly Reviews, Daily Session Plans, Watchlist Context, and Screenshots are stored only in the browser on the current device. Screenshots use IndexedDB so image files do not consume the smaller checklist storage area. Watchlist status is entered manually and is not live market data. Advanced Tool inputs are calculated locally and are not saved. The Currency Converter requests only the selected fiat currency pair from Frankfurter; it does not send the entered amount. Trading Companion does not place orders and does not send trade data to a server.
+Drafts, Decision Assistant sessions, assessment history, Weekly Reviews, Daily Session Plans, Watchlist Context, and Screenshots are stored only in the browser on the current device. Screenshots use IndexedDB so image files do not consume the smaller checklist storage area. Watchlist status is entered manually and is not live market data. Advanced Tool inputs are calculated locally and are not saved. The Currency Converter requests only the selected fiat currency pair from Frankfurter; it does not send the entered amount. The Decision Assistant uses the local Rulebook engine without an external AI API. Trading Companion does not place orders and does not send trade data to a server.

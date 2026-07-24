@@ -2,6 +2,23 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## v0.9.0 - 2026-07-24
+
+### Added
+
+- Added a local Decision Assistant across HTF, POI, Setup, Confirmation, and Entry.
+- Added 23 ordered Rulebook questions with early WAIT and NO TRADE outcomes.
+- Added live Grade, Score, progress, blocking conditions, and Next Action.
+- Added local assistant-session saving, answer revision, and reset.
+- Added one-step answer transfer into the New Trade Wizard.
+- Added Decision Assistant to desktop and mobile navigation.
+
+### Changed
+
+- Started Phase 9 while real-use validation continues for earlier phases.
+- Updated the visible Trading OS phase to Phase 9.
+- Updated the PWA cache for the Decision Assistant release.
+
 ## v0.8.3 - 2026-07-24
 
 ### Added
