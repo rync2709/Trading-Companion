@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.7.0
+Version: v0.8.0
 Status: Master product roadmap
 
 ## Product Direction
@@ -384,6 +384,20 @@ For each asset, show:
 ## Phase 8 - Advanced Tools
 
 Goal: add practical trading calculators and utilities.
+
+Status: In progress.
+
+First milestone:
+
+- [x] Add a direction-aware RR Calculator.
+- [x] Show risk distance, reward distance, and break-even win rate.
+- [x] Add Risk Amount and Position Size calculations.
+- [x] Support configurable value per 1.0 price move.
+- [x] Add a manual-rate Currency Converter with currency swap.
+- [x] Add a fixed Asia/Bangkok Session Timer and next-session countdown.
+- [x] Validate incomplete, invalid, and directionally incorrect inputs.
+- [x] Keep all calculations local and warn about broker contract specifications.
+- [ ] Validate calculator outputs against the instruments and broker contracts used in practice.
 
 Planned tools:
 

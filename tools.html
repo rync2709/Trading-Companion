@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0e1112">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Trading Companion">
+  <title>Advanced Tools | Trading Companion</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css?v=0.8.0">
+  <link rel="stylesheet" href="css/tools.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html" aria-label="Trading Companion Dashboard">
+        <img src="assets/app-icon.svg" alt="">
+        <span class="brand-copy">
+          <span class="brand-name">Trading Companion</span>
+          <span class="brand-phase">Trading OS · Phase 8</span>
+        </span>
+      </a>
+
+      <nav class="topnav" aria-label="เมนูหลัก">
+        <a class="nav-link" href="index.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-home"></use></svg>
+          Dashboard
+        </a>
+        <a class="nav-link" href="trade.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-plus"></use></svg>
+          New Trade
+        </a>
+        <a class="nav-link" href="journal.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+          Journal
+        </a>
+        <a class="nav-link" href="stats.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-chart"></use></svg>
+          Statistics
+        </a>
+        <a class="nav-link" href="database.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-database"></use></svg>
+          Database
+        </a>
+        <a class="nav-link" href="weekly.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calendar-check"></use></svg>
+          Weekly Review
+        </a>
+        <a class="nav-link" href="planner.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-clock"></use></svg>
+          Session Planner
+        </a>
+        <details class="topnav-more">
+          <summary class="nav-link" aria-current="page" title="More tools">
+            <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-more"></use></svg>
+            <span class="sr-only">More tools</span>
+          </summary>
+          <div class="topnav-more-menu">
+            <a class="nav-link" href="watchlist.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-eye"></use></svg>
+              Watchlist
+            </a>
+            <a class="nav-link" href="tools.html" aria-current="page">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calculator"></use></svg>
+              Advanced Tools
+            </a>
+            <a class="nav-link" href="checklist.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-list-checks"></use></svg>
+              Classic Checklist
+            </a>
+          </div>
+        </details>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <header class="page-heading">
+      <p class="eyebrow">Risk and execution utilities</p>
+      <h1>Advanced Tools</h1>
+      <p class="lede">คำนวณ RR, ความเสี่ยง และขนาด Position จากตัวเลขในแผนก่อนส่งคำสั่ง</p>
+    </header>
+
+    <section class="panel tools-session" aria-labelledby="sessionTimerHeading">
+      <div class="tools-session-heading">
+        <div class="tool-icon">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-clock"></use></svg>
+        </div>
+        <div>
+          <span class="status-pill" id="sessionTimerStatus" data-state="waiting">
+            <span class="status-dot"></span>
+            <span class="pill-copy">CHECKING SESSION</span>
+          </span>
+          <h2 id="sessionTimerHeading">Session Timer</h2>
+        </div>
+      </div>
+      <div class="session-metric">
+        <span>Current Session</span>
+        <strong id="sessionTimerName">--</strong>
+      </div>
+      <div class="session-metric">
+        <span>Bangkok Time</span>
+        <strong id="sessionBangkokTime">--:--:--</strong>
+      </div>
+      <div class="session-metric">
+        <span>Next Session</span>
+        <strong id="sessionNextName">--</strong>
+      </div>
+      <div class="session-metric">
+        <span>Time Remaining</span>
+        <strong id="sessionCountdown">--:--:--</strong>
+      </div>
+      <a class="button button-quiet" href="planner.html">
+        <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-arrow-right"></use></svg>
+        Session Plan
+      </a>
+    </section>
+
+    <section class="tools-grid" aria-label="Trading calculators">
+      <article class="panel tool-card">
+        <header class="tool-card-heading">
+          <div class="tool-icon">
+            <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-target"></use></svg>
+          </div>
+          <div>
+            <p class="eyebrow">Trade plan</p>
+            <h2>RR Calculator</h2>
+          </div>
+        </header>
+
+        <form id="rrCalculator">
+          <fieldset class="tools-fieldset">
+            <legend>Direction</legend>
+            <div class="tools-segment">
+              <label>
+                <input type="radio" name="rrDirection" value="bullish">
+                <span>Bullish / Long</span>
+              </label>
+              <label>
+                <input type="radio" name="rrDirection" value="bearish">
+                <span>Bearish / Short</span>
+              </label>
+            </div>
+          </fieldset>
+          <div class="tools-field-grid tools-field-grid-three">
+            <label class="tools-field">
+              <span>Entry</span>
+              <input type="number" name="entry" min="0" step="any" inputmode="decimal" placeholder="0.00">
+            </label>
+            <label class="tools-field">
+              <span>Stop Loss</span>
+              <input type="number" name="stopLoss" min="0" step="any" inputmode="decimal" placeholder="0.00">
+            </label>
+            <label class="tools-field">
+              <span>Take Profit</span>
+              <input type="number" name="takeProfit" min="0" step="any" inputmode="decimal" placeholder="0.00">
+            </label>
+          </div>
+        </form>
+
+        <div class="tool-result" aria-live="polite">
+          <div class="tool-result-primary">
+            <span class="status-pill" id="rrStatus" data-state="waiting">
+              <span class="status-dot"></span>
+              <span class="pill-copy">WAITING FOR INPUT</span>
+            </span>
+            <strong id="rrValue">1:--</strong>
+          </div>
+          <div class="tool-result-metrics">
+            <div><span>Risk Distance</span><strong id="rrRiskDistance">--</strong></div>
+            <div><span>Reward Distance</span><strong id="rrRewardDistance">--</strong></div>
+            <div><span>Break-even WR</span><strong id="rrBreakEven">--</strong></div>
+          </div>
+          <p id="rrMessage">กรอก Direction, Entry, Stop Loss และ Take Profit ให้ครบ</p>
+        </div>
+      </article>
+
+      <article class="panel tool-card">
+        <header class="tool-card-heading">
+          <div class="tool-icon">
+            <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-wallet"></use></svg>
+          </div>
+          <div>
+            <p class="eyebrow">Capital protection</p>
+            <h2>Risk &amp; Position Size</h2>
+          </div>
+        </header>
+
+        <form id="positionCalculator">
+          <div class="tools-field-grid">
+            <label class="tools-field">
+              <span>Account Balance</span>
+              <input type="number" name="accountBalance" min="0" step="any" inputmode="decimal" placeholder="10,000">
+            </label>
+            <label class="tools-field">
+              <span>Account Currency</span>
+              <select name="currency">
+                <option value="USD">USD</option>
+                <option value="THB">THB</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="JPY">JPY</option>
+                <option value="AUD">AUD</option>
+                <option value="SGD">SGD</option>
+                <option value="USDT">USDT</option>
+              </select>
+            </label>
+            <label class="tools-field">
+              <span>Risk %</span>
+              <input type="number" name="riskPercent" min="0" max="100" step="any" inputmode="decimal" value="1">
+            </label>
+            <label class="tools-field">
+              <span>Value per 1.0 Move / Size Unit</span>
+              <input type="number" name="valuePerMove" min="0" step="any" inputmode="decimal" value="1">
+            </label>
+            <label class="tools-field">
+              <span>Entry</span>
+              <input type="number" name="entry" min="0" step="any" inputmode="decimal" placeholder="0.00">
+            </label>
+            <label class="tools-field">
+              <span>Stop Loss</span>
+              <input type="number" name="stopLoss" min="0" step="any" inputmode="decimal" placeholder="0.00">
+            </label>
+          </div>
+        </form>
+
+        <div class="tool-result" aria-live="polite">
+          <div class="tool-result-primary">
+            <span class="status-pill" id="positionStatus" data-state="waiting">
+              <span class="status-dot"></span>
+              <span class="pill-copy">WAITING FOR INPUT</span>
+            </span>
+            <div class="position-primary-value">
+              <strong id="positionValue">--</strong>
+              <span>Size Units</span>
+            </div>
+          </div>
+          <div class="tool-result-metrics">
+            <div><span>Risk Amount</span><strong id="positionRiskAmount">-- USD</strong></div>
+            <div><span>Stop Distance</span><strong id="positionStopDistance">--</strong></div>
+            <div><span>Loss / Size Unit</span><strong id="positionLossPerUnit">-- USD</strong></div>
+          </div>
+          <p id="positionMessage">กรอกข้อมูลให้ครบเพื่อคำนวณขนาด Position</p>
+        </div>
+      </article>
+
+      <article class="panel tool-card tool-card-wide">
+        <header class="tool-card-heading">
+          <div class="tool-icon">
+            <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-arrow-left-right"></use></svg>
+          </div>
+          <div>
+            <p class="eyebrow">Manual reference rate</p>
+            <h2>Currency Converter</h2>
+          </div>
+        </header>
+
+        <div class="currency-layout">
+          <form id="currencyCalculator">
+            <div class="currency-fields">
+              <label class="tools-field">
+                <span>Amount</span>
+                <input type="number" name="amount" min="0" step="any" inputmode="decimal" placeholder="0.00">
+              </label>
+              <label class="tools-field">
+                <span>From</span>
+                <select name="from">
+                  <option value="USD">USD</option>
+                  <option value="THB">THB</option>
+                  <option value="EUR">EUR</option>
+                  <option value="GBP">GBP</option>
+                  <option value="JPY">JPY</option>
+                  <option value="AUD">AUD</option>
+                  <option value="SGD">SGD</option>
+                  <option value="USDT">USDT</option>
+                </select>
+              </label>
+              <button class="button button-quiet currency-swap" id="swapCurrencies" type="button" title="สลับสกุลเงิน">
+                <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-arrow-left-right"></use></svg>
+                <span class="sr-only">สลับสกุลเงิน</span>
+              </button>
+              <label class="tools-field">
+                <span>To</span>
+                <select name="to">
+                  <option value="THB">THB</option>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="GBP">GBP</option>
+                  <option value="JPY">JPY</option>
+                  <option value="AUD">AUD</option>
+                  <option value="SGD">SGD</option>
+                  <option value="USDT">USDT</option>
+                </select>
+              </label>
+              <label class="tools-field currency-rate-field">
+                <span>Exchange Rate: 1 From = ? To</span>
+                <input type="number" name="rate" min="0" step="any" inputmode="decimal" placeholder="กรอกเรตที่ตรวจสอบแล้ว">
+              </label>
+            </div>
+          </form>
+
+          <div class="tool-result currency-result" aria-live="polite">
+            <div class="tool-result-primary">
+              <span class="status-pill" id="currencyStatus" data-state="waiting">
+                <span class="status-dot"></span>
+                <span class="pill-copy">MANUAL RATE REQUIRED</span>
+              </span>
+              <strong id="currencyValue">-- THB</strong>
+            </div>
+            <strong class="currency-rate-label" id="currencyRateLabel">ยังไม่ได้ระบุ Exchange Rate</strong>
+            <p id="currencyMessage">กรอก Amount และ Exchange Rate ที่ตรวจสอบแล้ว</p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <aside class="tools-caution">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-shield"></use></svg>
+      <p>ผลลัพธ์เป็นเครื่องมือช่วยวางแผน โปรดตรวจ tick size, contract size, leverage และค่าธรรมเนียมจากโบรกเกอร์ก่อนส่งคำสั่ง Session Timer ใช้ตารางเวลาแบบคงที่ตาม Session Planner และไม่ปรับ DST อัตโนมัติ</p>
+    </aside>
+  </main>
+
+  <nav class="mobile-nav" aria-label="เมนูมือถือ">
+    <a class="nav-link" href="index.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-home"></use></svg>
+      Dashboard
+    </a>
+    <a class="nav-link" href="trade.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-plus"></use></svg>
+      New Trade
+    </a>
+    <a class="nav-link" href="journal.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+      Journal
+    </a>
+    <a class="nav-link" href="stats.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-chart"></use></svg>
+      Statistics
+    </a>
+    <details class="mobile-more">
+      <summary class="nav-link" aria-current="page">
+        <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-more"></use></svg>
+        More
+      </summary>
+      <div class="mobile-more-menu">
+        <a class="nav-link" href="database.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-database"></use></svg>
+          Database
+        </a>
+        <a class="nav-link" href="weekly.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calendar-check"></use></svg>
+          Weekly Review
+        </a>
+        <a class="nav-link" href="planner.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-clock"></use></svg>
+          Session Planner
+        </a>
+        <a class="nav-link" href="watchlist.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-eye"></use></svg>
+          Watchlist
+        </a>
+        <a class="nav-link" href="tools.html" aria-current="page">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calculator"></use></svg>
+          Advanced Tools
+        </a>
+        <a class="nav-link" href="checklist.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-list-checks"></use></svg>
+          Classic Checklist
+        </a>
+      </div>
+    </details>
+  </nav>
+
+  <script src="js/app.js"></script>
+  <script src="js/tools.js"></script>
+</body>
+</html>

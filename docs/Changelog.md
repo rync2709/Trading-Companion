@@ -2,6 +2,26 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## v0.8.0 - 2026-07-24
+
+### Added
+
+- Added a direction-aware RR Calculator for Bullish and Bearish plans.
+- Added risk distance, reward distance, RR, and break-even win-rate outputs.
+- Added Risk Amount and Position Size calculations.
+- Added configurable value per 1.0 price move for broker contract differences.
+- Added a manual-rate Currency Converter with currency swap.
+- Added a fixed Bangkok Session Timer with current, next, and remaining-session time.
+- Added input validation and broker contract-specification warnings.
+- Added Advanced Tools to desktop and mobile navigation.
+
+### Changed
+
+- Started Phase 8 while real-use validation continues for earlier phases.
+- Updated the PWA cache for the Advanced Tools release.
+- Updated the visible Trading OS phase to Phase 8.
+- Removed the 320px horizontal overflow and made the expanded mobile More menu scroll safely.
+
 ## v0.7.0 - 2026-07-24
 
 ### Added

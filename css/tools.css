@@ -1,0 +1,409 @@
+.tools-session {
+  min-width: 0;
+  min-height: 128px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: minmax(190px, 1.2fr) repeat(4, minmax(120px, 0.8fr)) auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.tools-session-heading {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tools-session-heading h2 {
+  margin: 8px 0 0;
+}
+
+.tool-icon {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-raised);
+  color: var(--cyan);
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.session-metric {
+  min-width: 0;
+  min-height: 64px;
+  padding-left: 14px;
+  border-left: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.session-metric span,
+.tools-field > span,
+.tools-fieldset legend,
+.tool-result-metrics span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.session-metric strong {
+  margin-top: 7px;
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#sessionCountdown {
+  color: var(--amber);
+  font-variant-numeric: tabular-nums;
+}
+
+.tools-grid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 14px;
+}
+
+.tool-card {
+  min-width: 0;
+  padding: 20px;
+}
+
+.tool-card-wide {
+  grid-column: 1 / -1;
+}
+
+.tool-card-heading {
+  min-height: 50px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tool-card-heading .eyebrow {
+  margin-bottom: 4px;
+  font-size: 10px;
+}
+
+.tool-card-heading h2 {
+  margin-bottom: 0;
+}
+
+.tools-fieldset {
+  min-width: 0;
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+}
+
+.tools-fieldset legend,
+.tools-field > span {
+  display: block;
+  margin-bottom: 7px;
+}
+
+.tools-segment {
+  width: 100%;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--bg);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.tools-segment label {
+  min-width: 0;
+  cursor: pointer;
+}
+
+.tools-segment input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tools-segment span {
+  min-height: 38px;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.tools-segment label:hover span {
+  background: var(--surface-raised);
+  color: var(--text);
+}
+
+.tools-segment input:focus-visible + span {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.tools-segment input[value="bullish"]:checked + span {
+  border-color: rgba(82, 212, 147, 0.4);
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.tools-segment input[value="bearish"]:checked + span {
+  border-color: rgba(255, 116, 116, 0.4);
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.tools-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tools-field-grid-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.tools-field {
+  min-width: 0;
+}
+
+.tools-field input,
+.tools-field select {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.tools-field input:focus,
+.tools-field select:focus {
+  border-color: var(--focus);
+}
+
+.tool-result {
+  min-width: 0;
+  margin: 20px -20px -20px;
+  padding: 18px 20px 17px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-raised);
+}
+
+.tool-result-primary {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.tool-result-primary > strong,
+.position-primary-value strong {
+  font-size: 28px;
+  line-height: 1;
+  text-align: right;
+}
+
+.position-primary-value {
+  min-width: 0;
+  text-align: right;
+}
+
+.position-primary-value span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.tool-result-metrics {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tool-result-metrics > div {
+  min-width: 0;
+  min-height: 60px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.tool-result-metrics strong {
+  display: block;
+  margin-top: 7px;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+
+.tool-result > p {
+  min-height: 18px;
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.currency-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.7fr);
+  align-items: stretch;
+  gap: 20px;
+}
+
+.currency-fields {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) minmax(100px, 0.7fr) 42px minmax(100px, 0.7fr);
+  align-items: end;
+  gap: 10px;
+}
+
+.currency-rate-field {
+  grid-column: 1 / -1;
+}
+
+.currency-swap {
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  padding: 10px;
+}
+
+.currency-result {
+  min-height: 164px;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+
+.currency-rate-label {
+  display: block;
+  margin-top: 18px;
+  color: var(--cyan);
+  font-size: 12px;
+}
+
+.tools-caution {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(237, 189, 91, 0.28);
+  border-radius: 7px;
+  background: var(--amber-soft);
+  color: var(--amber);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.tools-caution p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+@media (max-width: 1100px) {
+  .tools-session {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .tools-session-heading {
+    grid-column: span 2;
+  }
+
+  .tools-session .button {
+    grid-column: span 2;
+  }
+
+  .session-metric:nth-of-type(1) {
+    border-left: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .tools-grid,
+  .currency-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tool-card-wide {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .tools-session {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tools-session-heading,
+  .tools-session .button {
+    grid-column: 1 / -1;
+  }
+
+  .session-metric {
+    padding: 10px 0 0;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .tools-field-grid,
+  .tools-field-grid-three {
+    grid-template-columns: 1fr;
+  }
+
+  .currency-fields {
+    grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr);
+  }
+
+  .currency-fields > .tools-field:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .currency-rate-field {
+    grid-column: 1 / -1;
+  }
+
+  .tool-result-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .tools-segment {
+    grid-template-columns: 1fr;
+  }
+
+  .tool-result-primary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .tool-result-primary > strong,
+  .position-primary-value {
+    text-align: left;
+  }
+}
