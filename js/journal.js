@@ -259,9 +259,21 @@
               ${escapeHtml(formatSession(record.session))} · ${formatDate(record.savedAt || record.createdAt)}
             </p>
           </div>
-          <div class="journal-grade">
-            <strong>${escapeHtml(grade)}</strong>
-            <span>${escapeHtml(score)}</span>
+          <div class="journal-header-actions">
+            <div class="journal-grade">
+              <strong>${escapeHtml(grade)}</strong>
+              <span>${escapeHtml(score)}</span>
+            </div>
+            <button
+              class="button button-quiet button-danger journal-delete"
+              type="button"
+              data-delete-trade
+              title="ลบ Trade นี้"
+              aria-label="ลบ Trade ${escapeHtml(record.instrument || "Unknown")}"
+            >
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-trash"></use></svg>
+              <span class="sr-only">ลบ Trade</span>
+            </button>
           </div>
         </header>
 
@@ -543,7 +555,59 @@
     });
   });
 
-  list.addEventListener("click", function (event) {
+  list.addEventListener("click", async function (event) {
+    const deleteTradeButton = event.target.closest("[data-delete-trade]");
+    if (deleteTradeButton) {
+      const card = deleteTradeButton.closest("[data-journal-id]");
+      const tradeId = card.dataset.journalId;
+      const instrument = card.querySelector("h3").textContent;
+      const confirmed = window.confirm(
+        `ลบ Trade ${instrument} นี้ถาวรใช่หรือไม่?\n\n` +
+        "ข้อมูล Review, ผลลัพธ์ และ Screenshot จะถูกลบ " +
+        "พร้อมนำรายการนี้ออกจากสถิติและฐานข้อมูล"
+      );
+      if (!confirmed) return;
+
+      deleteTradeButton.disabled = true;
+      deleteTradeButton.setAttribute("aria-busy", "true");
+      let deleted = null;
+      try {
+        deleted = storage.deleteJournalTrade(tradeId);
+      } catch (error) {
+        deleteTradeButton.disabled = false;
+        deleteTradeButton.removeAttribute("aria-busy");
+        window.alert("ลบ Trade ไม่สำเร็จ กรุณาลองอีกครั้ง");
+        return;
+      }
+
+      if (!deleted) {
+        deleteTradeButton.disabled = false;
+        deleteTradeButton.removeAttribute("aria-busy");
+        if (!card.isConnected) return;
+        window.alert("ไม่พบ Trade ที่ต้องการลบ");
+        return;
+      }
+
+      try {
+        await media.deleteScreenshot(tradeId);
+      } catch (error) {
+        // The trade is already gone; a media cleanup failure must not restore it.
+      }
+
+      revokeScreenshotUrl(tradeId);
+      let currentHash = window.location.hash.slice(1);
+      try {
+        currentHash = decodeURIComponent(currentHash);
+      } catch (error) {
+        currentHash = window.location.hash.slice(1);
+      }
+      if (currentHash === `trade-${tradeId}`) {
+        window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+      }
+      render();
+      return;
+    }
+
     const mistakeButton = event.target.closest("[data-mistake]");
     if (mistakeButton) {
       const pressed = mistakeButton.getAttribute("aria-pressed") === "true";

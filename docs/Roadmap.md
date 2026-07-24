@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.8.1
+Version: v0.8.2
 Status: Master product roadmap
 
 ## Product Direction
@@ -139,6 +139,7 @@ First milestone:
 - [x] Keep journal data local to the current browser.
 - [x] Add local Screenshot upload, preview, full-size view, replacement, and removal.
 - [x] Add Actual Exit, automatic Realized RR, Close Note, and Holding Time.
+- [x] Add permanent Trade deletion with confirmation and Screenshot cleanup.
 - [ ] Validate post-trade review fields through repeated real use.
 
 Journal fields:
@@ -586,5 +587,6 @@ Expected outputs:
 | v0.7.0 | Watchlist |
 | v0.8.0 | Advanced tools |
 | v0.8.1 | Automatic fiat reference rates |
+| v0.8.2 | Journal trade deletion |
 | v0.9.0 | AI decision assistant prototype |
 | v1.0.0 | Trading OS MVP |

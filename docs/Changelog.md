@@ -2,6 +2,19 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## v0.8.2 - 2026-07-24
+
+### Added
+
+- Added a Delete Trade action to every Open and Closed Journal record.
+- Added a permanent-deletion confirmation explaining the impact on reviews, statistics, and the database.
+- Added automatic Screenshot cleanup when its Trade is deleted.
+
+### Changed
+
+- Journal summaries now refresh immediately after deleting a Trade.
+- Updated the PWA cache for the Journal deletion release.
+
 ## v0.8.1 - 2026-07-24
 
 ### Added

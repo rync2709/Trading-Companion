@@ -111,6 +111,12 @@
   line-height: 1.5;
 }
 
+.journal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .journal-grade {
   text-align: right;
 }
@@ -127,6 +133,20 @@
   margin-top: 5px;
   color: var(--muted);
   font-size: 10px;
+}
+
+.journal-delete {
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  padding: 10px;
+  color: var(--red);
+}
+
+.journal-delete:hover {
+  border-color: rgba(255, 116, 116, 0.42);
+  background: var(--red-soft);
+  color: var(--red);
 }
 
 .journal-plan {
@@ -576,6 +596,11 @@
 
   .journal-grade {
     text-align: left;
+  }
+
+  .journal-header-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .journal-actions {
