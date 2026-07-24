@@ -3,6 +3,10 @@
 
   const TIME_ZONE = "Asia/Bangkok";
   const CURRENCIES = ["USD", "THB", "EUR", "GBP", "JPY", "AUD", "SGD", "USDT"];
+  const AUTO_RATE_CURRENCIES = CURRENCIES.filter(function (currency) {
+    return currency !== "USDT";
+  });
+  const RATE_API_BASE = "https://api.frankfurter.dev/v2/rate";
   const SESSION_WINDOWS = [
     { start: 0, end: 2 * 3600, key: "new-york", label: "New York", next: "Off Session" },
     { start: 2 * 3600, end: 7 * 3600, key: "off", label: "Off Session", next: "Asia" },
@@ -216,6 +220,75 @@
     };
   }
 
+  async function fetchReferenceRate(from, to, fetchImplementation, options) {
+    if (!CURRENCIES.includes(from) || !CURRENCIES.includes(to)) {
+      throw new Error("Unsupported currency");
+    }
+
+    if (from === to) {
+      return {
+        date: null,
+        base: from,
+        quote: to,
+        rate: 1,
+        source: "Same currency"
+      };
+    }
+
+    if (!AUTO_RATE_CURRENCIES.includes(from) || !AUTO_RATE_CURRENCIES.includes(to)) {
+      throw new Error("Automatic rate is unavailable for USDT");
+    }
+
+    const fetcher = fetchImplementation ||
+      (typeof fetch === "function" ? fetch.bind(globalThis) : null);
+    if (!fetcher) throw new Error("Rate service is unavailable");
+
+    const response = await fetcher(
+      `${RATE_API_BASE}/${encodeURIComponent(from)}/${encodeURIComponent(to)}`,
+      { signal: options && options.signal }
+    );
+    if (!response.ok) throw new Error(`Rate service returned ${response.status || "an error"}`);
+
+    const payload = await response.json();
+    const rate = toNumber(payload && payload.rate);
+    const dateIsValid = payload && /^\d{4}-\d{2}-\d{2}$/.test(payload.date);
+    if (
+      !dateIsValid ||
+      payload.base !== from ||
+      payload.quote !== to ||
+      rate === null ||
+      rate <= 0
+    ) {
+      throw new Error("Rate service returned invalid data");
+    }
+
+    return {
+      date: payload.date,
+      base: payload.base,
+      quote: payload.quote,
+      rate: round(rate, 8),
+      source: "Frankfurter"
+    };
+  }
+
+  function buildGoogleRateUrl(from, to) {
+    const base = CURRENCIES.includes(from) ? from : "USD";
+    const quote = CURRENCIES.includes(to) ? to : "THB";
+    return `https://www.google.com/search?q=${encodeURIComponent(`1 ${base} to ${quote}`)}`;
+  }
+
+  function formatRateDate(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) return "";
+    const date = new Date(`${value}T00:00:00Z`);
+    if (!Number.isFinite(date.getTime())) return "";
+    return new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      timeZone: "UTC"
+    }).format(date);
+  }
+
   function getBangkokTimeParts(value) {
     const date = value instanceof Date ? value : new Date(value === undefined ? Date.now() : value);
     if (!Number.isFinite(date.getTime())) return null;
@@ -310,8 +383,20 @@
       status: document.getElementById("currencyStatus"),
       value: document.getElementById("currencyValue"),
       rate: document.getElementById("currencyRateLabel"),
+      source: document.getElementById("currencySourceLabel"),
       message: document.getElementById("currencyMessage")
     };
+    const autoRateButton = document.getElementById("fetchCurrencyRate");
+    const autoRateButtonCopy = autoRateButton.querySelector(".button-copy");
+    const currencyAutoNote = document.getElementById("currencyAutoNote");
+    const googleRateLink = document.getElementById("googleRateLink");
+    let referenceRate = null;
+    let rateController = null;
+    let rateRequestId = 0;
+    let rateLoading = false;
+    let rateError = false;
+    let currencyFeedback = "";
+    let applyingReferenceRate = false;
 
     function renderRiskReward() {
       const checkedDirection = rrForm.querySelector('input[name="rrDirection"]:checked');
@@ -361,29 +446,157 @@
       positionElements.message.textContent = result.message;
     }
 
+    function cancelRateRequest() {
+      if (rateController) rateController.abort();
+      rateController = null;
+      rateRequestId += 1;
+      rateLoading = false;
+    }
+
+    function rateMatchesReference(from, to, rate) {
+      return Boolean(
+        referenceRate &&
+        referenceRate.base === from &&
+        referenceRate.quote === to &&
+        rate !== null &&
+        round(rate, 8) === referenceRate.rate
+      );
+    }
+
     function renderCurrency() {
       const from = currencyForm.elements.from.value;
       const to = currencyForm.elements.to.value;
       const rate = toNumber(currencyForm.elements.rate.value);
+      const hasReferenceRate = rateMatchesReference(from, to, rate);
+      const supportsAutoRate = from !== to &&
+        AUTO_RATE_CURRENCIES.includes(from) &&
+        AUTO_RATE_CURRENCIES.includes(to);
       const result = calculateConversion({
         amount: currencyForm.elements.amount.value,
         rate: currencyForm.elements.rate.value,
         from,
         to
       });
-      setResultState(
-        currencyElements.status,
-        result.valid ? "ready" : result.complete ? "no-trade" : "waiting",
-        result.valid ? "CONVERTED" :
-          result.complete ? "INVALID RATE" : "MANUAL RATE REQUIRED"
-      );
+
+      if (rateLoading) {
+        setResultState(currencyElements.status, "waiting", "LOADING RATE");
+      } else if (rateError) {
+        setResultState(currencyElements.status, "waiting", "RATE UNAVAILABLE");
+      } else if (hasReferenceRate && !result.complete) {
+        setResultState(currencyElements.status, "ready", "RATE READY");
+      } else {
+        setResultState(
+          currencyElements.status,
+          result.valid ? "ready" : result.complete ? "no-trade" : "waiting",
+          result.valid ? "CONVERTED" :
+            result.complete ? "INVALID RATE" :
+              supportsAutoRate ? "AUTO OR MANUAL RATE" : "MANUAL RATE REQUIRED"
+        );
+      }
+
       currencyElements.value.textContent = result.converted === null ?
         `-- ${to}` : `${formatNumber(result.converted, 4)} ${to}`;
       currencyElements.rate.textContent = from === to ?
         `1 ${from} = 1 ${to}` :
         rate && from && to ?
           `1 ${from} = ${formatNumber(rate, 8)} ${to}` : "ยังไม่ได้ระบุ Exchange Rate";
-      currencyElements.message.textContent = result.message;
+
+      if (from === to) {
+        currencyElements.source.textContent = "Source: Same currency (1:1)";
+        currencyElements.source.dataset.source = "same";
+      } else if (hasReferenceRate) {
+        const rateDate = formatRateDate(referenceRate.date);
+        currencyElements.source.textContent =
+          `Source: Frankfurter${rateDate ? ` · ${rateDate}` : ""}`;
+        currencyElements.source.dataset.source = "reference";
+      } else {
+        currencyElements.source.textContent = rate ?
+          "Source: Manual rate" : "Source: Not set";
+        currencyElements.source.dataset.source = "manual";
+      }
+
+      if (rateLoading) {
+        currencyElements.message.textContent = "กำลังดึงอัตราอ้างอิง กรุณารอสักครู่";
+      } else if (currencyFeedback) {
+        currencyElements.message.textContent = currencyFeedback;
+      } else if (hasReferenceRate && !result.complete) {
+        currencyElements.message.textContent =
+          "ได้อัตราอ้างอิงแล้ว กรอก Amount เพื่อคำนวณ";
+      } else if (hasReferenceRate) {
+        currencyElements.message.textContent =
+          `${result.message} · เป็นอัตราอ้างอิงรายวัน ไม่ใช่ราคาเรียลไทม์ของโบรกเกอร์`;
+      } else {
+        currencyElements.message.textContent = result.message;
+      }
+
+      autoRateButton.disabled = rateLoading || !supportsAutoRate;
+      autoRateButton.setAttribute("aria-busy", rateLoading ? "true" : "false");
+      autoRateButtonCopy.textContent = rateLoading ? "กำลังโหลด" : "Auto Rate";
+      googleRateLink.href = buildGoogleRateUrl(from, to);
+
+      if (from === to) {
+        currencyAutoNote.textContent = "สกุลเงินเดียวกันใช้อัตรา 1:1";
+      } else if (!supportsAutoRate) {
+        currencyAutoNote.textContent =
+          "USDT ไม่มีในแหล่งอัตราอ้างอิงนี้ กรุณาใช้ Manual Rate";
+      } else {
+        currencyAutoNote.textContent =
+          "Auto Rate ใช้อัตราอ้างอิงรายวันจาก Frankfurter";
+      }
+    }
+
+    async function loadReferenceRate() {
+      const from = currencyForm.elements.from.value;
+      const to = currencyForm.elements.to.value;
+      const supportsAutoRate = from !== to &&
+        AUTO_RATE_CURRENCIES.includes(from) &&
+        AUTO_RATE_CURRENCIES.includes(to);
+      if (!supportsAutoRate) {
+        renderCurrency();
+        return;
+      }
+
+      if (rateController) rateController.abort();
+      const requestId = ++rateRequestId;
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(function () {
+        controller.abort();
+      }, 10000);
+      rateController = controller;
+      rateLoading = true;
+      rateError = false;
+      currencyFeedback = "";
+      renderCurrency();
+
+      try {
+        const result = await fetchReferenceRate(
+          from,
+          to,
+          window.fetch.bind(window),
+          { signal: controller.signal }
+        );
+        if (requestId !== rateRequestId) return;
+        referenceRate = result;
+        applyingReferenceRate = true;
+        currencyForm.elements.rate.value = String(result.rate);
+        applyingReferenceRate = false;
+        currencyFeedback =
+          "อัปเดตอัตราอ้างอิงแล้ว กรุณาเทียบกับราคาจริงของโบรกเกอร์ก่อนใช้งาน";
+      } catch (error) {
+        if (requestId !== rateRequestId) return;
+        referenceRate = null;
+        rateError = true;
+        currencyFeedback = error && error.name === "AbortError" ?
+          "โหลดอัตราไม่สำเร็จภายในเวลาที่กำหนด กรุณากรอก Manual Rate" :
+          "ดึงอัตราอ้างอิงไม่สำเร็จ กรุณากรอก Manual Rate หรือเช็กผ่าน Google";
+      } finally {
+        window.clearTimeout(timeoutId);
+        if (requestId === rateRequestId) {
+          rateController = null;
+          rateLoading = false;
+          renderCurrency();
+        }
+      }
     }
 
     function renderSession() {
@@ -404,15 +617,48 @@
 
     rrForm.addEventListener("input", renderRiskReward);
     positionForm.addEventListener("input", renderPositionSize);
-    currencyForm.addEventListener("input", renderCurrency);
+    currencyForm.addEventListener("input", function (event) {
+      if (event.target.tagName === "SELECT") return;
+      if (event.target.name === "rate" && !applyingReferenceRate) {
+        cancelRateRequest();
+        referenceRate = null;
+        rateError = false;
+        currencyFeedback = "";
+      } else if (event.target.name === "amount" && referenceRate) {
+        currencyFeedback = "";
+      }
+      renderCurrency();
+    });
+    currencyForm.addEventListener("change", function (event) {
+      if (event.target.tagName !== "SELECT") return;
+      cancelRateRequest();
+      referenceRate = null;
+      rateError = false;
+      currencyFeedback = "";
+      currencyForm.elements.rate.value = "";
+      renderCurrency();
+    });
+    autoRateButton.addEventListener("click", loadReferenceRate);
     document.getElementById("swapCurrencies").addEventListener("click", function () {
       const from = currencyForm.elements.from.value;
       const to = currencyForm.elements.to.value;
       const rate = toNumber(currencyForm.elements.rate.value);
+      const hadReferenceRate = rateMatchesReference(from, to, rate);
+      cancelRateRequest();
       currencyForm.elements.from.value = to;
       currencyForm.elements.to.value = from;
       currencyForm.elements.rate.value = rate && rate > 0 ?
         String(round(1 / rate, 8)) : "";
+      referenceRate = hadReferenceRate ? {
+        date: referenceRate.date,
+        base: to,
+        quote: from,
+        rate: round(1 / rate, 8),
+        source: referenceRate.source
+      } : null;
+      rateError = false;
+      currencyFeedback = hadReferenceRate ?
+        "สลับสกุลเงินและกลับด้านอัตราอ้างอิงแล้ว" : "";
       renderCurrency();
     });
 
@@ -426,9 +672,14 @@
   window.TradingTools = {
     TIME_ZONE,
     CURRENCIES,
+    AUTO_RATE_CURRENCIES,
+    RATE_API_BASE,
     calculateRiskReward,
     calculatePositionSize,
     calculateConversion,
+    fetchReferenceRate,
+    buildGoogleRateUrl,
+    formatRateDate,
     getSessionTimer,
     formatNumber,
     formatCountdown

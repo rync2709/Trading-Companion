@@ -11,7 +11,7 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Repository name: Trading-Companion
 - Phase: 8 - Advanced Tools (in progress)
 - Phase 1 validation: collecting 20 real-use outcomes
-- Version: v0.8.0
+- Version: v0.8.1
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -118,7 +118,8 @@ The first Phase 8 milestone includes:
 - Risk distance, reward distance, and break-even win-rate outputs
 - Risk Amount and Position Size Calculator
 - Configurable value per 1.0 price move for different contract specifications
-- Manual-rate Currency Converter with currency swap
+- Currency Converter with automatic daily fiat reference rates and manual fallback
+- Frankfurter source date, currency swap, and Google verification link
 - Fixed Bangkok Session Timer matching the existing Session Planner schedule
 - Input validation and explicit broker contract-specification warning
 
@@ -158,4 +159,4 @@ The first Phase 8 milestone includes:
 
 ## Data Note
 
-Drafts, assessment history, Weekly Reviews, Daily Session Plans, Watchlist Context, and Screenshots are stored only in the browser on the current device. Screenshots use IndexedDB so image files do not consume the smaller checklist storage area. Watchlist status is entered manually and is not live market data. Advanced Tool inputs are calculated locally and are not saved. Trading Companion does not place orders and does not send trade data to a server.
+Drafts, assessment history, Weekly Reviews, Daily Session Plans, Watchlist Context, and Screenshots are stored only in the browser on the current device. Screenshots use IndexedDB so image files do not consume the smaller checklist storage area. Watchlist status is entered manually and is not live market data. Advanced Tool inputs are calculated locally and are not saved. The Currency Converter requests only the selected fiat currency pair from Frankfurter; it does not send the entered amount. Trading Companion does not place orders and does not send trade data to a server.

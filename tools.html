@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css?v=0.8.0">
-  <link rel="stylesheet" href="css/tools.css">
+  <link rel="stylesheet" href="css/tools.css?v=0.8.1">
 </head>
 <body>
   <header class="topbar">
@@ -253,7 +253,7 @@
             <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-arrow-left-right"></use></svg>
           </div>
           <div>
-            <p class="eyebrow">Manual reference rate</p>
+            <p class="eyebrow">Reference or manual rate</p>
             <h2>Currency Converter</h2>
           </div>
         </header>
@@ -300,6 +300,23 @@
                 <input type="number" name="rate" min="0" step="any" inputmode="decimal" placeholder="กรอกเรตที่ตรวจสอบแล้ว">
               </label>
             </div>
+            <div class="currency-actions">
+              <button class="button button-primary" id="fetchCurrencyRate" type="button" aria-busy="false">
+                <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-rotate"></use></svg>
+                <span class="button-copy">Auto Rate</span>
+              </button>
+              <a
+                class="button button-quiet"
+                id="googleRateLink"
+                href="https://www.google.com/search?q=1%20USD%20to%20THB"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-search"></use></svg>
+                เช็ก Google
+              </a>
+              <span id="currencyAutoNote">Auto Rate ใช้อัตราอ้างอิงรายวันจาก Frankfurter</span>
+            </div>
           </form>
 
           <div class="tool-result currency-result" aria-live="polite">
@@ -311,6 +328,9 @@
               <strong id="currencyValue">-- THB</strong>
             </div>
             <strong class="currency-rate-label" id="currencyRateLabel">ยังไม่ได้ระบุ Exchange Rate</strong>
+            <span class="currency-source-label" id="currencySourceLabel" data-source="manual">
+              Source: Not set
+            </span>
             <p id="currencyMessage">กรอก Amount และ Exchange Rate ที่ตรวจสอบแล้ว</p>
           </div>
         </div>
@@ -319,7 +339,7 @@
 
     <aside class="tools-caution">
       <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-shield"></use></svg>
-      <p>ผลลัพธ์เป็นเครื่องมือช่วยวางแผน โปรดตรวจ tick size, contract size, leverage และค่าธรรมเนียมจากโบรกเกอร์ก่อนส่งคำสั่ง Session Timer ใช้ตารางเวลาแบบคงที่ตาม Session Planner และไม่ปรับ DST อัตโนมัติ</p>
+      <p>ผลลัพธ์เป็นเครื่องมือช่วยวางแผน โปรดตรวจ tick size, contract size, leverage, อัตราแลกเปลี่ยน และค่าธรรมเนียมจากโบรกเกอร์ก่อนส่งคำสั่ง Auto Rate เป็นอัตราอ้างอิงรายวัน ไม่ใช่ราคาเรียลไทม์ ส่วน Session Timer ใช้ตารางเวลาแบบคงที่และไม่ปรับ DST อัตโนมัติ</p>
     </aside>
   </main>
 
@@ -375,6 +395,6 @@
   </nav>
 
   <script src="js/app.js"></script>
-  <script src="js/tools.js"></script>
+  <script src="js/tools.js?v=0.8.1"></script>
 </body>
 </html>

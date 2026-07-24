@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.8.0
+Version: v0.8.1
 Status: Master product roadmap
 
 ## Product Direction
@@ -393,7 +393,9 @@ First milestone:
 - [x] Show risk distance, reward distance, and break-even win rate.
 - [x] Add Risk Amount and Position Size calculations.
 - [x] Support configurable value per 1.0 price move.
-- [x] Add a manual-rate Currency Converter with currency swap.
+- [x] Add a Currency Converter with automatic daily fiat reference rates.
+- [x] Show the reference source and date with a manual-rate fallback.
+- [x] Add currency swap and a Google verification link.
 - [x] Add a fixed Asia/Bangkok Session Timer and next-session countdown.
 - [x] Validate incomplete, invalid, and directionally incorrect inputs.
 - [x] Keep all calculations local and warn about broker contract specifications.
@@ -583,5 +585,6 @@ Expected outputs:
 | v0.6.0 | Session planner |
 | v0.7.0 | Watchlist |
 | v0.8.0 | Advanced tools |
+| v0.8.1 | Automatic fiat reference rates |
 | v0.9.0 | AI decision assistant prototype |
 | v1.0.0 | Trading OS MVP |

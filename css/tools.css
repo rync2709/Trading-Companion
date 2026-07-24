@@ -286,6 +286,31 @@
   grid-column: 1 / -1;
 }
 
+.currency-actions {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.currency-actions > span {
+  min-width: 0;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
+  text-align: right;
+}
+
+.currency-actions .button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.currency-actions .button[aria-busy="true"] .icon {
+  animation: currency-rate-spin 0.8s linear infinite;
+}
+
 .currency-swap {
   width: 42px;
   min-width: 42px;
@@ -305,6 +330,30 @@
   margin-top: 18px;
   color: var(--cyan);
   font-size: 12px;
+}
+
+.currency-source-label {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.currency-source-label[data-source="reference"] {
+  color: var(--green);
+}
+
+@keyframes currency-rate-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .currency-actions .button[aria-busy="true"] .icon {
+    animation: none;
+  }
 }
 
 .tools-caution {
@@ -387,6 +436,22 @@
     grid-column: 1 / -1;
   }
 
+  .currency-actions {
+    align-items: stretch;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .currency-actions .button {
+    min-width: 0;
+  }
+
+  .currency-actions > span {
+    grid-column: 1 / -1;
+    margin-left: 0;
+    text-align: left;
+  }
+
   .tool-result-metrics {
     grid-template-columns: 1fr;
   }
@@ -405,5 +470,13 @@
   .tool-result-primary > strong,
   .position-primary-value {
     text-align: left;
+  }
+
+  .currency-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .currency-actions > span {
+    grid-column: auto;
   }
 }

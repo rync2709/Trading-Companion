@@ -2,6 +2,21 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## v0.8.1 - 2026-07-24
+
+### Added
+
+- Added automatic daily fiat reference rates from Frankfurter.
+- Added the reference source and effective date to Currency Converter results.
+- Added loading, timeout, invalid-response, and manual-fallback states.
+- Added a Google search link for independent rate verification.
+
+### Changed
+
+- Kept manual Exchange Rate editing available for every currency pair.
+- Kept USDT on manual rates because the reference-rate provider does not support it.
+- Updated the PWA cache for the automatic-rate release.
+
 ## v0.8.0 - 2026-07-24
 
 ### Added
