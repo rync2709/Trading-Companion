@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.2.1
+Version: v0.2.2
 Status: Master product roadmap
 
 ## Product Direction
@@ -138,7 +138,8 @@ First milestone:
 - [x] Preserve compatibility with existing Phase 1 lifecycle records.
 - [x] Keep journal data local to the current browser.
 - [x] Add local Screenshot upload, preview, full-size view, replacement, and removal.
-- [ ] Add richer post-trade review fields based on real use.
+- [x] Add Actual Exit, automatic Realized RR, Close Note, and Holding Time.
+- [ ] Validate post-trade review fields through repeated real use.
 
 Journal fields:
 
@@ -147,6 +148,10 @@ Journal fields:
 - Emotion
 - Mistake
 - Lesson
+- Actual Exit
+- Realized RR
+- Close Note
+- Holding Time
 - Pair
 - Session
 - Setup type

@@ -128,6 +128,22 @@
     };
   }
 
+  function normalizeCloseReview(closeReview) {
+    const source = closeReview && typeof closeReview === "object" ? closeReview : {};
+    const hasRealizedRr = source.realizedRr !== null &&
+      source.realizedRr !== undefined &&
+      source.realizedRr !== "";
+    const realizedRr = hasRealizedRr ? Number(source.realizedRr) : null;
+    return {
+      actualExit: typeof source.actualExit === "string" ?
+        source.actualExit.trim().slice(0, 40) : "",
+      realizedRr: realizedRr !== null && Number.isFinite(realizedRr) ? realizedRr : null,
+      closeNote: typeof source.closeNote === "string" ?
+        source.closeNote.trim().slice(0, 2000) : "",
+      updatedAt: typeof source.updatedAt === "string" ? source.updatedAt : null
+    };
+  }
+
   function normalizeJournal(journal) {
     const source = journal && typeof journal === "object" ? journal : {};
     const emotion = JOURNAL_EMOTIONS.includes(source.emotion) ? source.emotion : "";
@@ -145,6 +161,7 @@
       lesson,
       tradingViewUrl,
       screenshot: normalizeScreenshotMetadata(source.screenshot),
+      closeReview: normalizeCloseReview(source.closeReview),
       updatedAt: typeof source.updatedAt === "string" ? source.updatedAt : null
     };
   }
@@ -266,6 +283,73 @@
     return updated;
   }
 
+  function calculateRealizedRr(item, actualExit) {
+    if (!item || actualExit === "" || actualExit == null) return null;
+    const exit = Number(actualExit);
+    const plan = item.tradePlan || {};
+    const entry = Number(plan.entry);
+    const stopLoss = Number(plan.stopLoss);
+    if (
+      !Number.isFinite(exit) ||
+      !Number.isFinite(entry) ||
+      !Number.isFinite(stopLoss) ||
+      exit <= 0 ||
+      entry <= 0 ||
+      stopLoss <= 0 ||
+      !["bullish", "bearish"].includes(item.direction)
+    ) return null;
+
+    const risk = Math.abs(entry - stopLoss);
+    const stopIsValid = item.direction === "bullish" ?
+      stopLoss < entry : stopLoss > entry;
+    if (risk <= 0 || !stopIsValid) return null;
+    const result = item.direction === "bullish" ? exit - entry : entry - exit;
+    const realizedRr = result / risk;
+    return Number.isFinite(realizedRr) ? Math.round(realizedRr * 100) / 100 : null;
+  }
+
+  function saveCloseReview(id, review) {
+    const source = review && typeof review === "object" ? review : {};
+    const actualExit = source.actualExit == null ? "" : String(source.actualExit).trim();
+    const closeNote = source.closeNote == null ? "" : String(source.closeNote).trim();
+    let updated = null;
+    let invalid = false;
+    const next = loadHistory().map(function (item) {
+      if (
+        item.id !== id ||
+        !item.lifecycle ||
+        item.lifecycle.status !== "closed" ||
+        !isEnteredRecord(item)
+      ) return item;
+
+      const realizedRr = actualExit ? calculateRealizedRr(item, actualExit) : null;
+      if (actualExit && realizedRr === null) {
+        invalid = true;
+        return item;
+      }
+
+      const now = new Date().toISOString();
+      updated = {
+        ...item,
+        journal: normalizeJournal({
+          ...normalizeJournal(item.journal),
+          closeReview: {
+            actualExit,
+            realizedRr,
+            closeNote,
+            updatedAt: now
+          },
+          updatedAt: now
+        })
+      };
+      return updated;
+    });
+    if (invalid || !updated) return null;
+
+    localStorage.setItem(KEYS.history, JSON.stringify(next));
+    return updated;
+  }
+
   function closePosition(id, outcome) {
     const allowed = ["win", "loss", "break-even"];
     if (!allowed.includes(outcome)) return null;
@@ -356,6 +440,7 @@
     loadHistory,
     isValidationEligible,
     normalizeScreenshotMetadata,
+    normalizeCloseReview,
     normalizeJournal,
     isEnteredRecord,
     saveAssessment,
@@ -363,6 +448,8 @@
     loadJournalTrades,
     saveJournalReview,
     saveJournalScreenshot,
+    calculateRealizedRr,
+    saveCloseReview,
     closePosition,
     reviewSkippedAssessment,
     getValidationSummary

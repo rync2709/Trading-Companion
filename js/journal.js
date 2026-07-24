@@ -104,6 +104,44 @@
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
+  function formatHoldingTime(record) {
+    const lifecycle = record.lifecycle || {};
+    const openedAt = new Date(lifecycle.openedAt);
+    const closedAt = new Date(lifecycle.closedAt);
+    if (
+      Number.isNaN(openedAt.getTime()) ||
+      Number.isNaN(closedAt.getTime()) ||
+      closedAt <= openedAt
+    ) return "Holding time --";
+
+    const totalMinutes = Math.max(Math.round((closedAt - openedAt) / 60000), 1);
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+    const parts = [];
+    if (days) parts.push(`${days}d`);
+    if (hours) parts.push(`${hours}h`);
+    if (minutes || !parts.length) parts.push(`${minutes}m`);
+    return `Held ${parts.join(" ")}`;
+  }
+
+  function formatRealizedRr(value) {
+    if (value === null || value === undefined || value === "") return "--";
+    const rr = Number(value);
+    if (!Number.isFinite(rr)) return "--";
+    const prefix = rr > 0 ? "+" : "";
+    return `${prefix}${rr.toFixed(2)}R`;
+  }
+
+  function realizedRrState(value) {
+    if (value === null || value === undefined || value === "") return "idle";
+    const rr = Number(value);
+    if (!Number.isFinite(rr)) return "idle";
+    if (rr > 0) return "positive";
+    if (rr < 0) return "negative";
+    return "neutral";
+  }
+
   function hasReview(journal) {
     return Boolean(journal.updatedAt);
   }
@@ -126,6 +164,67 @@
         </button>
       `;
     }).join("");
+  }
+
+  function renderCloseReview(record, journal) {
+    if (!record.lifecycle || record.lifecycle.status !== "closed") return "";
+    const closeReview = journal.closeReview;
+    const realizedRr = closeReview.actualExit ?
+      storage.calculateRealizedRr(record, closeReview.actualExit) : closeReview.realizedRr;
+    const savedState = closeReview.updatedAt ?
+      `บันทึกล่าสุด ${formatDate(closeReview.updatedAt)}` : "ยังไม่ได้บันทึกผลจริง";
+
+    return `
+      <section class="close-review journal-field-wide" data-close-review>
+        <header class="close-review-header">
+          <div>
+            <span>Trade result</span>
+            <strong>Post-trade execution</strong>
+          </div>
+          <span class="holding-time">${formatHoldingTime(record)}</span>
+        </header>
+        <div class="close-review-grid">
+          <div class="journal-field">
+            <label>Actual Exit</label>
+            <input
+              type="number"
+              min="0"
+              step="any"
+              inputmode="decimal"
+              placeholder="0.00"
+              value="${escapeHtml(closeReview.actualExit)}"
+              aria-label="Actual Exit"
+              data-actual-exit
+            >
+          </div>
+          <div class="realized-rr" data-realized-state="${realizedRrState(realizedRr)}">
+            <span>Realized RR</span>
+            <strong data-realized-rr>${formatRealizedRr(realizedRr)}</strong>
+            <small>จาก Entry และ Stop Loss</small>
+          </div>
+          <div class="journal-field close-note-field">
+            <label>Close Note</label>
+            <textarea
+              maxlength="2000"
+              placeholder="เหตุผลที่ปิด Trade และสิ่งที่เกิดขึ้นจริง"
+              aria-label="Close Note"
+              data-close-note
+            >${escapeHtml(closeReview.closeNote)}</textarea>
+          </div>
+        </div>
+        <div class="close-review-actions">
+          <span
+            class="close-review-state"
+            data-close-review-state
+            data-state="${closeReview.updatedAt ? "saved" : "idle"}"
+          >${savedState}</span>
+          <button class="button" type="button" data-save-close-review>
+            <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-save"></use></svg>
+            บันทึกผลจริง
+          </button>
+        </div>
+      </section>
+    `;
   }
 
   function renderCard(record) {
@@ -173,6 +272,7 @@
 
         <div class="journal-review">
           <div class="journal-form-grid">
+            ${renderCloseReview(record, journal)}
             <div class="journal-field journal-field-wide">
               <span>Screenshot</span>
               <div class="screenshot-control">
@@ -303,6 +403,29 @@
     const status = card.querySelector("[data-screenshot-status]");
     status.textContent = message;
     status.dataset.state = state || "idle";
+  }
+
+  function setCloseReviewStatus(card, message, state) {
+    const status = card.querySelector("[data-close-review-state]");
+    if (!status) return;
+    status.textContent = message;
+    status.dataset.state = state || "idle";
+  }
+
+  function updateRealizedRrPreview(card) {
+    const input = card.querySelector("[data-actual-exit]");
+    const output = card.querySelector("[data-realized-rr]");
+    if (!input || !output) return null;
+
+    const record = storage.loadJournalTrades().find(function (item) {
+      return item.id === card.dataset.journalId;
+    });
+    const realizedRr = record ? storage.calculateRealizedRr(record, input.value.trim()) : null;
+    const resultBox = output.closest(".realized-rr");
+    output.textContent = input.value.trim() ? formatRealizedRr(realizedRr) : "--";
+    resultBox.dataset.realizedState = input.value.trim() ?
+      realizedRrState(realizedRr) : "idle";
+    return realizedRr;
   }
 
   function showScreenshot(card, tradeId, entry) {
@@ -451,6 +574,35 @@
       return;
     }
 
+    const closeReviewButton = event.target.closest("[data-save-close-review]");
+    if (closeReviewButton) {
+      const card = closeReviewButton.closest("[data-journal-id]");
+      const actualExit = card.querySelector("[data-actual-exit]").value.trim();
+      const closeNote = card.querySelector("[data-close-note]").value;
+      const realizedRr = updateRealizedRrPreview(card);
+      if (actualExit && realizedRr === null) {
+        setCloseReviewStatus(card, "ตรวจ Actual Exit, Entry และ Stop Loss", "error");
+        card.querySelector("[data-actual-exit]").focus();
+        return;
+      }
+
+      const updated = storage.saveCloseReview(card.dataset.journalId, {
+        actualExit,
+        closeNote
+      });
+      if (!updated) {
+        setCloseReviewStatus(card, "บันทึกผลจริงไม่สำเร็จ", "error");
+        return;
+      }
+
+      setCloseReviewStatus(card, "บันทึกผลจริงแล้ว", "saved");
+      const saveState = card.querySelector("[data-journal-save-state]");
+      saveState.dataset.state = "saved";
+      saveState.textContent = "บันทึกผลจริงแล้ว";
+      renderMetrics(storage.loadJournalTrades());
+      return;
+    }
+
     const saveButton = event.target.closest("[data-save-journal]");
     if (!saveButton) return;
 
@@ -484,6 +636,15 @@
     saveState.dataset.state = "saved";
     saveState.textContent = "บันทึกแล้ว";
     renderMetrics(storage.loadJournalTrades());
+  });
+
+  list.addEventListener("input", function (event) {
+    const card = event.target.closest("[data-journal-id]");
+    if (!card) return;
+    if (event.target.matches("[data-actual-exit]")) updateRealizedRrPreview(card);
+    if (event.target.matches("[data-actual-exit], [data-close-note]")) {
+      setCloseReviewStatus(card, "มีการแก้ไขที่ยังไม่บันทึก", "idle");
+    }
   });
 
   list.addEventListener("change", async function (event) {

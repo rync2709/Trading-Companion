@@ -11,7 +11,7 @@ Trading Companion now combines the Phase 1 guided decision workflow with the fir
 - Repository name: Trading-Companion
 - Phase: 2 - Trade Journal (in progress)
 - Phase 1 validation: collecting 20 real-use outcomes
-- Version: v0.2.1
+- Version: v0.2.2
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -40,10 +40,11 @@ The first Phase 2 milestone includes:
 - All, Open, and Closed trade filters
 - Emotion, mistake, lesson, and TradingView link fields
 - Local Screenshot attachment with preview, full-size view, replacement, and removal
+- Closed Trade review with Actual Exit, automatic Realized RR, Close Note, and Holding Time
 - Backward-compatible journal data for existing lifecycle records
 - Local review progress summary
 
-Richer post-trade analysis remains planned.
+Phase 2 review fields will continue to be validated through real use.
 
 ## Repository Structure
 

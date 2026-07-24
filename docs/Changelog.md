@@ -2,6 +2,20 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## v0.2.2 - 2026-07-24
+
+### Added
+
+- Added Actual Exit and Close Note fields for Closed Trades.
+- Added automatic Realized RR calculation for Bullish and Bearish positions.
+- Added automatic Holding Time from lifecycle timestamps.
+- Added positive, negative, and break-even RR states.
+
+### Changed
+
+- Extended Journal records with backward-compatible close-review metadata.
+- Updated the PWA cache for the close-review release.
+
 ## v0.2.1 - 2026-07-24
 
 ### Added
