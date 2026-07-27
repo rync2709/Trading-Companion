@@ -6,8 +6,8 @@ indicator(
     max_boxes_count = 10
 )
 
-// Trading OS Pine Track v0.2.4-alpha
-// Modules: confirmed 4H/1H Bias and aligned HTF FVG candidates.
+// Trading OS Pine Track v0.3.0-alpha
+// Modules: confirmed 4H/1H Bias, aligned HTF FVG candidates, and daily liquidity.
 // This indicator is decision support. It does not generate Buy/Sell signals.
 
 string primaryTimeframe = input.timeframe("240", "Primary HTF", group = "HTF Bias")
@@ -35,6 +35,12 @@ string dashboardSizeInput = input.string(
     "Dashboard text size",
     options = ["Tiny", "Small", "Normal"],
     group = "Display"
+)
+bool showDailyLiquidity = input.bool(
+    true,
+    "Show previous day high / low",
+    tooltip = "Plots confirmed Previous Day High and Previous Day Low levels.",
+    group = "Liquidity"
 )
 string dashboardTextSize = (
     dashboardSizeInput == "Tiny" ? size.tiny :
@@ -181,6 +187,13 @@ int secondaryState = request.security(
     gaps = barmerge.gaps_off,
     lookahead = barmerge.lookahead_on
 )
+[previousDayHigh, previousDayLow] = request.security(
+    syminfo.tickerid,
+    "1D",
+    [high[1], low[1]],
+    gaps = barmerge.gaps_off,
+    lookahead = barmerge.lookahead_on
+)
 
 float primarySeconds = timeframe.in_seconds(primaryTimeframe)
 float secondarySeconds = timeframe.in_seconds(secondaryTimeframe)
@@ -291,6 +304,46 @@ string poiLocation = (
     poiActive ? "AWAY" :
     "--"
 )
+bool newExchangeDay = ta.change(time("1D")) != 0
+var bool pdhSweptToday = false
+var bool pdlSweptToday = false
+
+if newExchangeDay
+    pdhSweptToday := false
+    pdlSweptToday := false
+
+bool pdhSweepEvent = (
+    barstate.isconfirmed and
+    not pdhSweptToday and
+    not na(previousDayHigh) and
+    high > previousDayHigh and
+    close < previousDayHigh
+)
+bool pdlSweepEvent = (
+    barstate.isconfirmed and
+    not pdlSweptToday and
+    not na(previousDayLow) and
+    low < previousDayLow and
+    close > previousDayLow
+)
+
+if pdhSweepEvent
+    pdhSweptToday := true
+if pdlSweepEvent
+    pdlSweptToday := true
+
+string liquidityState = (
+    pdhSweptToday and pdlSweptToday ? "PDH + PDL SWEPT" :
+    pdhSweptToday ? "PDH SWEPT" :
+    pdlSweptToday ? "PDL SWEPT" :
+    "PDH / PDL WAIT"
+)
+color liquidityStateColor = (
+    pdhSweptToday and pdlSweptToday ? warningColor :
+    pdhSweptToday ? bearishColor :
+    pdlSweptToday ? bullishColor :
+    neutralColor
+)
 
 color backgroundColor = (
     showBiasBackground and timeframeOrderValid and combinedState != 0 ?
@@ -374,6 +427,30 @@ plot(
     title = "Selected HTF FVG status",
     display = display.data_window
 )
+plot(
+    showDailyLiquidity ? previousDayHigh : na,
+    title = "Previous Day High",
+    color = color.new(bearishColor, 48),
+    linewidth = 1,
+    style = plot.style_linebr
+)
+plot(
+    showDailyLiquidity ? previousDayLow : na,
+    title = "Previous Day Low",
+    color = color.new(bullishColor, 48),
+    linewidth = 1,
+    style = plot.style_linebr
+)
+plot(
+    pdhSweepEvent ? 1 : 0,
+    title = "Previous Day High sweep event",
+    display = display.data_window
+)
+plot(
+    pdlSweepEvent ? 1 : 0,
+    title = "Previous Day Low sweep event",
+    display = display.data_window
+)
 
 var table biasPanel = table.new(
     position.top_right,
@@ -393,7 +470,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF",
+        "TRADING OS · HTF v0.3",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,
@@ -515,7 +592,7 @@ if barstate.islast
         biasPanel,
         0,
         6,
-        "Model",
+        "Liquidity",
         bgcolor = panelColor,
         text_color = mutedTextColor,
         text_halign = text.align_left,
@@ -525,8 +602,10 @@ if barstate.islast
         biasPanel,
         1,
         6,
-        "v0.2.4",
-        bgcolor = panelColor,
-        text_color = mutedTextColor,
+        liquidityState,
+        bgcolor = pdhSweptToday or pdlSweptToday ?
+            color.new(liquidityStateColor, 86) :
+            panelColor,
+        text_color = liquidityStateColor,
         text_size = dashboardTextSize
     )

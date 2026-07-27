@@ -1,7 +1,7 @@
 # Trading OS Indicator Specification
 
-Version: v0.1.8
-Phase: Pine Track - Modules 1 and 2 baseline
+Version: v0.2.0
+Phase: Pine Track - Modules 1, 2, and Liquidity baseline
 
 ## Purpose
 
@@ -149,6 +149,8 @@ Output:
 
 ## Module 4 - Liquidity
 
+Implementation status: `Pine v0.3.0-alpha - Previous Day High/Low baseline`
+
 Input:
 
 - Asia high and low
@@ -168,6 +170,24 @@ Output:
 - liquidity_swept: true or false
 - liquidity_type: INTERNAL, EXTERNAL, SESSION, DAILY, EQUAL_LEVEL, or NONE
 - sweep_direction: BULLISH, BEARISH, or NEUTRAL
+
+Initial Previous Day Liquidity heuristic:
+
+- Request PDH and PDL from the previous completed Daily candle.
+- Use a one-bar offset with `lookahead_on` so historical and realtime levels use confirmed values.
+- PDH sweep: a confirmed chart candle trades above PDH and closes back below PDH.
+- PDL sweep: a confirmed chart candle trades below PDL and closes back above PDL.
+- Record only the first confirmed sweep of each level per exchange day.
+- PDH sweep maps to a potential BEARISH liquidity event.
+- PDL sweep maps to a potential BULLISH liquidity event.
+- Both levels swept in one day produce mixed context and must not imply a direction.
+
+Current limitation:
+
+- Sweep detection uses the chart timeframe candle.
+- Asia High/Low, Equal High/Low, and Internal/External classification are not automated.
+- Liquidity is not yet linked to a setup window, POI proximity, or Structure confirmation.
+- The output is context only and cannot mark an Entry ready.
 
 ## Module 5 - Structure
 

@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.2.4-alpha
+Version: v0.11.1 / Pine v0.3.0-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -638,6 +638,10 @@ First milestone:
 - [x] Reduce the HTF Context dashboard to a compact seven-row layout.
 - [x] Add Tiny, Small, and Normal dashboard text-size settings with Small as default.
 - [x] Keep inactive POI and Status rows neutral until price touches the selected zone.
+- [x] Add confirmed Previous Day High and Previous Day Low levels.
+- [x] Add first confirmed PDH/PDL sweep tracking per exchange day.
+- [x] Add compact Liquidity state without creating an Entry Signal.
+- [x] Smoke-test PDH/PDL rendering on XAUUSD at 5M, 15M, 1H, and 4H.
 - [ ] Compare the output against manually marked 4H/1H structure.
 - [ ] Compare FVG candidates and status transitions against manual markup.
 - [ ] Record disagreement examples before calibrating the heuristic.
@@ -647,7 +651,8 @@ Planned modules:
 - [x] HTF Bias baseline
 - [x] HTF POI - FVG candidate baseline
 - [ ] HTF POI - OB, Breaker, Liquidity, and Premium/Discount
-- [ ] Liquidity
+- [x] Liquidity - Previous Day High/Low baseline
+- [ ] Liquidity - Asia, Equal High/Low, and Internal/External expansion
 - [ ] Structure: MSS, CHOCH, BOS
 - [ ] CISD
 - [ ] Displacement
@@ -693,4 +698,5 @@ Expected outputs:
 | Pine v0.2.2-alpha | Compact HTF Context dashboard |
 | Pine v0.2.3-alpha | Adjustable compact dashboard text size |
 | Pine v0.2.4-alpha | Neutral inactive POI and Status dashboard colors |
+| Pine v0.3.0-alpha | Previous Day High/Low liquidity and sweep baseline |
 | v1.0.0 | Trading OS MVP |

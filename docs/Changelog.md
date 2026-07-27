@@ -2,6 +2,28 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.3.0-alpha - 2026-07-27
+
+### Added
+
+- Added confirmed Previous Day High and Previous Day Low levels.
+- Added confirmed-candle PDH and PDL sweep detection.
+- Added one-sweep-per-level tracking that resets each exchange day.
+- Added optional PDH/PDL chart plots.
+- Added Liquidity state to the compact dashboard and sweep events to the Data Window.
+
+### Validated
+
+- Compiled the v0.3.0 Liquidity baseline in TradingView Pine Editor.
+- Confirmed rendering without runtime errors on XAUUSD at 5M, 15M, 1H, and 4H.
+
+### Important
+
+- A sweep is context, not a Buy/Sell or Entry Signal.
+- Asia, Equal High/Low, and Internal/External Liquidity remain unimplemented.
+- Structure, CISD, Displacement, and risk confirmation remain manual.
+- Manual PDH/PDL and sweep-event comparison remains pending.
+
 ## Pine v0.2.4-alpha - 2026-07-27
 
 ### Changed

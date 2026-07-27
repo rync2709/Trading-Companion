@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.2.4-alpha
+Version: v0.3.0-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -10,6 +10,7 @@ The Pine track automates selected Trading OS context checks without replacing tr
 
 - Module 1: HTF Bias baseline
 - Module 2 baseline: aligned HTF FVG candidate
+- Module 4 baseline: Previous Day High/Low liquidity
 
 Defaults:
 
@@ -63,6 +64,23 @@ The dashboard uses seven rows to reduce chart obstruction. Its text size default
 
 POI and Status rows remain neutral gray while price is `AWAY`. They receive active colors only when price is `TOUCH` or `IN ZONE`. Bias and Context colors remain directional because they describe market context rather than POI interaction.
 
+## Daily Liquidity Baseline
+
+The first Liquidity module uses the confirmed Previous Day High (`PDH`) and Previous Day Low (`PDL`):
+
+- PDH and PDL come from the previous completed Daily candle.
+- A PDH sweep requires a confirmed chart candle to trade above PDH and close back below it.
+- A PDL sweep requires a confirmed chart candle to trade below PDL and close back above it.
+- Only the first confirmed sweep of each level is recorded per exchange day.
+- PDH and PDL lines can be hidden under the Liquidity settings.
+- The dashboard remains neutral while waiting and colors the Liquidity row after a sweep.
+
+Interpretation remains manual:
+
+- PDH sweep is a potential bearish liquidity event.
+- PDL sweep is a potential bullish liquidity event.
+- A sweep is not an Entry Signal and still requires POI, Structure, CISD, Displacement, and risk confirmation.
+
 ## Non-Repainting Baseline
 
 The script requests the previous completed HTF state. Confirmed pivots also require bars on both sides, so the output intentionally lags live price. This tradeoff avoids treating a still-forming HTF structure as confirmed.
@@ -74,7 +92,9 @@ Compile status:
 - Compiled successfully in TradingView Pine Editor on 2026-07-27.
 - Render smoke test passed on XAUUSD at 5M, 15M, 1H, and 4H.
 - The HTF Context table and selected FVG box rendered without a compiler error.
+- The v0.3.0 PDH/PDL levels and Liquidity dashboard state rendered without a runtime error at 5M, 15M, 1H, and 4H.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
+- Manual PDH/PDL and sweep-event comparison remains pending.
 
 1. Open Pine Editor in TradingView.
 2. Paste the contents of `TradingOS.pine`.
@@ -83,13 +103,16 @@ Compile status:
 5. Compare the table with manually marked 4H and 1H swing structure.
 6. Compare the selected FVG candidate with manually marked three-candle imbalances.
 7. Confirm Fresh, Partial, and Filled transitions on completed HTF candles.
-8. Record disagreements before changing the structure or FVG rules.
+8. Compare PDH and PDL with the previous completed Daily candle.
+9. Confirm sweep state only after a candle crosses a level and closes back inside.
+10. Record disagreements before changing the structure, FVG, or Liquidity rules.
 
 ## Current Limits
 
 - HTF POI currently supports FVG candidates only.
 - No Order Block, Breaker, mitigation block, or liquidity POI.
-- No liquidity, MSS/CHOCH/BOS, CISD, or displacement module.
+- Liquidity currently supports PDH and PDL only.
+- No Asia High/Low, Equal High/Low, Internal/External Liquidity, MSS/CHOCH/BOS, CISD, or displacement module.
 - No Entry FVG confirmation or setup-window validation.
 - No Entry grade or alert.
 - Premium/discount and displacement are not yet included in HTF confidence.
