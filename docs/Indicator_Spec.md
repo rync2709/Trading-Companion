@@ -1,7 +1,7 @@
 # Trading OS Indicator Specification
 
-Version: v0.1.3
-Phase: Pine Track - Module 1 implementation
+Version: v0.1.4
+Phase: Pine Track - Modules 1 and 2 baseline
 
 ## Purpose
 
@@ -83,6 +83,8 @@ These inputs remain required for later confidence calibration and should not be 
 
 ## Module 2 - HTF POI
 
+Implementation status: `Pine v0.2.0-alpha - FVG candidate only`
+
 Input:
 
 - HTF FVG zones
@@ -103,6 +105,26 @@ Output:
 - poi_active: true or false
 - poi_type: FVG, OB, BREAKER, LIQUIDITY, PREMIUM_DISCOUNT, or NONE
 - poi_status: FRESH, PARTIAL, FILLED, INVALID, or NONE
+
+Initial FVG candidate heuristic:
+
+- Use a completed three-candle imbalance.
+- Bullish FVG: latest completed candle low is above the high two candles earlier.
+- Bearish FVG: latest completed candle high is below the low two candles earlier.
+- Track the latest Bullish and Bearish candidate independently on 4H and 1H.
+- Mark Partial when a completed HTF candle enters the zone.
+- Mark Filled when a completed HTF candle crosses the opposite boundary.
+- Select only a candidate aligned with the combined HTF Bias.
+- Prefer the Primary 4H candidate before the Secondary 1H candidate.
+- Return no selected candidate during neutral or conflicting Bias.
+
+Current limitation:
+
+- The candidate is not confirmed by displacement.
+- Filled status is based on completed HTF candles and intentionally updates with HTF confirmation lag.
+- INVALID status is not automated because structure invalidation rules are not yet explicit.
+- Order Block, Breaker, Liquidity, and Premium/Discount POIs are not implemented.
+- The output must be described as an HTF FVG candidate, not a ready Entry zone.
 
 ## Module 3 - LTF Context
 

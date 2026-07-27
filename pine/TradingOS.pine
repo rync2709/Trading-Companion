@@ -1,12 +1,13 @@
 //@version=6
 indicator(
-    "Trading OS - HTF Bias",
-    shorttitle = "Trading OS Bias",
-    overlay = true
+    "Trading OS - HTF Context",
+    shorttitle = "Trading OS Context",
+    overlay = true,
+    max_boxes_count = 10
 )
 
-// Trading OS Pine Track v0.1.0-alpha
-// Module 1 only: confirmed 4H/1H swing-structure context.
+// Trading OS Pine Track v0.2.0-alpha
+// Modules: confirmed 4H/1H Bias and aligned HTF FVG candidates.
 // This indicator is decision support. It does not generate Buy/Sell signals.
 
 string primaryTimeframe = input.timeframe("240", "Primary HTF", group = "HTF Bias")
@@ -22,6 +23,11 @@ int swingLength = input.int(
 bool showBiasBackground = input.bool(
     true,
     "Show bias background",
+    group = "Display"
+)
+bool showHtfFvg = input.bool(
+    true,
+    "Show aligned HTF FVG candidate",
     group = "Display"
 )
 
@@ -75,6 +81,63 @@ f_state_text(int state) =>
 f_state_color(int state) =>
     state == 1 ? bullishColor : state == -1 ? bearishColor : neutralColor
 
+f_fvg_status_text(int status) =>
+    status == 1 ? "FRESH" :
+     status == 2 ? "PARTIAL" :
+     status == 3 ? "FILLED" :
+     "NONE"
+
+f_fvg_state() =>
+    var float bullishTop = na
+    var float bullishBottom = na
+    var int bullishStart = na
+    var int bullishStatus = 0
+    var float bearishTop = na
+    var float bearishBottom = na
+    var int bearishStart = na
+    var int bearishStatus = 0
+
+    // Every expression uses completed HTF bars. Bar [1] is the latest
+    // completed candle and bar [3] is the first candle in the FVG pattern.
+    bool bullishCreated = low[1] > high[3]
+    bool bearishCreated = high[1] < low[3]
+
+    if bullishCreated
+        bullishTop := low[1]
+        bullishBottom := high[3]
+        bullishStart := time[3]
+        bullishStatus := 1
+    else if bullishStatus == 1 or bullishStatus == 2
+        if low[1] <= bullishBottom
+            bullishStatus := 3
+        else if low[1] < bullishTop
+            bullishStatus := 2
+
+    if bearishCreated
+        bearishTop := low[3]
+        bearishBottom := high[1]
+        bearishStart := time[3]
+        bearishStatus := 1
+    else if bearishStatus == 1 or bearishStatus == 2
+        if high[1] >= bearishTop
+            bearishStatus := 3
+        else if high[1] > bearishBottom
+            bearishStatus := 2
+
+    [
+        bullishTop,
+        bullishBottom,
+        bullishStart,
+        bullishStatus,
+        bearishTop,
+        bearishBottom,
+        bearishStart,
+        bearishStatus
+    ]
+
+f_fvg_active(int status) =>
+    status == 1 or status == 2
+
 f_timeframe_label(string value) =>
     value == "240" ? "4H" :
      value == "60" ? "1H" :
@@ -99,8 +162,41 @@ int secondaryState = request.security(
     lookahead = barmerge.lookahead_on
 )
 
-int primarySeconds = timeframe.in_seconds(primaryTimeframe)
-int secondarySeconds = timeframe.in_seconds(secondaryTimeframe)
+[
+    primaryBullTop,
+    primaryBullBottom,
+    primaryBullStart,
+    primaryBullStatus,
+    primaryBearTop,
+    primaryBearBottom,
+    primaryBearStart,
+    primaryBearStatus
+] = request.security(
+    syminfo.tickerid,
+    primaryTimeframe,
+    f_fvg_state(),
+    gaps = barmerge.gaps_off,
+    lookahead = barmerge.lookahead_on
+)
+[
+    secondaryBullTop,
+    secondaryBullBottom,
+    secondaryBullStart,
+    secondaryBullStatus,
+    secondaryBearTop,
+    secondaryBearBottom,
+    secondaryBearStart,
+    secondaryBearStatus
+] = request.security(
+    syminfo.tickerid,
+    secondaryTimeframe,
+    f_fvg_state(),
+    gaps = barmerge.gaps_off,
+    lookahead = barmerge.lookahead_on
+)
+
+float primarySeconds = timeframe.in_seconds(primaryTimeframe)
+float secondarySeconds = timeframe.in_seconds(secondaryTimeframe)
 bool timeframeOrderValid = primarySeconds > secondarySeconds
 bool conflict = (
     timeframeOrderValid and
@@ -135,12 +231,125 @@ color alignmentColor = (
     neutralColor
 )
 
+bool primaryBullAvailable = f_fvg_active(primaryBullStatus)
+bool primaryBearAvailable = f_fvg_active(primaryBearStatus)
+bool secondaryBullAvailable = f_fvg_active(secondaryBullStatus)
+bool secondaryBearAvailable = f_fvg_active(secondaryBearStatus)
+bool usePrimaryBull = combinedState == 1 and primaryBullAvailable
+bool useSecondaryBull = (
+    combinedState == 1 and
+    not primaryBullAvailable and
+    secondaryBullAvailable
+)
+bool usePrimaryBear = combinedState == -1 and primaryBearAvailable
+bool useSecondaryBear = (
+    combinedState == -1 and
+    not primaryBearAvailable and
+    secondaryBearAvailable
+)
+
+int poiDirection = (
+    usePrimaryBull or useSecondaryBull ? 1 :
+    usePrimaryBear or useSecondaryBear ? -1 :
+    0
+)
+float poiTop = (
+    usePrimaryBull ? primaryBullTop :
+    useSecondaryBull ? secondaryBullTop :
+    usePrimaryBear ? primaryBearTop :
+    useSecondaryBear ? secondaryBearTop :
+    na
+)
+float poiBottom = (
+    usePrimaryBull ? primaryBullBottom :
+    useSecondaryBull ? secondaryBullBottom :
+    usePrimaryBear ? primaryBearBottom :
+    useSecondaryBear ? secondaryBearBottom :
+    na
+)
+int poiStart = (
+    usePrimaryBull ? primaryBullStart :
+    useSecondaryBull ? secondaryBullStart :
+    usePrimaryBear ? primaryBearStart :
+    useSecondaryBear ? secondaryBearStart :
+    na
+)
+int poiStatus = (
+    usePrimaryBull ? primaryBullStatus :
+    useSecondaryBull ? secondaryBullStatus :
+    usePrimaryBear ? primaryBearStatus :
+    useSecondaryBear ? secondaryBearStatus :
+    0
+)
+string poiTimeframe = (
+    usePrimaryBull or usePrimaryBear ? f_timeframe_label(primaryTimeframe) :
+    useSecondaryBull or useSecondaryBear ? f_timeframe_label(secondaryTimeframe) :
+    "--"
+)
+bool poiActive = poiDirection != 0 and f_fvg_active(poiStatus)
+bool priceInsidePoi = (
+    poiActive and
+    close <= poiTop and
+    close >= poiBottom
+)
+bool priceTouchesPoi = (
+    poiActive and
+    high >= poiBottom and
+    low <= poiTop
+)
+string poiLocation = (
+    priceInsidePoi ? "IN ZONE" :
+    priceTouchesPoi ? "TOUCH" :
+    poiActive ? "AWAY" :
+    "--"
+)
+
 color backgroundColor = (
     showBiasBackground and timeframeOrderValid and combinedState != 0 ?
     color.new(f_state_color(combinedState), 92) :
     na
 )
 bgcolor(backgroundColor, title = "Confirmed HTF bias")
+
+var box poiBox = na
+if barstate.islast
+    if showHtfFvg and poiActive
+        color poiColor = f_state_color(poiDirection)
+        string poiText = (
+            poiTimeframe + " " +
+            f_state_text(poiDirection) + " FVG · " +
+            f_fvg_status_text(poiStatus)
+        )
+        if na(poiBox)
+            poiBox := box.new(
+                left = poiStart,
+                top = poiTop,
+                right = time,
+                bottom = poiBottom,
+                xloc = xloc.bar_time,
+                extend = extend.right,
+                border_color = color.new(poiColor, 28),
+                border_width = 1,
+                bgcolor = color.new(poiColor, 88),
+                text = poiText,
+                text_color = color.new(poiColor, 8),
+                text_size = size.tiny,
+                text_halign = text.align_left,
+                text_valign = text.align_top
+            )
+        else
+            box.set_left(poiBox, poiStart)
+            box.set_top(poiBox, poiTop)
+            box.set_right(poiBox, time)
+            box.set_bottom(poiBox, poiBottom)
+            box.set_extend(poiBox, extend.right)
+            box.set_border_color(poiBox, color.new(poiColor, 28))
+            box.set_bgcolor(poiBox, color.new(poiColor, 88))
+            box.set_text(poiBox, poiText)
+            box.set_text_color(poiBox, color.new(poiColor, 8))
+    else if not na(poiBox)
+        box.delete(poiBox)
+        poiBox := na
 
 plot(
     primaryState,
@@ -162,11 +371,26 @@ plot(
     title = "HTF conflict",
     display = display.data_window
 )
+plot(
+    poiActive ? poiTop : na,
+    title = "Selected HTF FVG top",
+    display = display.data_window
+)
+plot(
+    poiActive ? poiBottom : na,
+    title = "Selected HTF FVG bottom",
+    display = display.data_window
+)
+plot(
+    poiStatus,
+    title = "Selected HTF FVG status",
+    display = display.data_window
+)
 
 var table biasPanel = table.new(
     position.top_right,
     2,
-    7,
+    11,
     frame_color = panelBorderColor,
     frame_width = 1,
     border_color = panelBorderColor,
@@ -181,7 +405,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF BIAS",
+        "TRADING OS · HTF CONTEXT",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left
@@ -275,7 +499,7 @@ if barstate.islast
         biasPanel,
         0,
         6,
-        "Model",
+        "POI candidate",
         bgcolor = panelColor,
         text_color = mutedTextColor,
         text_halign = text.align_left
@@ -284,7 +508,85 @@ if barstate.islast
         biasPanel,
         1,
         6,
-        "SWING v0.1",
+        poiActive ? f_state_text(poiDirection) + " FVG" : "NONE",
+        bgcolor = poiActive ?
+            color.new(f_state_color(poiDirection), 84) :
+            panelColor,
+        text_color = poiActive ?
+            f_state_color(poiDirection) :
+            neutralColor
+    )
+    table.cell(
+        biasPanel,
+        0,
+        7,
+        "POI timeframe",
+        bgcolor = panelColor,
+        text_color = mutedTextColor,
+        text_halign = text.align_left
+    )
+    table.cell(
+        biasPanel,
+        1,
+        7,
+        poiTimeframe,
+        bgcolor = panelColor,
+        text_color = textColor
+    )
+    table.cell(
+        biasPanel,
+        0,
+        8,
+        "POI status",
+        bgcolor = panelColor,
+        text_color = mutedTextColor,
+        text_halign = text.align_left
+    )
+    table.cell(
+        biasPanel,
+        1,
+        8,
+        f_fvg_status_text(poiStatus),
+        bgcolor = panelColor,
+        text_color = poiStatus == 1 ? bullishColor :
+            poiStatus == 2 ? warningColor :
+            neutralColor
+    )
+    table.cell(
+        biasPanel,
+        0,
+        9,
+        "Price location",
+        bgcolor = panelColor,
+        text_color = mutedTextColor,
+        text_halign = text.align_left
+    )
+    table.cell(
+        biasPanel,
+        1,
+        9,
+        poiLocation,
+        bgcolor = priceInsidePoi or priceTouchesPoi ?
+            color.new(warningColor, 86) :
+            panelColor,
+        text_color = priceInsidePoi or priceTouchesPoi ?
+            warningColor :
+            neutralColor
+    )
+    table.cell(
+        biasPanel,
+        0,
+        10,
+        "Model",
+        bgcolor = panelColor,
+        text_color = mutedTextColor,
+        text_halign = text.align_left
+    )
+    table.cell(
+        biasPanel,
+        1,
+        10,
+        "SWING + FVG v0.2",
         bgcolor = panelColor,
         text_color = mutedTextColor
     )

@@ -2,6 +2,23 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.2.0-alpha - 2026-07-27
+
+### Added
+
+- Added completed-candle Bullish and Bearish FVG detection on the Primary and Secondary HTFs.
+- Added Fresh, Partial, and Filled FVG candidate status.
+- Added conservative Bias-aligned candidate selection with Primary HTF priority.
+- Added a single latest-candidate box to keep the chart readable.
+- Added POI timeframe, status, and current price-location rows to the Pine dashboard.
+- Added selected FVG levels and status to the Data Window.
+
+### Important
+
+- The detected zone is an HTF FVG candidate, not a confirmed Entry FVG.
+- Displacement, Structure, CISD, and setup-window confirmation are still required in later modules.
+- Order Block and Breaker detection remain intentionally unimplemented until their selection rules are explicit.
+
 ## Pine v0.1.0-alpha - 2026-07-27
 
 ### Added

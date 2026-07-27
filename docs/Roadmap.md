@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.1.0-alpha
+Version: v0.11.1 / Pine v0.2.0-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -629,14 +629,20 @@ First milestone:
 - [x] Add conservative alignment, conflict, combined Bias, and confidence logic.
 - [x] Add a fixed HTF Bias table and optional background.
 - [x] Request the previous completed HTF state.
+- [x] Add completed-candle 4H/1H FVG candidates.
+- [x] Add Fresh, Partial, and Filled candidate status.
+- [x] Select only a Bias-aligned candidate with Primary HTF priority.
+- [x] Add a latest-candidate box and price-location status.
 - [ ] Compile the first file in TradingView Pine Editor.
 - [ ] Compare the output against manually marked 4H/1H structure.
+- [ ] Compare FVG candidates and status transitions against manual markup.
 - [ ] Record disagreement examples before calibrating the heuristic.
 
 Planned modules:
 
 - [x] HTF Bias baseline
-- [ ] HTF POI
+- [x] HTF POI - FVG candidate baseline
+- [ ] HTF POI - OB, Breaker, Liquidity, and Premium/Discount
 - [ ] Liquidity
 - [ ] Structure: MSS, CHOCH, BOS
 - [ ] CISD
@@ -678,4 +684,5 @@ Expected outputs:
 | v0.11.0 | Personal Playbook Library |
 | v0.11.1 | Real-use Validation Center and v1.0 readiness |
 | Pine v0.1.0-alpha | Confirmed 4H/1H HTF Bias baseline |
+| Pine v0.2.0-alpha | Bias-aligned 4H/1H FVG candidate baseline |
 | v1.0.0 | Trading OS MVP |

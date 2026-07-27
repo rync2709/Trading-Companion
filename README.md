@@ -12,7 +12,7 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Phase: Validation Sprint after Phase 11
 - Validation target: 20 real-use outcomes with at least 80% R and review coverage
 - Version: v0.11.1
-- Pine indicator: v0.1.0-alpha - HTF Bias
+- Pine indicator: v0.2.0-alpha - HTF Bias and FVG candidate
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -189,6 +189,14 @@ The first Pine milestone includes:
 - Fixed chart table and optional Bias background
 - Previous completed HTF state requests to avoid using a still-forming HTF bar
 - No Buy/Sell signal, Entry grade, or alert
+
+The second Pine milestone adds:
+
+- Completed-candle three-bar FVG detection on 4H and 1H
+- Fresh, Partial, and Filled candidate status
+- Bias-aligned candidate selection with 4H priority
+- Latest selected FVG box and live chart-price location
+- Explicit separation between an HTF POI candidate and a confirmed Entry FVG
 
 The Pine source and TradingView test notes are stored under `pine/`.
 

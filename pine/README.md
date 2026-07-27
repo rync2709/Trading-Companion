@@ -1,12 +1,15 @@
 # Trading OS Pine Indicator
 
-Version: v0.1.0-alpha
+Version: v0.2.0-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
 ## Current Module
 
-`TradingOS.pine` currently implements only Module 1: HTF Bias.
+`TradingOS.pine` currently implements:
+
+- Module 1: HTF Bias baseline
+- Module 2 baseline: aligned HTF FVG candidate
 
 Defaults:
 
@@ -27,6 +30,26 @@ Combined bias is conservative:
 - Directional 4H with neutral 1H: 4H bias with `MEDIUM` confidence
 - Conflicting timeframes or neutral 4H: `NEUTRAL` with `LOW` confidence
 
+## HTF FVG Candidate
+
+The first POI baseline scans completed 4H and 1H candles using three-candle imbalance logic:
+
+- Bullish candidate: the latest completed candle low is above the high two candles earlier.
+- Bearish candidate: the latest completed candle high is below the low two candles earlier.
+- Fresh: price has not re-entered the candidate on completed HTF candles.
+- Partial: price has entered part of the candidate.
+- Filled: price has crossed the opposite boundary.
+
+Selection rules:
+
+- The candidate direction must match the combined HTF Bias.
+- The Primary 4H candidate has priority.
+- The Secondary 1H candidate is used only when no active aligned 4H candidate exists.
+- Neutral or conflicting Bias produces no selected candidate.
+- Only the latest Bullish and Bearish candidate on each HTF is tracked.
+
+This is a POI candidate, not a valid Entry FVG. Displacement, Structure, CISD, and setup-window confirmation are not implemented yet.
+
 ## Non-Repainting Baseline
 
 The script requests the previous completed HTF state. Confirmed pivots also require bars on both sides, so the output intentionally lags live price. This tradeoff avoids treating a still-forming HTF structure as confirmed.
@@ -38,12 +61,16 @@ The script requests the previous completed HTF state. Confirmed pivots also requ
 3. Save and add the indicator to a chart.
 4. Test on 5M, 15M, 1H, and 4H charts.
 5. Compare the table with manually marked 4H and 1H swing structure.
-6. Record disagreements before changing the swing length or structure rules.
+6. Compare the selected FVG candidate with manually marked three-candle imbalances.
+7. Confirm Fresh, Partial, and Filled transitions on completed HTF candles.
+8. Record disagreements before changing the structure or FVG rules.
 
 ## Current Limits
 
-- No HTF POI detection.
-- No liquidity, MSS/CHOCH/BOS, CISD, displacement, or FVG module.
+- HTF POI currently supports FVG candidates only.
+- No Order Block, Breaker, mitigation block, or liquidity POI.
+- No liquidity, MSS/CHOCH/BOS, CISD, or displacement module.
+- No Entry FVG confirmation or setup-window validation.
 - No Entry grade or alert.
 - Premium/discount and displacement are not yet included in HTF confidence.
 - The file must still be compiled in TradingView Pine Editor before it is considered release-ready.
