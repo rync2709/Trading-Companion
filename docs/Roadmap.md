@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.3.1-alpha
+Version: v0.11.1 / Pine v0.3.2-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -644,6 +644,8 @@ First milestone:
 - [x] Smoke-test PDH/PDL rendering on XAUUSD at 5M, 15M, 1H, and 4H.
 - [x] Add an optional viewport-pinned display for the current FVG and PDH/PDL.
 - [x] Compile and scroll/zoom test the viewport-pinned display in TradingView.
+- [x] Remove the FVG box and PDH/PDL chart lines after mobile usability review.
+- [x] Compile and visually confirm the dashboard-only presentation in TradingView.
 - [ ] Compare the output against manually marked 4H/1H structure.
 - [ ] Compare FVG candidates and status transitions against manual markup.
 - [ ] Record disagreement examples before calibrating the heuristic.
@@ -702,4 +704,5 @@ Expected outputs:
 | Pine v0.2.4-alpha | Neutral inactive POI and Status dashboard colors |
 | Pine v0.3.0-alpha | Previous Day High/Low liquidity and sweep baseline |
 | Pine v0.3.1-alpha | Viewport-pinned current FVG and PDH/PDL display |
+| Pine v0.3.2-alpha | Dashboard-only FVG and liquidity context without chart drawings |
 | v1.0.0 | Trading OS MVP |

@@ -2,12 +2,10 @@
 indicator(
     "Trading OS - HTF Context",
     shorttitle = "Trading OS Context",
-    overlay = true,
-    max_boxes_count = 10,
-    max_lines_count = 10
+    overlay = true
 )
 
-// Trading OS Pine Track v0.3.1-alpha
+// Trading OS Pine Track v0.3.2-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG candidates, and daily liquidity.
 // This indicator is decision support. It does not generate Buy/Sell signals.
 
@@ -26,28 +24,11 @@ bool showBiasBackground = input.bool(
     "Show bias background",
     group = "Display"
 )
-bool showHtfFvg = input.bool(
-    true,
-    "Show aligned HTF FVG candidate",
-    group = "Display"
-)
-bool pinCurrentContext = input.bool(
-    true,
-    "Pin current context to visible chart",
-    tooltip = "Keeps the selected FVG and current PDH/PDL stretched across the visible chart. Turn off to view their historical time anchors.",
-    group = "Display"
-)
 string dashboardSizeInput = input.string(
     "Small",
     "Dashboard text size",
     options = ["Tiny", "Small", "Normal"],
     group = "Display"
-)
-bool showDailyLiquidity = input.bool(
-    true,
-    "Show previous day high / low",
-    tooltip = "Plots confirmed Previous Day High and Previous Day Low levels.",
-    group = "Liquidity"
 )
 string dashboardTextSize = (
     dashboardSizeInput == "Tiny" ? size.tiny :
@@ -359,93 +340,6 @@ color backgroundColor = (
 )
 bgcolor(backgroundColor, title = "Confirmed HTF bias")
 
-var box poiBox = na
-if barstate.islast
-    if showHtfFvg and poiActive
-        color poiColor = f_state_color(poiDirection)
-        int poiDisplayLeft = pinCurrentContext ? chart.left_visible_bar_time : poiStart
-        int poiDisplayRight = pinCurrentContext ? chart.right_visible_bar_time : time
-        string poiDisplayMode = pinCurrentContext ? " · CURRENT" : ""
-        string poiText = (
-            poiTimeframe + " " +
-            f_state_text(poiDirection) + " FVG · " +
-            f_fvg_status_text(poiStatus) +
-            poiDisplayMode
-        )
-        if na(poiBox)
-            poiBox := box.new(
-                left = poiDisplayLeft,
-                top = poiTop,
-                right = poiDisplayRight,
-                bottom = poiBottom,
-                xloc = xloc.bar_time,
-                extend = pinCurrentContext ? extend.none : extend.right,
-                border_color = color.new(poiColor, 28),
-                border_width = 1,
-                bgcolor = color.new(poiColor, 88),
-                text = poiText,
-                text_color = color.new(poiColor, 8),
-                text_size = size.tiny,
-                text_halign = text.align_left,
-                text_valign = text.align_top
-            )
-        else
-            box.set_left(poiBox, poiDisplayLeft)
-            box.set_top(poiBox, poiTop)
-            box.set_right(poiBox, poiDisplayRight)
-            box.set_bottom(poiBox, poiBottom)
-            box.set_extend(poiBox, pinCurrentContext ? extend.none : extend.right)
-            box.set_border_color(poiBox, color.new(poiColor, 28))
-            box.set_bgcolor(poiBox, color.new(poiColor, 88))
-            box.set_text(poiBox, poiText)
-            box.set_text_color(poiBox, color.new(poiColor, 8))
-    else if not na(poiBox)
-        box.delete(poiBox)
-        poiBox := na
-
-var line pdhLine = na
-var line pdlLine = na
-if barstate.islast
-    if showDailyLiquidity and pinCurrentContext and not na(previousDayHigh)
-        if na(pdhLine)
-            pdhLine := line.new(
-                x1 = chart.left_visible_bar_time,
-                y1 = previousDayHigh,
-                x2 = chart.right_visible_bar_time,
-                y2 = previousDayHigh,
-                xloc = xloc.bar_time,
-                extend = extend.none,
-                color = color.new(bearishColor, 32),
-                width = 1
-            )
-        else
-            line.set_xy1(pdhLine, chart.left_visible_bar_time, previousDayHigh)
-            line.set_xy2(pdhLine, chart.right_visible_bar_time, previousDayHigh)
-            line.set_color(pdhLine, color.new(bearishColor, 32))
-    else if not na(pdhLine)
-        line.delete(pdhLine)
-        pdhLine := na
-
-    if showDailyLiquidity and pinCurrentContext and not na(previousDayLow)
-        if na(pdlLine)
-            pdlLine := line.new(
-                x1 = chart.left_visible_bar_time,
-                y1 = previousDayLow,
-                x2 = chart.right_visible_bar_time,
-                y2 = previousDayLow,
-                xloc = xloc.bar_time,
-                extend = extend.none,
-                color = color.new(bullishColor, 32),
-                width = 1
-            )
-        else
-            line.set_xy1(pdlLine, chart.left_visible_bar_time, previousDayLow)
-            line.set_xy2(pdlLine, chart.right_visible_bar_time, previousDayLow)
-            line.set_color(pdlLine, color.new(bullishColor, 32))
-    else if not na(pdlLine)
-        line.delete(pdlLine)
-        pdlLine := na
-
 plot(
     primaryState,
     title = "Primary HTF structure state",
@@ -480,20 +374,6 @@ plot(
     poiStatus,
     title = "Selected HTF FVG status",
     display = display.data_window
-)
-plot(
-    showDailyLiquidity and not pinCurrentContext ? previousDayHigh : na,
-    title = "Historical Previous Day High",
-    color = color.new(bearishColor, 48),
-    linewidth = 1,
-    style = plot.style_linebr
-)
-plot(
-    showDailyLiquidity and not pinCurrentContext ? previousDayLow : na,
-    title = "Historical Previous Day Low",
-    color = color.new(bullishColor, 48),
-    linewidth = 1,
-    style = plot.style_linebr
 )
 plot(
     previousDayHigh,
@@ -534,7 +414,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.3.1",
+        "TRADING OS · HTF v0.3.2",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,

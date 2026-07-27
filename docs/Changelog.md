@@ -2,6 +2,26 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.3.2-alpha - 2026-07-27
+
+### Changed
+
+- Removed the selected FVG box from the price chart.
+- Removed current and historical PDH/PDL chart lines.
+- Removed the viewport-pinning and chart-drawing settings.
+- Kept FVG state, price location, Liquidity state, and exact values in the Dashboard or Data Window.
+- Kept HTF Bias, FVG selection, daily levels, and sweep detection unchanged.
+
+### Important
+
+- This is a presentation-only correction after mobile usability review.
+- The optional HTF Bias background remains available.
+
+### Validated
+
+- Compiled Pine v0.3.2-alpha successfully in TradingView Pine Editor.
+- Confirmed on XAUUSD 15M that Trading OS draws no FVG box or PDH/PDL chart lines while Dashboard states remain visible.
+
 ## Pine v0.3.1-alpha - 2026-07-27
 
 ### Changed

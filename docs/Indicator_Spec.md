@@ -1,6 +1,6 @@
 # Trading OS Indicator Specification
 
-Version: v0.2.1
+Version: v0.2.2
 Phase: Pine Track - Modules 1, 2, and Liquidity baseline
 
 ## Purpose
@@ -83,7 +83,7 @@ These inputs remain required for later confidence calibration and should not be 
 
 ## Module 2 - HTF POI
 
-Implementation status: `Pine v0.3.1-alpha - compiled FVG candidate with pinned current-context display`
+Implementation status: `Pine v0.3.2-alpha - FVG candidate in Dashboard and Data Window only`
 
 Input:
 
@@ -126,12 +126,11 @@ Current limitation:
 - Order Block, Breaker, Liquidity, and Premium/Discount POIs are not implemented.
 - The output must be described as an HTF FVG candidate, not a ready Entry zone.
 
-Current-context display:
+Current display:
 
-- The selected FVG can stretch across the currently visible chart for consistent live use.
-- This viewport-pinned box shows current context and must not be read as historical evidence on earlier candles.
-- Turning pinning off restores the candidate's original time anchor.
-- Display pinning must not change the selected candidate, zone prices, status, or Entry logic.
+- The selected FVG is reported in the fixed Dashboard and Data Window.
+- No FVG box is drawn over the price chart.
+- Removing the chart box must not change candidate selection, zone prices, status, or Entry logic.
 
 ## Module 3 - LTF Context
 
@@ -156,7 +155,7 @@ Output:
 
 ## Module 4 - Liquidity
 
-Implementation status: `Pine v0.3.1-alpha - Previous Day High/Low baseline with pinned current levels`
+Implementation status: `Pine v0.3.2-alpha - Previous Day High/Low baseline without chart lines`
 
 Input:
 
@@ -188,8 +187,7 @@ Initial Previous Day Liquidity heuristic:
 - PDH sweep maps to a potential BEARISH liquidity event.
 - PDL sweep maps to a potential BULLISH liquidity event.
 - Both levels swept in one day produce mixed context and must not imply a direction.
-- The current PDH/PDL can stretch across the visible chart while sweep calculations continue to use the confirmed historical series.
-- Turning current-context pinning off restores historical daily step plots.
+- PDH/PDL values remain in the Data Window while sweep calculations use the confirmed historical series.
 
 Current limitation:
 
@@ -197,7 +195,7 @@ Current limitation:
 - Asia High/Low, Equal High/Low, and Internal/External classification are not automated.
 - Liquidity is not yet linked to a setup window, POI proximity, or Structure confirmation.
 - The output is context only and cannot mark an Entry ready.
-- Viewport-pinned PDH/PDL are current-context overlays and must not be used as historical levels on earlier candles.
+- No PDH/PDL lines are drawn over the price chart.
 
 ## Module 5 - Structure
 

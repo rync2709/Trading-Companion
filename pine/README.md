@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.3.1-alpha
+Version: v0.3.2-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -72,20 +72,16 @@ The first Liquidity module uses the confirmed Previous Day High (`PDH`) and Prev
 - A PDH sweep requires a confirmed chart candle to trade above PDH and close back below it.
 - A PDL sweep requires a confirmed chart candle to trade below PDL and close back above it.
 - Only the first confirmed sweep of each level is recorded per exchange day.
-- PDH and PDL lines can be hidden under the Liquidity settings.
+- PDH and PDL remain available in the Data Window without drawing horizontal lines on the chart.
 - The dashboard remains neutral while waiting and colors the Liquidity row after a sweep.
 
-## Pinned Current Context
+## Chart Presentation
 
-`Pin current context to visible chart` is enabled by default:
-
-- The currently selected HTF FVG and current PDH/PDL stretch across the visible chart.
-- The display refreshes when the chart is scrolled or zoomed.
-- Turning the setting off restores the FVG time anchor and historical PDH/PDL step plots.
-- Pinning changes presentation only. FVG selection, PDH/PDL values, and sweep detection still use their confirmed source data.
-- A pinned zone is current context overlaid on the visible chart. It must not be interpreted as historical evidence on earlier candles.
-
-Price-level drawings remain attached to their actual price. They therefore move vertically on screen when the price scale is dragged or zoomed; only a table can remain fixed to screen pixels.
+- The indicator does not draw an FVG box or PDH/PDL lines on the price chart.
+- FVG candidate, price-location, and Liquidity states remain in the fixed Dashboard.
+- Exact FVG top/bottom and PDH/PDL values remain available in the Data Window.
+- The optional HTF Bias background remains the only full-chart visual.
+- Removing chart drawings changes presentation only. Detection and status logic remain unchanged.
 
 Interpretation remains manual:
 
@@ -103,9 +99,10 @@ Compile status:
 
 - Compiled successfully in TradingView Pine Editor on 2026-07-27.
 - Render smoke test passed on XAUUSD at 5M, 15M, 1H, and 4H.
-- The HTF Context table and selected FVG box rendered without a compiler error.
+- The HTF Context table and selected FVG data rendered without a compiler error.
 - The v0.3.0 PDH/PDL levels and Liquidity dashboard state rendered without a runtime error at 5M, 15M, 1H, and 4H.
 - The v0.3.1 pinned current-context display compiled successfully and passed horizontal scroll and zoom checks on XAUUSD 15M.
+- The v0.3.2 dashboard-only chart presentation compiled successfully and visually confirmed that Trading OS draws no FVG box or PDH/PDL chart lines on XAUUSD 15M.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 

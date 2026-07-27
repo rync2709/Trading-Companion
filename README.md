@@ -12,7 +12,7 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Phase: Validation Sprint after Phase 11
 - Validation target: 20 real-use outcomes with at least 80% R and review coverage
 - Version: v0.11.1
-- Pine indicator: v0.3.1-alpha - HTF context, pinned current FVG, and daily liquidity baseline
+- Pine indicator: v0.3.2-alpha - dashboard-only HTF context and daily liquidity baseline
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -195,7 +195,7 @@ The second Pine milestone adds:
 - Completed-candle three-bar FVG detection on 4H and 1H
 - Fresh, Partial, and Filled candidate status
 - Bias-aligned candidate selection with 4H priority
-- Latest selected FVG box and live chart-price location
+- Latest selected FVG state and live chart-price location
 - Explicit separation between an HTF POI candidate and a confirmed Entry FVG
 - Successful TradingView compilation and rendering checks on 5M, 15M, 1H, and 4H
 - Compact seven-row dashboard with grouped context fields and adjustable text size
@@ -208,8 +208,7 @@ The third Pine milestone adds:
 - Sweep rules that require price to cross a level and close back inside
 - Compact Liquidity status in the existing seven-row dashboard
 - Data Window outputs without Buy/Sell signals or alerts
-- A default-on current-context view that keeps the selected FVG and current PDH/PDL stretched across the visible chart
-- An optional historical mode that restores the FVG time anchor and daily PDH/PDL step plots
+- Dashboard and Data Window outputs without an FVG box or PDH/PDL lines on the price chart
 
 The Pine source and TradingView test notes are stored under `pine/`.
 
