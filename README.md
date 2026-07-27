@@ -12,7 +12,7 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Phase: Validation Sprint after Phase 11
 - Validation target: 20 real-use outcomes with at least 80% R and review coverage
 - Version: v0.11.1
-- Pine indicator: v0.6.1-alpha - full HTF FVG, liquidity, structure, CISD, and Displacement chart context
+- Pine indicator: v0.7.0-alpha - Displacement-linked Entry FVG and retracement tracking
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -270,6 +270,16 @@ The v0.6.1 chart-presentation milestone adds:
 - Displacement Watch and confirmed range boxes
 - Independent Display toggles for each drawing group, enabled by default
 - The existing ten-row Dashboard with `Small` as the unchanged default size
+
+The seventh Pine milestone adds:
+
+- Current-chart Entry FVG detection tied to a confirmed Displacement candle
+- A three-candle imbalance rule that requires the Displacement candle to be the middle candle
+- Fresh, Partial, and Filled lifecycle tracking
+- Entry FVG creation, retracement, and filled event labels
+- A latest Entry FVG box anchored to its actual formation time and price
+- Exact Entry FVG direction, status, boundaries, events, and interaction state in the Data Window
+- Entry FVG status in the existing Status row without increasing the ten-row Dashboard
 
 The Pine source and TradingView test notes are stored under `pine/`.
 

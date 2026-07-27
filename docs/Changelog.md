@@ -2,6 +2,32 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.7.0-alpha - 2026-07-27
+
+### Added
+
+- Added current-chart Entry FVG detection tied to a confirmed Displacement event.
+- Required the Displacement expansion candle to be the middle candle of a valid three-candle imbalance.
+- Added support for follow-through confirmation on the first or second candle after expansion.
+- Added Fresh, Partial, and Filled Entry FVG lifecycle states.
+- Added separate creation, first-retracement, and filled event outputs and labels.
+- Added a latest Entry FVG box anchored to actual formation time and exact prices.
+- Added exact Entry FVG evidence and price-interaction state to the Data Window.
+
+### Kept
+
+- Reused the existing Status row for active Entry FVG context.
+- Kept the compact ten-row Dashboard and `Small` default size unchanged.
+- Kept Entry FVG as decision-support context without Buy/Sell signals, grades, risk decisions, or alerts.
+
+### Validated
+
+- Compiled Pine v0.7.0-alpha successfully in TradingView Pine Editor.
+- Confirmed one v0.7.0 indicator instance and no runtime alerts on XAUUSD at 5M, 15M, 1H, and 4H.
+- Confirmed a Displacement-linked Entry FVG and exact boundaries render in the XAUUSD 15M Data Window.
+- Removed the previous v0.6.1 chart instance, returned the chart to 15M, and saved the layout.
+- Saved the private TradingView script as `Trading OS HTF Context v0.7.0` without publishing.
+
 ## Pine v0.6.1-alpha - 2026-07-27
 
 ### Added

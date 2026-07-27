@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.6.1-alpha
+Version: v0.7.0-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -14,6 +14,7 @@ The Pine track automates selected Trading OS context checks without replacing tr
 - Module 5 baseline: execution-chart BOS/CHOCH/MSS
 - Module 6 baseline: strict execution-chart CISD
 - Module 7 baseline: execution-chart Displacement and follow-through
+- Module 8 baseline: Displacement-linked Entry FVG and retracement
 
 Defaults:
 
@@ -74,7 +75,7 @@ The dashboard uses ten rows to reduce chart obstruction. Its text size defaults 
 - Bias: Combined Bias and Confidence
 - Context: HTF alignment
 - POI: selected timeframe, direction, and FVG type
-- Status: FVG status and current price location
+- Status: Entry FVG status and price location when active, otherwise HTF FVG status
 - Liquidity: confirmed PDH/PDL sweep state
 - Structure: active BOS, CHOCH, MSS, or WAIT
 - CISD: active direction with Weak, Medium, Strong, or WAIT quality
@@ -102,7 +103,8 @@ The first Liquidity module uses the confirmed Previous Day High (`PDH`) and Prev
 - Confirmed BOS, CHOCH, and MSS events can display as historical break segments and labels.
 - Armed CISD candidates use dashed levels; confirmed CISD events use solid historical levels and labels.
 - A Displacement Watch candidate can display its expansion range; confirmed events keep historical range boxes and labels.
-- FVG, liquidity, Structure, CISD, Displacement, and Bias-background drawings have independent Display toggles.
+- The latest Entry FVG can display as a price/time-anchored box with creation, retracement, and fill labels.
+- FVG, liquidity, Structure, CISD, Displacement, Entry FVG, and Bias-background drawings have independent Display toggles.
 - Chart drawings are enabled by default and use actual bar time and price coordinates rather than viewport positioning.
 - Detection, Dashboard, and Data Window state remain available when any drawing group is disabled.
 - The compact Dashboard remains ten rows with `Small` as the default text size.
@@ -174,6 +176,25 @@ The first Displacement module runs on the current chart timeframe:
 
 Displacement remains decision-support context. It does not generate a Buy/Sell signal, grade, alert, or automatic Entry.
 
+## Entry FVG / Entry Zone Baseline
+
+The first Entry FVG module runs on the current chart timeframe:
+
+- A confirmed Displacement event must exist first.
+- The Displacement expansion candle must be the middle candle of a valid three-candle imbalance.
+- Bullish Entry FVG: the right candle low is above the left candle high.
+- Bearish Entry FVG: the right candle high is below the left candle low.
+- The module supports Displacement follow-through on either the first or second candle after expansion.
+- A new zone starts as `FRESH`.
+- The zone becomes `PARTIAL` after price enters it without crossing the opposite boundary.
+- The zone becomes `FILLED` after price reaches or crosses the opposite boundary.
+- Creation, retracement, and filled events are recorded separately.
+- The latest zone uses actual formation time and exact top/bottom prices.
+- The existing Dashboard Status row temporarily becomes `Entry FVG` while the zone is active, so the Dashboard remains ten rows.
+- Exact direction, status, boundaries, event pulses, creation bar, and price-interaction state remain available in the Data Window.
+
+This baseline tracks the latest Entry FVG only. It does not yet automate invalidation beyond a full fill, Entry trigger, Stop Loss, target, RR, grade, or alert.
+
 ## Non-Repainting Baseline
 
 The script requests the previous completed HTF state. Confirmed pivots also require bars on both sides, so the output intentionally lags live price. This tradeoff avoids treating a still-forming HTF structure as confirmed.
@@ -209,6 +230,11 @@ Compile status:
 - Confirmed the selected FVG, PDH/PDL, Structure, CISD, and Displacement drawing groups load with actual time and price anchors.
 - Removed the previous v0.6.0 chart instance, returned the chart to 15M, and saved the layout.
 - Saved the private TradingView script as `Trading OS HTF Context v0.6.1` without publishing.
+- The v0.7.0 Entry FVG baseline compiled successfully in TradingView.
+- Confirmed one v0.7.0 indicator instance and no runtime alerts on XAUUSD at 5M, 15M, 1H, and 4H.
+- Confirmed a Displacement-linked Entry FVG and its exact boundaries appear in the XAUUSD 15M Data Window.
+- Removed the previous v0.6.1 chart instance, returned the chart to 15M, and saved the layout.
+- Saved the private TradingView script as `Trading OS HTF Context v0.7.0` without publishing.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.
@@ -227,8 +253,10 @@ Compile status:
 12. Confirm CISD recalculates from the current chart after every timeframe change.
 13. Confirm CISD and Structure drawings use only the current chart timeframe.
 14. Compare Watch, Medium, and Strong Displacement states with manually marked expansion and follow-through.
-15. Confirm all drawings remain anchored to their source bar time and price while scrolling or zooming.
-16. Record disagreements before changing the Structure, CISD, Displacement, FVG, or Liquidity rules.
+15. Confirm each Entry FVG uses a confirmed Displacement candle as the middle candle of its three-candle pattern.
+16. Confirm Fresh, Partial, and Filled Entry FVG transitions against manual markup.
+17. Confirm all drawings remain anchored to their source bar time and price while scrolling or zooming.
+18. Record disagreements before changing the Structure, CISD, Displacement, FVG, or Liquidity rules.
 
 ## Current Limits
 
@@ -239,7 +267,8 @@ Compile status:
 - Structure is a baseline without automated setup type, POI proximity, or a complete setup window.
 - CISD and Displacement remain separate conservative baselines without a complete setup-window state machine.
 - Displacement has not been calibrated against a manual sample.
-- No Entry FVG confirmation or setup-window validation.
+- Entry FVG tracks the latest confirmed zone only and has not been calibrated against a manual sample.
+- No Entry FVG invalidation beyond Filled status or complete setup-window validation.
 - No Entry grade or alert.
 - Premium/discount and displacement are not yet included in HTF confidence.
 - Compilation and rendering are confirmed, but manual comparison and heuristic calibration are still required before release readiness.

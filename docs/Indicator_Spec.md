@@ -1,7 +1,7 @@
 # Trading OS Indicator Specification
 
-Version: v0.2.8
-Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, and Displacement baselines
+Version: v0.2.9
+Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, and Entry FVG baselines
 
 ## Purpose
 
@@ -343,24 +343,47 @@ Current limitation:
 
 ## Module 8 - FVG / Entry Zone
 
+Implementation status: `Pine v0.7.0-alpha - latest Displacement-linked Entry FVG baseline`
+
 Input:
 
-- Displacement candles
+- Confirmed Displacement direction and expansion candle
 - Three-candle imbalance logic
 - Retracement into imbalance
 - Mitigation status
 
 Process:
 
-- Detect FVG created by valid displacement.
-- Track fresh, partial, filled, or invalid status.
-- Confirm whether price retraces into the entry zone.
+- Require the confirmed Displacement expansion candle to be the middle candle of the three-candle pattern.
+- Support Displacement follow-through confirmation one or two candles after expansion.
+- Create a Bullish FVG when the right candle low is above the left candle high.
+- Create a Bearish FVG when the right candle high is below the left candle low.
+- Track the latest zone as Fresh, Partial, or Filled using confirmed chart candles.
+- Emit separate creation, first retracement, and filled event pulses.
+- Confirm whether current price touches or closes inside the active entry zone.
+- Draw the latest zone with actual formation time and exact top/bottom prices.
+- Reuse the existing Dashboard Status row so the table remains ten rows.
 
 Output:
 
-- fvg_present: true or false
-- fvg_status: FRESH, PARTIAL, FILLED, INVALID, or NONE
-- entry_zone_active: true or false
+- entry_fvg_created_event: BULLISH, BEARISH, or NONE
+- entry_fvg_retrace_event: BULLISH, BEARISH, or NONE
+- entry_fvg_filled_event: BULLISH, BEARISH, or NONE
+- entry_fvg_direction: BULLISH, BEARISH, or NONE
+- entry_fvg_status: FRESH, PARTIAL, FILLED, or NONE
+- entry_fvg_top
+- entry_fvg_bottom
+- entry_fvg_active: true or false
+- entry_fvg_price_interaction: true or false
+
+Current limitation:
+
+- The baseline runs on the current chart timeframe.
+- Only the latest confirmed Entry FVG is tracked.
+- INVALID is not automated because non-fill invalidation rules are not explicit.
+- A direct full fill emits Filled without requiring a prior Partial state.
+- Entry FVG is decision-support context, not an Entry Signal.
+- Stop Loss, target, RR, grade, setup-window validation, and alerts remain manual.
 
 ## Module 9 - Risk / Entry Decision
 

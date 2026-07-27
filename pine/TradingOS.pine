@@ -8,10 +8,10 @@ indicator(
     max_labels_count = 300
 )
 
-// Trading OS Pine Track v0.6.1-alpha
+// Trading OS Pine Track v0.7.0-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG candidates, daily liquidity,
 // confirmed execution-chart BOS/CHOCH/MSS, strict CISD context, and
-// execution-chart displacement with follow-through confirmation.
+// execution-chart displacement with follow-through and Entry FVG confirmation.
 // Full chart context is enabled by default. This indicator remains decision
 // support and does not generate Buy/Sell signals.
 
@@ -178,6 +178,18 @@ bool showDisplacementEvents = input.bool(
     true,
     "Show Displacement event labels",
     group = "Displacement"
+)
+bool showEntryFvg = input.bool(
+    true,
+    "Show Entry FVG",
+    tooltip = "Draws the latest FVG created by a confirmed Displacement candle.",
+    group = "Entry FVG"
+)
+bool showEntryFvgEvents = input.bool(
+    true,
+    "Show Entry FVG event labels",
+    tooltip = "Marks Entry FVG creation, retracement, and fill events.",
+    group = "Entry FVG"
 )
 bool showBiasBackground = input.bool(
     true,
@@ -639,6 +651,86 @@ f_displacement_state(
 
     [eventPulse, latestDirection, latestQuality, latestEventBar, latestExpansionBar, latestHigh, latestLow, latestStructureLevel, latestBodyMultiple, latestRangeAtrMultiple, latestBodyShare, candidateDirection, candidateBar, candidateHigh, candidateLow]
 
+f_entry_fvg_state(int displacementPulse, int displacementExpansionBar) =>
+    var int direction = 0
+    var float top = na
+    var float bottom = na
+    var int startTime = na
+    var int createdBar = na
+    var int filledTime = na
+    var int status = 0
+    int createdPulse = 0
+    int retracePulse = 0
+    int filledPulse = 0
+
+    bool firstFollowThroughBar = (
+        not na(displacementExpansionBar) and
+        displacementExpansionBar == bar_index - 1
+    )
+    bool secondFollowThroughBar = (
+        not na(displacementExpansionBar) and
+        displacementExpansionBar == bar_index - 2
+    )
+    bool bullishCurrentFvg = firstFollowThroughBar and low > high[2]
+    bool bullishPriorFvg = secondFollowThroughBar and low[1] > high[3]
+    bool bearishCurrentFvg = firstFollowThroughBar and high < low[2]
+    bool bearishPriorFvg = secondFollowThroughBar and high[1] < low[3]
+    bool bullishCreated = (
+        displacementPulse == 1 and
+        (bullishCurrentFvg or bullishPriorFvg)
+    )
+    bool bearishCreated = (
+        displacementPulse == -1 and
+        (bearishCurrentFvg or bearishPriorFvg)
+    )
+
+    if bullishCreated
+        direction := 1
+        top := bullishCurrentFvg ? low : low[1]
+        bottom := bullishCurrentFvg ? high[2] : high[3]
+        startTime := bullishCurrentFvg ? time[2] : time[3]
+        createdBar := bullishCurrentFvg ? bar_index : bar_index - 1
+        filledTime := na
+        status := 1
+        createdPulse := 1
+    else if bearishCreated
+        direction := -1
+        top := bearishCurrentFvg ? low[2] : low[3]
+        bottom := bearishCurrentFvg ? high : high[1]
+        startTime := bearishCurrentFvg ? time[2] : time[3]
+        createdBar := bearishCurrentFvg ? bar_index : bar_index - 1
+        filledTime := na
+        status := 1
+        createdPulse := -1
+
+    if (
+        direction != 0 and
+        f_fvg_active(status) and
+        not na(createdBar) and
+        bar_index > createdBar and
+        barstate.isconfirmed
+    )
+        int priorStatus = status
+        if direction == 1
+            if low <= bottom
+                status := 3
+                filledTime := time
+            else if low < top
+                status := 2
+        else
+            if high >= top
+                status := 3
+                filledTime := time
+            else if high > bottom
+                status := 2
+
+        if priorStatus == 1 and status == 2
+            retracePulse := direction
+        else if priorStatus != 3 and status == 3
+            filledPulse := direction
+
+    [direction, top, bottom, startTime, createdBar, filledTime, status, createdPulse, retracePulse, filledPulse]
+
 f_timeframe_label(string value) =>
     value == "240" ? "4H" :
      value == "60" ? "1H" :
@@ -1021,6 +1113,67 @@ string displacementState = (
 color displacementStateColor = (
     displacementValid ? f_state_color(latestDisplacementDirection) :
     displacementCandidateActive or displacementEventActive ? warningColor :
+    neutralColor
+)
+
+[entryFvgDirection, entryFvgTop, entryFvgBottom, entryFvgStartTime, entryFvgCreatedBar, entryFvgFilledTime, entryFvgStatus, entryFvgCreatedPulse, entryFvgRetracePulse, entryFvgFilledPulse] = f_entry_fvg_state(
+    displacementEventPulse,
+    latestDisplacementExpansionBar
+)
+bool entryFvgExists = (
+    entryFvgDirection != 0 and
+    entryFvgStatus != 0 and
+    not na(entryFvgTop) and
+    not na(entryFvgBottom)
+)
+bool entryFvgActive = entryFvgExists and f_fvg_active(entryFvgStatus)
+bool priceInsideEntryFvg = (
+    entryFvgActive and
+    close <= entryFvgTop and
+    close >= entryFvgBottom
+)
+bool priceTouchesEntryFvg = (
+    entryFvgActive and
+    high >= entryFvgBottom and
+    low <= entryFvgTop
+)
+bool entryFvgInteractionActive = (
+    priceInsideEntryFvg or
+    priceTouchesEntryFvg
+)
+string entryFvgLocation = (
+    entryFvgStatus == 3 ? "FILLED" :
+    priceInsideEntryFvg ? "IN ZONE" :
+    priceTouchesEntryFvg ? "TOUCH" :
+    entryFvgActive ? "AWAY" :
+    "--"
+)
+bool entryFvgDashboardVisible = (
+    entryFvgActive or
+    entryFvgFilledPulse != 0
+)
+string dashboardStatusLabel = (
+    entryFvgDashboardVisible ?
+    "Entry FVG" :
+    "Status"
+)
+string dashboardStatusValue = (
+    entryFvgDashboardVisible ?
+    (
+        f_state_short(entryFvgDirection) + " · " +
+        f_fvg_status_text(entryFvgStatus) + " · " +
+        entryFvgLocation
+    ) :
+    f_fvg_status_text(poiStatus) + " · " + poiLocation
+)
+bool dashboardStatusActive = (
+    entryFvgDashboardVisible ?
+    entryFvgInteractionActive :
+    poiInteractionActive
+)
+color dashboardStatusColor = (
+    entryFvgDashboardVisible and entryFvgStatus == 3 ? neutralColor :
+    dashboardStatusActive ? warningColor :
     neutralColor
 )
 
@@ -1490,6 +1643,110 @@ if showDisplacementEvents and displacementEventPulse != 0
         size = size.tiny
     )
 
+var box entryFvgBox = na
+if barstate.islast
+    if (
+        showEntryFvg and
+        entryFvgExists and
+        not na(entryFvgStartTime)
+    )
+        color entryFvgColor = (
+            entryFvgStatus == 3 ?
+            neutralColor :
+            f_state_color(entryFvgDirection)
+        )
+        int entryFvgRightTime = (
+            entryFvgStatus == 3 and not na(entryFvgFilledTime) ?
+            entryFvgFilledTime :
+            time
+        )
+        string entryFvgText = (
+            f_timeframe_label(timeframe.period) + " " +
+            f_state_short(entryFvgDirection) + " ENTRY FVG · " +
+            f_fvg_status_text(entryFvgStatus)
+        )
+        if na(entryFvgBox)
+            entryFvgBox := box.new(
+                left = entryFvgStartTime,
+                top = entryFvgTop,
+                right = entryFvgRightTime,
+                bottom = entryFvgBottom,
+                xloc = xloc.bar_time,
+                extend = entryFvgActive ? extend.right : extend.none,
+                border_color = color.new(entryFvgColor, 8),
+                border_width = 2,
+                bgcolor = color.new(entryFvgColor, 86),
+                text = entryFvgText,
+                text_color = entryFvgColor,
+                text_size = size.tiny,
+                text_halign = text.align_left,
+                text_valign = text.align_top
+            )
+        else
+            box.set_left(entryFvgBox, entryFvgStartTime)
+            box.set_top(entryFvgBox, entryFvgTop)
+            box.set_right(entryFvgBox, entryFvgRightTime)
+            box.set_bottom(entryFvgBox, entryFvgBottom)
+            box.set_extend(
+                entryFvgBox,
+                entryFvgActive ? extend.right : extend.none
+            )
+            box.set_border_color(
+                entryFvgBox,
+                color.new(entryFvgColor, 8)
+            )
+            box.set_bgcolor(
+                entryFvgBox,
+                color.new(entryFvgColor, 86)
+            )
+            box.set_text(entryFvgBox, entryFvgText)
+            box.set_text_color(entryFvgBox, entryFvgColor)
+    else if not na(entryFvgBox)
+        box.delete(entryFvgBox)
+        entryFvgBox := na
+
+if showEntryFvgEvents and entryFvgCreatedPulse != 0
+    label.new(
+        x = entryFvgCreatedBar,
+        y = entryFvgDirection == 1 ? entryFvgBottom : entryFvgTop,
+        text = "ENTRY FVG",
+        xloc = xloc.bar_index,
+        style = entryFvgDirection == 1 ?
+            label.style_label_up :
+            label.style_label_down,
+        color = color.new(f_state_color(entryFvgDirection), 12),
+        textcolor = panelColor,
+        size = size.tiny
+    )
+
+if showEntryFvgEvents and entryFvgRetracePulse != 0
+    label.new(
+        x = bar_index,
+        y = entryFvgRetracePulse == 1 ? entryFvgTop : entryFvgBottom,
+        text = "FVG RETRACE",
+        xloc = xloc.bar_index,
+        style = entryFvgRetracePulse == 1 ?
+            label.style_label_down :
+            label.style_label_up,
+        color = color.new(warningColor, 12),
+        textcolor = panelColor,
+        size = size.tiny
+    )
+
+if showEntryFvgEvents and entryFvgFilledPulse != 0
+    label.new(
+        x = bar_index,
+        y = entryFvgFilledPulse == 1 ? entryFvgBottom : entryFvgTop,
+        text = "FVG FILLED",
+        xloc = xloc.bar_index,
+        style = entryFvgFilledPulse == 1 ?
+            label.style_label_up :
+            label.style_label_down,
+        color = color.new(neutralColor, 12),
+        textcolor = panelColor,
+        size = size.tiny
+    )
+
 plot(
     primaryState,
     title = "Primary HTF structure state",
@@ -1704,6 +1961,56 @@ plot(
     title = "Active displacement expansion bar",
     display = display.data_window
 )
+plot(
+    entryFvgCreatedPulse,
+    title = "Entry FVG created event",
+    display = display.data_window
+)
+plot(
+    entryFvgRetracePulse,
+    title = "Entry FVG retrace event",
+    display = display.data_window
+)
+plot(
+    entryFvgFilledPulse,
+    title = "Entry FVG filled event",
+    display = display.data_window
+)
+plot(
+    entryFvgExists ? entryFvgDirection : 0,
+    title = "Latest Entry FVG direction",
+    display = display.data_window
+)
+plot(
+    entryFvgExists ? entryFvgStatus : 0,
+    title = "Latest Entry FVG status",
+    display = display.data_window
+)
+plot(
+    entryFvgExists ? entryFvgTop : na,
+    title = "Latest Entry FVG top",
+    display = display.data_window
+)
+plot(
+    entryFvgExists ? entryFvgBottom : na,
+    title = "Latest Entry FVG bottom",
+    display = display.data_window
+)
+plot(
+    entryFvgActive ? 1 : 0,
+    title = "Latest Entry FVG active",
+    display = display.data_window
+)
+plot(
+    entryFvgInteractionActive ? 1 : 0,
+    title = "Price interacting with Entry FVG",
+    display = display.data_window
+)
+plot(
+    entryFvgExists ? entryFvgCreatedBar : na,
+    title = "Latest Entry FVG creation bar",
+    display = display.data_window
+)
 
 var table biasPanel = table.new(
     position.top_right,
@@ -1723,7 +2030,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.6.1",
+        "TRADING OS · HTF v0.7.0",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,
@@ -1822,7 +2129,7 @@ if barstate.islast
         biasPanel,
         0,
         5,
-        "Status",
+        dashboardStatusLabel,
         bgcolor = panelColor,
         text_color = mutedTextColor,
         text_halign = text.align_left,
@@ -1832,13 +2139,11 @@ if barstate.islast
         biasPanel,
         1,
         5,
-        f_fvg_status_text(poiStatus) + " · " + poiLocation,
-        bgcolor = poiInteractionActive ?
-            color.new(warningColor, 86) :
+        dashboardStatusValue,
+        bgcolor = dashboardStatusActive ?
+            color.new(dashboardStatusColor, 86) :
             panelColor,
-        text_color = poiInteractionActive ?
-            warningColor :
-            neutralColor,
+        text_color = dashboardStatusColor,
         text_size = dashboardTextSize
     )
     table.cell(

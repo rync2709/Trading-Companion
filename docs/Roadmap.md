@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.6.1-alpha
+Version: v0.11.1 / Pine v0.7.0-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -669,11 +669,17 @@ First milestone:
 - [x] Draw Displacement Watch and confirmed range boxes.
 - [x] Keep the ten-row Dashboard and `Small` default size unchanged.
 - [x] Compile, load, and save Pine v0.6.1 privately in TradingView.
+- [x] Add a Displacement-linked current-chart Entry FVG baseline.
+- [x] Track Entry FVG Fresh, Partial, Filled, and price-interaction state.
+- [x] Draw the latest Entry FVG and creation/retracement/fill labels.
+- [x] Reuse the existing Status row and keep the ten-row Dashboard unchanged.
+- [x] Compile, load, and save Pine v0.7.0 privately in TradingView.
 - [ ] Compare the output against manually marked 4H/1H structure.
 - [ ] Compare FVG candidates and status transitions against manual markup.
 - [ ] Compare execution BOS/CHOCH/MSS events against manual markup.
 - [ ] Compare Bullish and Bearish CISD events against manual markup.
 - [ ] Compare Displacement candidates and confirmed follow-through against manual markup.
+- [ ] Compare Entry FVG formation and lifecycle transitions against manual markup.
 - [ ] Record disagreement examples before calibrating the heuristic.
 
 Planned modules:
@@ -686,7 +692,7 @@ Planned modules:
 - [x] Structure: MSS, CHOCH, BOS baseline
 - [x] CISD baseline
 - [x] Displacement baseline
-- [ ] FVG / Entry Zone
+- [x] FVG / Entry Zone baseline
 - [ ] Score Engine
 - [ ] Alert System
 
@@ -738,4 +744,5 @@ Expected outputs:
 | Pine v0.5.3-alpha | Dashboard-only Structure and CISD presentation |
 | Pine v0.6.0-alpha | Current-chart Displacement and follow-through baseline |
 | Pine v0.6.1-alpha | Full price/time-anchored chart context with unchanged compact Dashboard |
+| Pine v0.7.0-alpha | Displacement-linked Entry FVG and retracement baseline |
 | v1.0.0 | Trading OS MVP |
