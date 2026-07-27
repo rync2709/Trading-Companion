@@ -2,14 +2,18 @@
 indicator(
     "Trading OS - HTF Context",
     shorttitle = "Trading OS Context",
-    overlay = true
+    overlay = true,
+    max_lines_count = 300,
+    max_boxes_count = 100,
+    max_labels_count = 300
 )
 
-// Trading OS Pine Track v0.6.0-alpha
+// Trading OS Pine Track v0.6.1-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG candidates, daily liquidity,
 // confirmed execution-chart BOS/CHOCH/MSS, strict CISD context, and
 // execution-chart displacement with follow-through confirmation.
-// This indicator is decision support. It does not generate Buy/Sell signals.
+// Full chart context is enabled by default. This indicator remains decision
+// support and does not generate Buy/Sell signals.
 
 string primaryTimeframe = input.timeframe("240", "Primary HTF", group = "HTF Bias")
 string secondaryTimeframe = input.timeframe("60", "Secondary HTF", group = "HTF Bias")
@@ -35,6 +39,18 @@ int structureContextBars = input.int(
     minval = 1,
     maxval = 200,
     tooltip = "Maximum chart bars used to connect a liquidity sweep to MSS and keep the latest structure event active in the Dashboard.",
+    group = "Market Structure"
+)
+bool showStructureLevels = input.bool(
+    true,
+    "Show active swing levels",
+    tooltip = "Draws the latest confirmed execution-chart swing high and swing low.",
+    group = "Market Structure"
+)
+bool showStructureEvents = input.bool(
+    true,
+    "Show BOS / CHOCH / MSS",
+    tooltip = "Draws the broken swing segment and an event label on the execution chart.",
     group = "Market Structure"
 )
 int cisdMinimumDeliveryCandles = input.int(
@@ -83,6 +99,17 @@ int cisdContextBars = input.int(
     minval = 1,
     maxval = 200,
     tooltip = "Number of chart bars that the latest confirmed CISD remains active.",
+    group = "CISD"
+)
+bool showCisdLevels = input.bool(
+    true,
+    "Show CISD levels",
+    tooltip = "Draws armed candidate levels and confirmed CISD levels on the current chart timeframe.",
+    group = "CISD"
+)
+bool showCisdEvents = input.bool(
+    true,
+    "Show CISD event labels",
     group = "CISD"
 )
 int displacementBodyLength = input.int(
@@ -141,9 +168,37 @@ int displacementContextBars = input.int(
     tooltip = "Number of chart bars that the latest confirmed displacement remains active.",
     group = "Displacement"
 )
+bool showDisplacementZones = input.bool(
+    true,
+    "Show Displacement zones",
+    tooltip = "Draws the Watch candidate candle range and confirmed Displacement ranges.",
+    group = "Displacement"
+)
+bool showDisplacementEvents = input.bool(
+    true,
+    "Show Displacement event labels",
+    group = "Displacement"
+)
 bool showBiasBackground = input.bool(
     true,
     "Show bias background",
+    group = "Display"
+)
+bool showHtfFvg = input.bool(
+    true,
+    "Show aligned HTF FVG",
+    tooltip = "Draws the selected HTF FVG at its actual time and price.",
+    group = "Display"
+)
+bool showDailyLiquidity = input.bool(
+    true,
+    "Show PDH / PDL",
+    tooltip = "Draws confirmed Previous Day High and Previous Day Low history.",
+    group = "Display"
+)
+bool showLiquiditySweeps = input.bool(
+    true,
+    "Show liquidity sweep labels",
     group = "Display"
 )
 string dashboardSizeInput = input.string(
@@ -276,6 +331,8 @@ f_execution_structure(int length, bool recentPdhSweep, bool recentPdlSweep) =>
     float pivotLow = ta.pivotlow(low, length, length)
     var float latestSwingHigh = na
     var float latestSwingLow = na
+    var int latestSwingHighBar = na
+    var int latestSwingLowBar = na
     var bool latestHighBroken = false
     var bool latestLowBroken = false
     var int trendState = 0
@@ -283,6 +340,7 @@ f_execution_structure(int length, bool recentPdhSweep, bool recentPdlSweep) =>
     var int latestDirection = 0
     var float latestBreakLevel = na
     var int latestEventBar = na
+    var int latestBreakOriginBar = na
 
     bool bullishBreak = (
         barstate.isconfirmed and
@@ -306,6 +364,7 @@ f_execution_structure(int length, bool recentPdhSweep, bool recentPdlSweep) =>
         latestDirection := 1
         latestBreakLevel := latestSwingHigh
         latestEventBar := bar_index
+        latestBreakOriginBar := latestSwingHighBar
         trendState := 1
         latestHighBroken := true
     else if bearishBreak
@@ -314,18 +373,21 @@ f_execution_structure(int length, bool recentPdhSweep, bool recentPdlSweep) =>
         latestDirection := -1
         latestBreakLevel := latestSwingLow
         latestEventBar := bar_index
+        latestBreakOriginBar := latestSwingLowBar
         trendState := -1
         latestLowBroken := true
 
     if not na(pivotHigh)
         latestSwingHigh := pivotHigh
+        latestSwingHighBar := bar_index - length
         latestHighBroken := false
 
     if not na(pivotLow)
         latestSwingLow := pivotLow
+        latestSwingLowBar := bar_index - length
         latestLowBroken := false
 
-    [eventPulse, latestEvent, latestDirection, trendState, latestBreakLevel, latestEventBar, latestSwingHigh, latestSwingLow]
+    [eventPulse, latestEvent, latestDirection, trendState, latestBreakLevel, latestEventBar, latestBreakOriginBar, latestSwingHigh, latestSwingLow, latestSwingHighBar, latestSwingLowBar, latestHighBroken, latestLowBroken]
 
 f_cisd_state(
     int minimumDeliveryCandles,
@@ -477,7 +539,7 @@ f_cisd_state(
         bearishCandidateActive := false
         bearishCandidateLevel := na
 
-    [eventPulse, latestDirection, latestLevel, latestEventBar, latestLegCount, latestLegRange, bullishCandidateActive ? bullishCandidateLevel : na, bearishCandidateActive ? bearishCandidateLevel : na]
+    [eventPulse, latestDirection, latestLevel, latestEventBar, latestLegCount, latestLegRange, bullishCandidateActive ? bullishCandidateLevel : na, bullishCandidateActive ? bullishCandidateBar : na, bearishCandidateActive ? bearishCandidateLevel : na, bearishCandidateActive ? bearishCandidateBar : na]
 
 f_displacement_state(
     bool bullishExpansion,
@@ -495,6 +557,8 @@ f_displacement_state(
     var int candidateDirection = 0
     var int candidateBar = na
     var float candidateClose = na
+    var float candidateHigh = na
+    var float candidateLow = na
     var float candidateStructureLevel = na
     var float candidateBodyMultiple = na
     var float candidateRangeAtrMultiple = na
@@ -505,6 +569,8 @@ f_displacement_state(
     var int latestQuality = 0
     var int latestEventBar = na
     var int latestExpansionBar = na
+    var float latestHigh = na
+    var float latestLow = na
     var float latestStructureLevel = na
     var float latestBodyMultiple = na
     var float latestRangeAtrMultiple = na
@@ -534,6 +600,8 @@ f_displacement_state(
             latestQuality := candidateStrong and candidateCisdQuality == 3 ? 3 : 2
             latestEventBar := bar_index
             latestExpansionBar := candidateBar
+            latestHigh := candidateHigh
+            latestLow := candidateLow
             latestStructureLevel := candidateStructureLevel
             latestBodyMultiple := candidateBodyMultiple
             latestRangeAtrMultiple := candidateRangeAtrMultiple
@@ -560,6 +628,8 @@ f_displacement_state(
             candidateDirection := bullishCandidate ? 1 : -1
             candidateBar := bar_index
             candidateClose := close
+            candidateHigh := high
+            candidateLow := low
             candidateStructureLevel := structureLevel
             candidateBodyMultiple := bodyMultiple
             candidateRangeAtrMultiple := rangeAtrMultiple
@@ -567,7 +637,7 @@ f_displacement_state(
             candidateCisdQuality := cisdQuality
             candidateStrong := strongExpansion
 
-    [eventPulse, latestDirection, latestQuality, latestEventBar, latestExpansionBar, latestStructureLevel, latestBodyMultiple, latestRangeAtrMultiple, latestBodyShare, candidateDirection, candidateBar]
+    [eventPulse, latestDirection, latestQuality, latestEventBar, latestExpansionBar, latestHigh, latestLow, latestStructureLevel, latestBodyMultiple, latestRangeAtrMultiple, latestBodyShare, candidateDirection, candidateBar, candidateHigh, candidateLow]
 
 f_timeframe_label(string value) =>
     value == "240" ? "4H" :
@@ -763,7 +833,7 @@ bool recentPdlSweep = (
     barsSincePdlSweep <= structureContextBars
 )
 
-[structureEventPulse, latestStructureEvent, latestStructureDirection, executionTrendState, latestStructureLevel, latestStructureEventBar, latestExecutionSwingHigh, latestExecutionSwingLow] = f_execution_structure(
+[structureEventPulse, latestStructureEvent, latestStructureDirection, executionTrendState, latestStructureLevel, latestStructureEventBar, latestStructureOriginBar, latestExecutionSwingHigh, latestExecutionSwingLow, latestExecutionSwingHighBar, latestExecutionSwingLowBar, latestExecutionHighBroken, latestExecutionLowBroken] = f_execution_structure(
     structureSwingLength,
     recentPdhSweep,
     recentPdlSweep
@@ -791,7 +861,7 @@ color structureStateColor = (
     warningColor
 )
 
-[cisdEventPulse, latestCisdDirection, latestCisdLevel, latestCisdEventBar, latestCisdLegCount, latestCisdLegRange, bullishCisdCandidateLevel, bearishCisdCandidateLevel] = f_cisd_state(
+[cisdEventPulse, latestCisdDirection, latestCisdLevel, latestCisdEventBar, latestCisdLegCount, latestCisdLegRange, bullishCisdCandidateLevel, bullishCisdCandidateBar, bearishCisdCandidateLevel, bearishCisdCandidateBar] = f_cisd_state(
     cisdMinimumDeliveryCandles,
     cisdMaximumDeliveryCandles,
     cisdAtrLength,
@@ -903,7 +973,7 @@ bool bearishDisplacementContext = (
     latestCisdDirection == -1
 )
 
-[displacementEventPulse, latestDisplacementDirection, latestDisplacementQuality, latestDisplacementEventBar, latestDisplacementExpansionBar, latestDisplacementStructureLevel, latestDisplacementBodyMultiple, latestDisplacementRangeAtr, latestDisplacementBodyShare, displacementCandidateDirection, displacementCandidateBar] = f_displacement_state(
+[displacementEventPulse, latestDisplacementDirection, latestDisplacementQuality, latestDisplacementEventBar, latestDisplacementExpansionBar, latestDisplacementHigh, latestDisplacementLow, latestDisplacementStructureLevel, latestDisplacementBodyMultiple, latestDisplacementRangeAtr, latestDisplacementBodyShare, displacementCandidateDirection, displacementCandidateBar, displacementCandidateHigh, displacementCandidateLow] = f_displacement_state(
     bullishDisplacementExpansion,
     bearishDisplacementExpansion,
     strongDisplacementExpansion,
@@ -974,6 +1044,452 @@ color backgroundColor = (
 )
 bgcolor(backgroundColor, title = "Confirmed HTF bias")
 
+// Chart drawings use actual bar time/index and price coordinates. They never
+// depend on the visible viewport, so scrolling does not relocate the context.
+var box poiBox = na
+if barstate.islast
+    if showHtfFvg and poiActive and not na(poiStart)
+        color poiColor = f_state_color(poiDirection)
+        string poiText = (
+            poiTimeframe + " " +
+            f_state_short(poiDirection) + " FVG · " +
+            f_fvg_status_text(poiStatus)
+        )
+        if na(poiBox)
+            poiBox := box.new(
+                left = poiStart,
+                top = poiTop,
+                right = time,
+                bottom = poiBottom,
+                xloc = xloc.bar_time,
+                extend = extend.right,
+                border_color = color.new(poiColor, 18),
+                border_width = 1,
+                bgcolor = color.new(poiColor, 88),
+                text = poiText,
+                text_color = color.new(poiColor, 4),
+                text_size = size.tiny,
+                text_halign = text.align_left,
+                text_valign = text.align_top
+            )
+        else
+            box.set_left(poiBox, poiStart)
+            box.set_top(poiBox, poiTop)
+            box.set_right(poiBox, time)
+            box.set_bottom(poiBox, poiBottom)
+            box.set_extend(poiBox, extend.right)
+            box.set_border_color(poiBox, color.new(poiColor, 18))
+            box.set_bgcolor(poiBox, color.new(poiColor, 88))
+            box.set_text(poiBox, poiText)
+            box.set_text_color(poiBox, color.new(poiColor, 4))
+    else if not na(poiBox)
+        box.delete(poiBox)
+        poiBox := na
+
+var label pdhLabel = na
+var label pdlLabel = na
+if barstate.islast
+    if showDailyLiquidity and not na(previousDayHigh)
+        if na(pdhLabel)
+            pdhLabel := label.new(
+                x = bar_index + 1,
+                y = previousDayHigh,
+                text = "PDH",
+                xloc = xloc.bar_index,
+                style = label.style_label_left,
+                color = color.new(bearishColor, 72),
+                textcolor = bearishColor,
+                size = size.tiny
+            )
+        else
+            label.set_xy(pdhLabel, bar_index + 1, previousDayHigh)
+            label.set_text(pdhLabel, "PDH")
+    else if not na(pdhLabel)
+        label.delete(pdhLabel)
+        pdhLabel := na
+
+    if showDailyLiquidity and not na(previousDayLow)
+        if na(pdlLabel)
+            pdlLabel := label.new(
+                x = bar_index + 1,
+                y = previousDayLow,
+                text = "PDL",
+                xloc = xloc.bar_index,
+                style = label.style_label_left,
+                color = color.new(bullishColor, 72),
+                textcolor = bullishColor,
+                size = size.tiny
+            )
+        else
+            label.set_xy(pdlLabel, bar_index + 1, previousDayLow)
+            label.set_text(pdlLabel, "PDL")
+    else if not na(pdlLabel)
+        label.delete(pdlLabel)
+        pdlLabel := na
+
+var line swingHighLine = na
+var line swingLowLine = na
+var label swingHighLabel = na
+var label swingLowLabel = na
+if barstate.islast
+    if (
+        showStructureLevels and
+        not na(latestExecutionSwingHigh) and
+        not na(latestExecutionSwingHighBar)
+    )
+        color swingHighColor = color.new(
+            bearishColor,
+            latestExecutionHighBroken ? 68 : 24
+        )
+        if na(swingHighLine)
+            swingHighLine := line.new(
+                x1 = latestExecutionSwingHighBar,
+                y1 = latestExecutionSwingHigh,
+                x2 = bar_index + 1,
+                y2 = latestExecutionSwingHigh,
+                xloc = xloc.bar_index,
+                extend = extend.right,
+                color = swingHighColor,
+                style = latestExecutionHighBroken ?
+                    line.style_dotted :
+                    line.style_dashed,
+                width = 1
+            )
+        else
+            line.set_xy1(
+                swingHighLine,
+                latestExecutionSwingHighBar,
+                latestExecutionSwingHigh
+            )
+            line.set_xy2(
+                swingHighLine,
+                bar_index + 1,
+                latestExecutionSwingHigh
+            )
+            line.set_color(swingHighLine, swingHighColor)
+            line.set_style(
+                swingHighLine,
+                latestExecutionHighBroken ?
+                    line.style_dotted :
+                    line.style_dashed
+            )
+        if na(swingHighLabel)
+            swingHighLabel := label.new(
+                x = bar_index + 1,
+                y = latestExecutionSwingHigh,
+                text = "SH",
+                xloc = xloc.bar_index,
+                style = label.style_label_left,
+                color = color.new(bearishColor, 78),
+                textcolor = bearishColor,
+                size = size.tiny
+            )
+        else
+            label.set_xy(
+                swingHighLabel,
+                bar_index + 1,
+                latestExecutionSwingHigh
+            )
+    else
+        if not na(swingHighLine)
+            line.delete(swingHighLine)
+            swingHighLine := na
+        if not na(swingHighLabel)
+            label.delete(swingHighLabel)
+            swingHighLabel := na
+
+    if (
+        showStructureLevels and
+        not na(latestExecutionSwingLow) and
+        not na(latestExecutionSwingLowBar)
+    )
+        color swingLowColor = color.new(
+            bullishColor,
+            latestExecutionLowBroken ? 68 : 24
+        )
+        if na(swingLowLine)
+            swingLowLine := line.new(
+                x1 = latestExecutionSwingLowBar,
+                y1 = latestExecutionSwingLow,
+                x2 = bar_index + 1,
+                y2 = latestExecutionSwingLow,
+                xloc = xloc.bar_index,
+                extend = extend.right,
+                color = swingLowColor,
+                style = latestExecutionLowBroken ?
+                    line.style_dotted :
+                    line.style_dashed,
+                width = 1
+            )
+        else
+            line.set_xy1(
+                swingLowLine,
+                latestExecutionSwingLowBar,
+                latestExecutionSwingLow
+            )
+            line.set_xy2(
+                swingLowLine,
+                bar_index + 1,
+                latestExecutionSwingLow
+            )
+            line.set_color(swingLowLine, swingLowColor)
+            line.set_style(
+                swingLowLine,
+                latestExecutionLowBroken ?
+                    line.style_dotted :
+                    line.style_dashed
+            )
+        if na(swingLowLabel)
+            swingLowLabel := label.new(
+                x = bar_index + 1,
+                y = latestExecutionSwingLow,
+                text = "SL",
+                xloc = xloc.bar_index,
+                style = label.style_label_left,
+                color = color.new(bullishColor, 78),
+                textcolor = bullishColor,
+                size = size.tiny
+            )
+        else
+            label.set_xy(
+                swingLowLabel,
+                bar_index + 1,
+                latestExecutionSwingLow
+            )
+    else
+        if not na(swingLowLine)
+            line.delete(swingLowLine)
+            swingLowLine := na
+        if not na(swingLowLabel)
+            label.delete(swingLowLabel)
+            swingLowLabel := na
+
+if (
+    showStructureEvents and
+    structureEventPulse != 0 and
+    not na(latestStructureOriginBar) and
+    not na(latestStructureLevel)
+)
+    color structureEventColor = (
+        structureEventPulse == 2 ?
+        warningColor :
+        f_state_color(latestStructureDirection)
+    )
+    string structureEventLabel = (
+        f_structure_event_text(structureEventPulse) + " " +
+        f_state_short(latestStructureDirection)
+    )
+    line.new(
+        x1 = latestStructureOriginBar,
+        y1 = latestStructureLevel,
+        x2 = latestStructureEventBar,
+        y2 = latestStructureLevel,
+        xloc = xloc.bar_index,
+        extend = extend.none,
+        color = structureEventColor,
+        style = line.style_solid,
+        width = structureEventPulse == 3 ? 2 : 1
+    )
+    label.new(
+        x = latestStructureEventBar,
+        y = latestStructureLevel,
+        text = structureEventLabel,
+        xloc = xloc.bar_index,
+        style = latestStructureDirection == 1 ?
+            label.style_label_down :
+            label.style_label_up,
+        color = color.new(structureEventColor, 12),
+        textcolor = panelColor,
+        size = size.tiny
+    )
+
+var line bullishCisdCandidateLine = na
+var line bearishCisdCandidateLine = na
+
+if (
+    showCisdLevels and
+    not na(bullishCisdCandidateLevel) and
+    not na(bullishCisdCandidateBar)
+)
+    if na(bullishCisdCandidateLine)
+        bullishCisdCandidateLine := line.new(
+            x1 = bullishCisdCandidateBar,
+            y1 = bullishCisdCandidateLevel,
+            x2 = bullishCisdCandidateBar + cisdConfirmationBars,
+            y2 = bullishCisdCandidateLevel,
+            xloc = xloc.bar_index,
+            extend = extend.none,
+            color = color.new(bullishColor, 34),
+            style = line.style_dashed,
+            width = 1
+        )
+    else
+        line.set_xy1(
+            bullishCisdCandidateLine,
+            bullishCisdCandidateBar,
+            bullishCisdCandidateLevel
+        )
+        line.set_xy2(
+            bullishCisdCandidateLine,
+            bullishCisdCandidateBar + cisdConfirmationBars,
+            bullishCisdCandidateLevel
+        )
+else if not na(bullishCisdCandidateLine)
+    line.delete(bullishCisdCandidateLine)
+    bullishCisdCandidateLine := na
+
+if (
+    showCisdLevels and
+    not na(bearishCisdCandidateLevel) and
+    not na(bearishCisdCandidateBar)
+)
+    if na(bearishCisdCandidateLine)
+        bearishCisdCandidateLine := line.new(
+            x1 = bearishCisdCandidateBar,
+            y1 = bearishCisdCandidateLevel,
+            x2 = bearishCisdCandidateBar + cisdConfirmationBars,
+            y2 = bearishCisdCandidateLevel,
+            xloc = xloc.bar_index,
+            extend = extend.none,
+            color = color.new(bearishColor, 34),
+            style = line.style_dashed,
+            width = 1
+        )
+    else
+        line.set_xy1(
+            bearishCisdCandidateLine,
+            bearishCisdCandidateBar,
+            bearishCisdCandidateLevel
+        )
+        line.set_xy2(
+            bearishCisdCandidateLine,
+            bearishCisdCandidateBar + cisdConfirmationBars,
+            bearishCisdCandidateLevel
+        )
+else if not na(bearishCisdCandidateLine)
+    line.delete(bearishCisdCandidateLine)
+    bearishCisdCandidateLine := na
+
+if showCisdLevels and cisdEventPulse != 0
+    line.new(
+        x1 = latestCisdEventBar,
+        y1 = latestCisdLevel,
+        x2 = latestCisdEventBar + cisdContextBars,
+        y2 = latestCisdLevel,
+        xloc = xloc.bar_index,
+        extend = extend.none,
+        color = f_state_color(latestCisdDirection),
+        style = line.style_solid,
+        width = cisdQuality == 3 ? 2 : 1
+    )
+
+if showCisdEvents and cisdEventPulse != 0
+    label.new(
+        x = latestCisdEventBar,
+        y = latestCisdLevel,
+        text = f_state_short(latestCisdDirection) + " CISD",
+        xloc = xloc.bar_index,
+        style = latestCisdDirection == 1 ?
+            label.style_label_down :
+            label.style_label_up,
+        color = color.new(f_state_color(latestCisdDirection), 12),
+        textcolor = panelColor,
+        size = size.tiny
+    )
+
+var box displacementCandidateBox = na
+if (
+    showDisplacementZones and
+    displacementCandidateActive and
+    not na(displacementCandidateHigh) and
+    not na(displacementCandidateLow)
+)
+    color displacementCandidateColor = f_state_color(
+        displacementCandidateDirection
+    )
+    if na(displacementCandidateBox)
+        displacementCandidateBox := box.new(
+            left = displacementCandidateBar,
+            top = displacementCandidateHigh,
+            right = displacementCandidateBar + displacementFollowThroughBars,
+            bottom = displacementCandidateLow,
+            xloc = xloc.bar_index,
+            extend = extend.none,
+            border_color = color.new(displacementCandidateColor, 20),
+            border_width = 1,
+            border_style = line.style_dashed,
+            bgcolor = color.new(displacementCandidateColor, 90),
+            text = "DISP WATCH",
+            text_color = displacementCandidateColor,
+            text_size = size.tiny,
+            text_halign = text.align_left,
+            text_valign = text.align_top
+        )
+    else
+        box.set_left(displacementCandidateBox, displacementCandidateBar)
+        box.set_top(displacementCandidateBox, displacementCandidateHigh)
+        box.set_right(
+            displacementCandidateBox,
+            displacementCandidateBar + displacementFollowThroughBars
+        )
+        box.set_bottom(displacementCandidateBox, displacementCandidateLow)
+        box.set_border_color(
+            displacementCandidateBox,
+            color.new(displacementCandidateColor, 20)
+        )
+        box.set_bgcolor(
+            displacementCandidateBox,
+            color.new(displacementCandidateColor, 90)
+        )
+else if not na(displacementCandidateBox)
+    box.delete(displacementCandidateBox)
+    displacementCandidateBox := na
+
+if (
+    showDisplacementZones and
+    displacementEventPulse != 0 and
+    not na(latestDisplacementHigh) and
+    not na(latestDisplacementLow)
+)
+    color displacementEventColor = f_state_color(
+        latestDisplacementDirection
+    )
+    box.new(
+        left = latestDisplacementExpansionBar,
+        top = latestDisplacementHigh,
+        right = latestDisplacementEventBar + displacementContextBars,
+        bottom = latestDisplacementLow,
+        xloc = xloc.bar_index,
+        extend = extend.none,
+        border_color = color.new(displacementEventColor, 12),
+        border_width = latestDisplacementQuality == 3 ? 2 : 1,
+        bgcolor = color.new(displacementEventColor, 89),
+        text = (
+            f_state_short(latestDisplacementDirection) + " DISP · " +
+            f_quality_text(latestDisplacementQuality)
+        ),
+        text_color = displacementEventColor,
+        text_size = size.tiny,
+        text_halign = text.align_left,
+        text_valign = text.align_top
+    )
+
+if showDisplacementEvents and displacementEventPulse != 0
+    label.new(
+        x = latestDisplacementEventBar,
+        y = latestDisplacementDirection == 1 ?
+            latestDisplacementHigh :
+            latestDisplacementLow,
+        text = "DISP " + f_quality_text(latestDisplacementQuality),
+        xloc = xloc.bar_index,
+        style = latestDisplacementDirection == 1 ?
+            label.style_label_down :
+            label.style_label_up,
+        color = color.new(f_state_color(latestDisplacementDirection), 12),
+        textcolor = panelColor,
+        size = size.tiny
+    )
+
 plot(
     primaryState,
     title = "Primary HTF structure state",
@@ -1010,14 +1526,38 @@ plot(
     display = display.data_window
 )
 plot(
-    previousDayHigh,
-    title = "Current Previous Day High",
-    display = display.data_window
+    showDailyLiquidity ? previousDayHigh : na,
+    title = "Previous Day High",
+    color = color.new(bearishColor, 42),
+    linewidth = 1,
+    style = plot.style_stepline
 )
 plot(
-    previousDayLow,
-    title = "Current Previous Day Low",
-    display = display.data_window
+    showDailyLiquidity ? previousDayLow : na,
+    title = "Previous Day Low",
+    color = color.new(bullishColor, 42),
+    linewidth = 1,
+    style = plot.style_stepline
+)
+plotshape(
+    showLiquiditySweeps and pdhSweepEvent,
+    title = "Previous Day High sweep marker",
+    style = shape.labeldown,
+    location = location.abovebar,
+    color = color.new(bearishColor, 12),
+    text = "PDH SWEEP",
+    textcolor = panelColor,
+    size = size.tiny
+)
+plotshape(
+    showLiquiditySweeps and pdlSweepEvent,
+    title = "Previous Day Low sweep marker",
+    style = shape.labelup,
+    location = location.belowbar,
+    color = color.new(bullishColor, 12),
+    text = "PDL SWEEP",
+    textcolor = panelColor,
+    size = size.tiny
 )
 plot(
     pdhSweepEvent ? 1 : 0,
@@ -1183,7 +1723,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.6.0",
+        "TRADING OS · HTF v0.6.1",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,

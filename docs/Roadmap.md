@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.6.0-alpha
+Version: v0.11.1 / Pine v0.6.1-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -662,6 +662,13 @@ First milestone:
 - [x] Confirm Structure and CISD remain available in Dashboard and Data Window.
 - [x] Add a confirmed current-chart Displacement baseline.
 - [x] Add Displacement Watch, Medium, and Strong state to the Dashboard and Data Window without chart drawings.
+- [x] Restore the selected HTF FVG box with actual time and price anchoring.
+- [x] Restore PDH/PDL levels and confirmed sweep markers.
+- [x] Draw current swings and historical BOS/CHOCH/MSS events.
+- [x] Draw armed and confirmed current-chart CISD levels.
+- [x] Draw Displacement Watch and confirmed range boxes.
+- [x] Keep the ten-row Dashboard and `Small` default size unchanged.
+- [x] Compile, load, and save Pine v0.6.1 privately in TradingView.
 - [ ] Compare the output against manually marked 4H/1H structure.
 - [ ] Compare FVG candidates and status transitions against manual markup.
 - [ ] Compare execution BOS/CHOCH/MSS events against manual markup.
@@ -730,4 +737,5 @@ Expected outputs:
 | Pine v0.5.2-alpha | Automatic current-chart CISD timeframe behavior |
 | Pine v0.5.3-alpha | Dashboard-only Structure and CISD presentation |
 | Pine v0.6.0-alpha | Current-chart Displacement and follow-through baseline |
+| Pine v0.6.1-alpha | Full price/time-anchored chart context with unchanged compact Dashboard |
 | v1.0.0 | Trading OS MVP |

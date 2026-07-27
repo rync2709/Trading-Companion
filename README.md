@@ -12,7 +12,7 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Phase: Validation Sprint after Phase 11
 - Validation target: 20 real-use outcomes with at least 80% R and review coverage
 - Version: v0.11.1
-- Pine indicator: v0.6.0-alpha - dashboard-only HTF, liquidity, structure, CISD, and Displacement context
+- Pine indicator: v0.6.1-alpha - full HTF FVG, liquidity, structure, CISD, and Displacement chart context
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -244,7 +244,7 @@ The follow-up simplifies timeframe behavior:
 - Switching chart timeframe recalculates CISD and its levels from that timeframe's candles
 - No CISD level persists or projects from the previous chart timeframe
 
-The current presentation returns to Dashboard-only:
+The v0.5.3 presentation returned to Dashboard-only:
 
 - Removed all CISD candidate and confirmed lines
 - Kept Structure and CISD detection unchanged
@@ -258,7 +258,18 @@ The sixth Pine milestone adds:
 - Directional alignment with HTF Bias, active Structure, and valid CISD
 - A Watch candidate followed by confirmed close-based follow-through
 - Medium and Strong Displacement quality in a ten-row Dashboard
-- Exact Displacement evidence in the Data Window without chart drawings, Buy/Sell signals, or alerts
+- Exact Displacement evidence in the Data Window without Buy/Sell signals or alerts
+
+The v0.6.1 chart-presentation milestone adds:
+
+- A selected HTF FVG box anchored to its actual origin time and price
+- Historical PDH/PDL levels and confirmed sweep markers
+- Current swing-high and swing-low levels
+- Historical BOS, CHOCH, and MSS break segments and labels
+- Armed and confirmed CISD levels on the current chart timeframe
+- Displacement Watch and confirmed range boxes
+- Independent Display toggles for each drawing group, enabled by default
+- The existing ten-row Dashboard with `Small` as the unchanged default size
 
 The Pine source and TradingView test notes are stored under `pine/`.
 

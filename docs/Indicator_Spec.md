@@ -1,7 +1,7 @@
 # Trading OS Indicator Specification
 
-Version: v0.2.7
-Phase: Pine Track - Modules 1, 2, 4, Structure, and CISD baselines
+Version: v0.2.8
+Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, and Displacement baselines
 
 ## Purpose
 
@@ -83,7 +83,7 @@ These inputs remain required for later confidence calibration and should not be 
 
 ## Module 2 - HTF POI
 
-Implementation status: `Pine v0.3.2-alpha - FVG candidate in Dashboard and Data Window only`
+Implementation status: `Pine v0.6.1-alpha - FVG candidate with optional price/time-anchored chart box`
 
 Input:
 
@@ -129,8 +129,8 @@ Current limitation:
 Current display:
 
 - The selected FVG is reported in the fixed Dashboard and Data Window.
-- No FVG box is drawn over the price chart.
-- Removing the chart box must not change candidate selection, zone prices, status, or Entry logic.
+- An optional box starts at the actual HTF origin time and uses the candidate's exact top and bottom prices.
+- Disabling the chart box must not change candidate selection, zone prices, status, or Entry logic.
 
 ## Module 3 - LTF Context
 
@@ -155,7 +155,7 @@ Output:
 
 ## Module 4 - Liquidity
 
-Implementation status: `Pine v0.3.2-alpha - Previous Day High/Low baseline without chart lines`
+Implementation status: `Pine v0.6.1-alpha - Previous Day High/Low baseline with optional chart levels`
 
 Input:
 
@@ -195,7 +195,7 @@ Current limitation:
 - Asia High/Low, Equal High/Low, and Internal/External classification are not automated.
 - Liquidity is not yet linked to a setup window, POI proximity, or Structure confirmation.
 - The output is context only and cannot mark an Entry ready.
-- No PDH/PDL lines are drawn over the price chart.
+- Historical PDH/PDL steplines and confirmed sweep markers can be enabled independently.
 
 ## Module 5 - Structure
 
@@ -237,10 +237,11 @@ Current limitation:
 - Setup type, POI proximity, and a complete setup-window state machine are not automated.
 - A Structure event is decision-support context, not an Entry Signal.
 - Manual comparison against marked BOS/CHOCH/MSS examples remains required.
+- Current swing levels and confirmed BOS/CHOCH/MSS events can be drawn from their source bars.
 
 ## Module 6 - CISD
 
-Implementation status: `Pine v0.5.3-alpha - strict current-chart CISD in Dashboard and Data Window only`
+Implementation status: `Pine v0.6.1-alpha - strict current-chart CISD with optional chart levels`
 
 Input:
 
@@ -263,7 +264,7 @@ Process:
 - Keep the latest confirmed event active for the configured CISD context window.
 - Calculate CISD from the current chart timeframe automatically.
 - Recalculate candidates, confirmed events, and levels when the chart timeframe changes.
-- Keep candidate and confirmed levels in the Data Window without drawing them over the price chart.
+- Keep candidate and confirmed levels in the Data Window and optionally draw them over the current chart timeframe.
 - Assign Weak when only the mechanical event exists.
 - Assign Medium when direction matches HTF Bias and at least one matching POI, Sweep, or Structure context exists.
 - Assign Strong when direction matches HTF Bias and matching Structure is supported by a matching POI interaction or Sweep.
@@ -285,7 +286,7 @@ Current limitation:
 - The baseline runs on the current chart timeframe.
 - CISD has no independent timeframe setting.
 - CISD is never projected from one chart timeframe onto another.
-- No CISD, Structure, FVG, or PDH/PDL line is drawn by Trading OS.
+- Armed CISD levels use dashed lines and confirmed events use solid historical lines when enabled.
 - It uses a conservative delivery-series and body-close heuristic; manual comparison remains required.
 - Context may strengthen while the event remains active because Sweep, Structure, and CISD can occur in different orders inside one setup window.
 - Displacement and follow-through are not yet part of CISD quality.
@@ -293,7 +294,7 @@ Current limitation:
 
 ## Module 7 - Displacement
 
-Implementation status: `Pine v0.6.0-alpha - current-chart expansion and follow-through baseline`
+Implementation status: `Pine v0.6.1-alpha - current-chart expansion and follow-through with optional range boxes`
 
 Input:
 
@@ -318,7 +319,7 @@ Process:
 - Expire or invalidate the candidate when follow-through does not occur inside the configured window or price closes back through the Structure level.
 - Classify confirmed displacement as Medium by default.
 - Classify it as Strong only when expansion exceeds the stronger body, range, and body-share thresholds while CISD quality is Strong.
-- Keep all exact values in the Data Window without drawing lines, boxes, or labels.
+- Keep all exact values in the Data Window and optionally draw Watch and confirmed range boxes with event labels.
 
 Output:
 

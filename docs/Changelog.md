@@ -2,6 +2,30 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.6.1-alpha - 2026-07-27
+
+### Added
+
+- Restored a selected HTF FVG box anchored to its actual origin time and price.
+- Added historical PDH/PDL levels, right-edge labels, and confirmed sweep markers.
+- Added current swing levels and historical BOS/CHOCH/MSS break segments and labels.
+- Added dashed armed CISD levels and solid confirmed CISD event levels on the current chart timeframe.
+- Added Displacement Watch and confirmed range boxes with event labels.
+- Added independent Display toggles for every chart-drawing group, enabled by default.
+
+### Kept
+
+- Kept the compact ten-row Dashboard and `Small` default text size unchanged.
+- Kept all modules as decision-support context without Buy/Sell signals, Entry grades, or alerts.
+
+### Validated
+
+- Compiled Pine v0.6.1-alpha successfully in TradingView Pine Editor.
+- Confirmed one v0.6.1 indicator instance and no runtime alerts on XAUUSD at 5M, 15M, 1H, and 4H.
+- Confirmed the drawing groups load using actual bar time and price coordinates rather than viewport positioning.
+- Removed the previous v0.6.0 chart instance, returned the chart to 15M, and saved the layout.
+- Saved the private TradingView script as `Trading OS HTF Context v0.6.1` without publishing.
+
 ## Pine v0.6.0-alpha - 2026-07-27
 
 ### Added

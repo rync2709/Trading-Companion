@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.6.0-alpha
+Version: v0.6.1-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -64,7 +64,7 @@ Selection rules:
 - Neutral or conflicting Bias produces no selected candidate.
 - Only the latest Bullish and Bearish candidate on each HTF is tracked.
 
-This is a POI candidate, not a valid Entry FVG. Displacement and complete setup-window confirmation are not implemented yet.
+This is a POI candidate, not a valid Entry FVG. The separate Displacement baseline does not yet validate this HTF candidate, and complete setup-window confirmation is not implemented.
 
 ## Compact Dashboard
 
@@ -90,19 +90,22 @@ The first Liquidity module uses the confirmed Previous Day High (`PDH`) and Prev
 - A PDH sweep requires a confirmed chart candle to trade above PDH and close back below it.
 - A PDL sweep requires a confirmed chart candle to trade below PDL and close back above it.
 - Only the first confirmed sweep of each level is recorded per exchange day.
-- PDH and PDL remain available in the Data Window without drawing horizontal lines on the chart.
+- PDH and PDL remain available in the Data Window and can be drawn as historical chart levels.
 - The dashboard remains neutral while waiting and colors the Liquidity row after a sweep.
 
 ## Chart Presentation
 
-- The indicator does not draw an FVG box or PDH/PDL lines on the price chart.
-- FVG candidate, price-location, and Liquidity states remain in the fixed Dashboard.
-- Exact FVG top/bottom and PDH/PDL values remain available in the Data Window.
-- The optional HTF Bias background remains the only full-chart visual.
-- Structure and CISD remain in the Dashboard and Data Window only.
-- No Structure or CISD lines or labels are drawn over the price chart.
-- Displacement remains in the Dashboard and Data Window without lines, boxes, or labels.
-- Removing chart drawings changes presentation only. Detection and status logic remain unchanged.
+- The selected HTF FVG is drawn from its actual HTF origin time and price and extends right until replaced.
+- PDH and PDL are drawn as historical steplines with right-edge labels.
+- Confirmed PDH and PDL sweeps can display event markers.
+- Current confirmed swing high and low levels can display with labels.
+- Confirmed BOS, CHOCH, and MSS events can display as historical break segments and labels.
+- Armed CISD candidates use dashed levels; confirmed CISD events use solid historical levels and labels.
+- A Displacement Watch candidate can display its expansion range; confirmed events keep historical range boxes and labels.
+- FVG, liquidity, Structure, CISD, Displacement, and Bias-background drawings have independent Display toggles.
+- Chart drawings are enabled by default and use actual bar time and price coordinates rather than viewport positioning.
+- Detection, Dashboard, and Data Window state remain available when any drawing group is disabled.
+- The compact Dashboard remains ten rows with `Small` as the default text size.
 
 Interpretation remains manual:
 
@@ -123,7 +126,7 @@ The first Structure module runs on the current chart timeframe:
 - The active Structure event expires from the Dashboard after the configured context window.
 - Direction matching the combined HTF Bias uses directional color; conflict uses the warning color.
 - Exact event codes, direction, trend, break level, and swing values remain available in the Data Window.
-- No structure lines or labels are drawn over the price chart.
+- Current swing levels and confirmed BOS/CHOCH/MSS events can be drawn on the price chart.
 
 This baseline does not yet know Reversal versus Continuation setup type, full POI proximity, or a complete setup-window state.
 
@@ -148,7 +151,7 @@ The first CISD module runs on the current chart timeframe:
 - Changing timeframe recalculates the complete CISD state.
 - CISD is not projected from the previous chart timeframe onto the new one.
 - Exact armed candidate and confirmed CISD values remain available in the Data Window.
-- No CISD lines or labels are drawn over the price chart.
+- Armed and confirmed CISD levels can be drawn on the current chart timeframe.
 
 CISD remains context only. Displacement is evaluated by a separate module; risk and Entry readiness are not automated.
 
@@ -167,7 +170,7 @@ The first Displacement module runs on the current chart timeframe:
 - Confirmed displacement is Medium by default and Strong when expansion is materially larger while CISD is Strong.
 - The confirmed state remains active for 20 chart bars by default.
 - Exact direction, quality, Structure level, body multiple, range/ATR multiple, body share, and candidate state remain available in the Data Window.
-- No Displacement line, box, or label is drawn over the price chart.
+- Watch and confirmed Displacement ranges can be drawn as chart boxes with confirmed-event labels.
 
 Displacement remains decision-support context. It does not generate a Buy/Sell signal, grade, alert, or automatic Entry.
 
@@ -201,6 +204,11 @@ Compile status:
 - Confirmed the updated indicator and Displacement settings load without a runtime error on XAUUSD at 5M, 15M, 1H, and 4H.
 - Returned the chart to its original 15M timeframe.
 - Saved the private TradingView script as `Trading OS HTF Context v0.6.0` without publishing.
+- The v0.6.1 full chart presentation compiled successfully in TradingView.
+- Confirmed one v0.6.1 indicator instance and no runtime alerts on XAUUSD at 5M, 15M, 1H, and 4H.
+- Confirmed the selected FVG, PDH/PDL, Structure, CISD, and Displacement drawing groups load with actual time and price anchors.
+- Removed the previous v0.6.0 chart instance, returned the chart to 15M, and saved the layout.
+- Saved the private TradingView script as `Trading OS HTF Context v0.6.1` without publishing.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.
@@ -217,9 +225,9 @@ Compile status:
 10. Compare BOS, CHOCH, and MSS with manually marked execution structure.
 11. Compare Bullish and Bearish CISD with manually marked delivery changes.
 12. Confirm CISD recalculates from the current chart after every timeframe change.
-13. Confirm Trading OS adds no CISD or Structure drawing to the price chart.
+13. Confirm CISD and Structure drawings use only the current chart timeframe.
 14. Compare Watch, Medium, and Strong Displacement states with manually marked expansion and follow-through.
-15. Confirm Trading OS adds no Displacement drawing to the price chart.
+15. Confirm all drawings remain anchored to their source bar time and price while scrolling or zooming.
 16. Record disagreements before changing the Structure, CISD, Displacement, FVG, or Liquidity rules.
 
 ## Current Limits
