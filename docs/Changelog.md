@@ -2,6 +2,25 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## v0.10.0 - 2026-07-27
+
+### Added
+
+- Added TradingView Hub with editable Symbol and Timeframe.
+- Added external TradingView Chart links and link copying.
+- Added 30-day, 90-day, and all-time Journal export ranges.
+- Added UTF-8 CSV export for Trade, risk, result, and review data.
+- Added a printable Journal report for browser Save as PDF.
+- Added export summaries for Trade count, closed trades, R coverage, Net R, links, and Screenshots.
+- Added TradingView Hub to desktop and mobile navigation.
+
+### Changed
+
+- Started Phase 10 while real-use validation continues for earlier phases.
+- Updated the visible Trading OS phase to Phase 10.
+- Clarified that Trading Companion does not directly access TradingView market data or place orders.
+- Updated the PWA cache for the TradingView Integration release.
+
 ## v0.9.0 - 2026-07-24
 
 ### Added

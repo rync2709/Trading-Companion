@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.9.0
+Version: v0.10.0
 Status: Master product roadmap
 
 ## Product Direction
@@ -457,6 +457,20 @@ Important rule:
 
 Goal: connect Trading OS with TradingView in ways that are realistic for a web app.
 
+Status: In progress.
+
+First milestone:
+
+- [x] Add a TradingView Chart Launcher with editable symbol and timeframe.
+- [x] Open TradingView as an external chart without claiming direct data access.
+- [x] Preserve Screenshot import and TradingView links in the Journal.
+- [x] Add 30-day, 90-day, and all-time Journal export ranges.
+- [x] Add UTF-8 CSV export with Trade, risk, result, and review fields.
+- [x] Add a printable Journal report for browser Save as PDF.
+- [x] Generate export files locally without uploading Journal data.
+- [x] Document the limits around market data and order placement.
+- [ ] Validate exported CSV and PDF reports against a larger real-trade sample.
+
 Supported scope:
 
 - Import screenshots
@@ -606,4 +620,5 @@ Expected outputs:
 | v0.8.2 | Journal trade deletion |
 | v0.8.3 | NO TRADE and SKIP assessment deletion |
 | v0.9.0 | Local Decision Assistant prototype |
+| v0.10.0 | TradingView evidence workflow and Journal export |
 | v1.0.0 | Trading OS MVP |

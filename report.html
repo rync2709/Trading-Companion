@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Journal Report | Trading Companion</title>
+  <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/report.css?v=0.10.0">
+</head>
+<body>
+  <nav class="report-actions" aria-label="Report actions">
+    <a href="integration.html">กลับ TradingView Hub</a>
+    <button id="printReport" type="button">Print / Save as PDF</button>
+  </nav>
+
+  <main class="report-shell">
+    <header class="report-header">
+      <span class="report-brand">Trading Companion · Trading OS Phase 10</span>
+      <h1>Journal Report</h1>
+      <p><span id="reportRange">ทุกช่วงเวลา</span> · <span id="reportGenerated"></span></p>
+    </header>
+
+    <section class="report-summary" aria-label="Journal summary">
+      <div class="report-metric">
+        <span>Trades</span>
+        <strong id="reportTotal">0</strong>
+      </div>
+      <div class="report-metric">
+        <span>Closed</span>
+        <strong id="reportClosed">0</strong>
+      </div>
+      <div class="report-metric">
+        <span>Win Rate</span>
+        <strong id="reportWinRate">--</strong>
+      </div>
+      <div class="report-metric">
+        <span>Net R</span>
+        <strong id="reportNetR">--</strong>
+      </div>
+    </section>
+
+    <p class="report-empty" id="reportEmpty" hidden>ยังไม่มี Trade แบบ ENTERED ในช่วงที่เลือก</p>
+
+    <section class="report-section" id="reportTable">
+      <h2>Trade Summary</h2>
+      <div class="report-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Pair</th>
+              <th>Setup</th>
+              <th>Direction</th>
+              <th>Grade</th>
+              <th>Status</th>
+              <th>Outcome</th>
+              <th>Planned RR</th>
+              <th>Realized R</th>
+            </tr>
+          </thead>
+          <tbody id="reportRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="report-section" id="reportReviewSection">
+      <h2>Review Notes</h2>
+      <div class="report-reviews" id="reportReviews"></div>
+    </section>
+
+    <footer class="report-footer">
+      รายงานนี้สร้างจากข้อมูลในเบราว์เซอร์ของอุปกรณ์ปัจจุบัน Trading Companion ไม่ส่งคำสั่งซื้อขายและไม่รับรองความถูกต้องของข้อมูลตลาด
+    </footer>
+  </main>
+
+  <script src="js/storage.js?v=0.10.0"></script>
+  <script src="js/integration.js?v=0.10.0"></script>
+  <script src="js/report.js?v=0.10.0"></script>
+</body>
+</html>

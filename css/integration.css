@@ -1,0 +1,385 @@
+.integration-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 14px;
+}
+
+.integration-panel {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.integration-panel-header {
+  min-height: 76px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.integration-panel-title {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.integration-panel-title h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.integration-icon {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(101, 200, 208, 0.35);
+  border-radius: 7px;
+  background: var(--cyan-soft);
+  color: var(--cyan);
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.integration-panel-header > span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 750;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.integration-panel-body {
+  padding: 18px;
+}
+
+.integration-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.integration-field {
+  min-width: 0;
+}
+
+.integration-field-wide {
+  grid-column: 1 / -1;
+}
+
+.integration-field > span,
+.integration-status > span,
+.export-metric span,
+.workflow-step > span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.integration-field input,
+.integration-field select {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.integration-field select {
+  padding-right: 34px;
+}
+
+.integration-field input:focus,
+.integration-field select:focus {
+  border-color: var(--cyan);
+}
+
+.chart-url-row {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.chart-url-row input {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.integration-actions {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.integration-status {
+  min-width: 0;
+  margin-left: auto;
+  text-align: right;
+}
+
+.integration-status > span {
+  margin-bottom: 3px;
+}
+
+.integration-status strong {
+  color: var(--cyan);
+  font-size: 11px;
+}
+
+.integration-status strong[data-state="saved"] {
+  color: var(--green);
+}
+
+.integration-status strong[data-state="error"] {
+  color: var(--red);
+}
+
+.integration-note {
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.export-controls {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.export-controls .integration-field {
+  width: min(220px, 100%);
+}
+
+.export-metrics {
+  margin: 16px -18px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.export-metric {
+  min-width: 0;
+  min-height: 78px;
+  padding: 13px 14px;
+  border-right: 1px solid var(--line);
+}
+
+.export-metric:last-child {
+  border-right: 0;
+}
+
+.export-metric strong {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 18px;
+}
+
+.export-attachments {
+  min-height: 44px;
+  margin: 0 -18px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.export-empty {
+  margin: 14px 0 0;
+  color: var(--amber);
+  font-size: 11px;
+}
+
+.button[aria-disabled="true"] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.integration-workflow {
+  margin-top: 32px;
+}
+
+.integration-workflow-heading {
+  margin-bottom: 13px;
+}
+
+.integration-workflow-heading h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+
+.integration-workflow-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.workflow-steps {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.workflow-step {
+  min-width: 0;
+  padding: 16px;
+  border-right: 1px solid var(--line);
+}
+
+.workflow-step:last-child {
+  border-right: 0;
+}
+
+.workflow-step > span {
+  color: var(--green);
+}
+
+.workflow-step strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.workflow-step p {
+  min-height: 34px;
+  margin: 0 0 11px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.workflow-step a {
+  color: var(--cyan);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.integration-limits {
+  margin-top: 24px;
+  padding: 15px 0;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--muted);
+}
+
+.integration-limits .icon {
+  margin-top: 2px;
+  color: var(--amber);
+  flex: 0 0 auto;
+}
+
+.integration-limits p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+@media (max-width: 940px) {
+  .integration-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .integration-panel-header {
+    align-items: flex-start;
+  }
+
+  .integration-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .integration-field-wide {
+    grid-column: auto;
+  }
+
+  .workflow-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workflow-step:nth-child(2) {
+    border-right: 0;
+  }
+
+  .workflow-step:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-url-row {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-url-row .button {
+    width: 100%;
+  }
+
+  .integration-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .integration-actions .button {
+    width: 100%;
+  }
+
+  .integration-status {
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .export-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .export-controls .integration-field {
+    width: 100%;
+  }
+
+  .export-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .export-metric:nth-child(2) {
+    border-right: 0;
+  }
+
+  .export-metric:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .workflow-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .workflow-step,
+  .workflow-step:nth-child(2) {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .workflow-step:last-child {
+    border-bottom: 0;
+  }
+}

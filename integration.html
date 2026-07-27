@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0e1112">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Trading Companion">
+  <title>TradingView Hub | Trading Companion</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css?v=0.8.0">
+  <link rel="stylesheet" href="css/integration.css?v=0.10.0">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html" aria-label="Trading Companion Dashboard">
+        <img src="assets/app-icon.svg" alt="">
+        <span class="brand-copy">
+          <span class="brand-name">Trading Companion</span>
+          <span class="brand-phase">Trading OS · Phase 10</span>
+        </span>
+      </a>
+
+      <nav class="topnav" aria-label="เมนูหลัก">
+        <a class="nav-link" href="index.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-home"></use></svg>
+          Dashboard
+        </a>
+        <a class="nav-link" href="trade.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-plus"></use></svg>
+          New Trade
+        </a>
+        <a class="nav-link" href="journal.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+          Journal
+        </a>
+        <a class="nav-link" href="stats.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-chart"></use></svg>
+          Statistics
+        </a>
+        <a class="nav-link" href="database.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-database"></use></svg>
+          Database
+        </a>
+        <a class="nav-link" href="weekly.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calendar-check"></use></svg>
+          Weekly Review
+        </a>
+        <a class="nav-link" href="planner.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-clock"></use></svg>
+          Session Planner
+        </a>
+        <details class="topnav-more">
+          <summary class="nav-link" aria-current="page" title="More tools">
+            <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-more"></use></svg>
+            <span class="sr-only">More tools</span>
+          </summary>
+          <div class="topnav-more-menu">
+            <a class="nav-link" href="watchlist.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-eye"></use></svg>
+              Watchlist
+            </a>
+            <a class="nav-link" href="assistant.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-sparkles"></use></svg>
+              Decision Assistant
+            </a>
+            <a class="nav-link" href="tools.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calculator"></use></svg>
+              Advanced Tools
+            </a>
+            <a class="nav-link" href="integration.html" aria-current="page">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-external-link"></use></svg>
+              TradingView Hub
+            </a>
+            <a class="nav-link" href="checklist.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-list-checks"></use></svg>
+              Classic Checklist
+            </a>
+          </div>
+        </details>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-shell" id="tradingViewHub">
+    <header class="page-heading">
+      <p class="eyebrow">Phase 10 · Supported web workflow</p>
+      <h1>TradingView Hub</h1>
+      <p class="lede">เปิดกราฟ เก็บหลักฐาน และส่งออก Journal โดยไม่อ้างว่าดึงข้อมูลตลาดอัตโนมัติ</p>
+    </header>
+
+    <section class="integration-grid" aria-label="TradingView integration tools">
+      <article class="panel integration-panel">
+        <header class="integration-panel-header">
+          <div class="integration-panel-title">
+            <span class="integration-icon">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-chart"></use></svg>
+            </span>
+            <div>
+              <p class="eyebrow">External chart</p>
+              <h2>Chart Launcher</h2>
+            </div>
+          </div>
+          <span>TradingView.com</span>
+        </header>
+        <div class="integration-panel-body">
+          <div class="integration-fields">
+            <label class="integration-field">
+              <span>Pair</span>
+              <select id="tvInstrument">
+                <option value="XAUUSD">XAUUSD · Gold</option>
+                <option value="BTCUSD">BTCUSD · Bitcoin</option>
+                <option value="ETHUSD">ETHUSD · Ethereum</option>
+                <option value="NAS100">NAS100 · Nasdaq</option>
+                <option value="EURUSD">EURUSD</option>
+              </select>
+            </label>
+            <label class="integration-field">
+              <span>Timeframe</span>
+              <select id="tvTimeframe">
+                <option value="15">15 Minutes</option>
+                <option value="60" selected>1 Hour</option>
+                <option value="240">4 Hours</option>
+                <option value="D">1 Day</option>
+              </select>
+            </label>
+            <label class="integration-field integration-field-wide">
+              <span>TradingView Symbol</span>
+              <input id="tvSymbol" type="text" maxlength="80" autocomplete="off" spellcheck="false">
+            </label>
+          </div>
+
+          <div class="chart-url-row">
+            <label class="integration-field">
+              <span>Chart Link</span>
+              <input id="tvChartUrl" type="text" readonly aria-label="TradingView chart link">
+            </label>
+            <button class="button button-quiet" id="tvCopyChart" type="button" title="คัดลอกลิงก์">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-copy"></use></svg>
+              คัดลอกลิงก์
+            </button>
+          </div>
+
+          <div class="integration-actions">
+            <a
+              class="button button-primary"
+              id="tvOpenChart"
+              href="https://www.tradingview.com/chart/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-external-link"></use></svg>
+              เปิดกราฟ
+            </a>
+            <div class="integration-status">
+              <span>Link status</span>
+              <strong id="tvCopyState" data-state="idle">พร้อมเปิดกราฟ</strong>
+            </div>
+          </div>
+
+          <p class="integration-note">Symbol เป็นค่าเริ่มต้นที่แก้ไขได้ เพราะชื่อสินทรัพย์และแหล่งข้อมูลใน TradingView อาจต่างจากโบรกเกอร์ที่ใช้จริง</p>
+        </div>
+      </article>
+
+      <article class="panel integration-panel">
+        <header class="integration-panel-header">
+          <div class="integration-panel-title">
+            <span class="integration-icon">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-download"></use></svg>
+            </span>
+            <div>
+              <p class="eyebrow">Local journal data</p>
+              <h2>Journal Export</h2>
+            </div>
+          </div>
+          <span>No cloud upload</span>
+        </header>
+        <div class="integration-panel-body">
+          <div class="export-controls">
+            <label class="integration-field">
+              <span>ช่วงข้อมูล</span>
+              <select id="exportRange">
+                <option value="30">30 วันที่ผ่านมา</option>
+                <option value="90">90 วันที่ผ่านมา</option>
+                <option value="all" selected>ทุกช่วงเวลา</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="export-metrics" aria-label="Export summary">
+            <div class="export-metric">
+              <span>Trades</span>
+              <strong id="exportTotal">0</strong>
+            </div>
+            <div class="export-metric">
+              <span>Closed</span>
+              <strong id="exportClosed">0</strong>
+            </div>
+            <div class="export-metric">
+              <span>R Coverage</span>
+              <strong id="exportCoverage">--</strong>
+            </div>
+            <div class="export-metric">
+              <span>Net R</span>
+              <strong id="exportNetR">--</strong>
+            </div>
+          </div>
+
+          <p class="export-attachments" id="exportAttachmentSummary">0 TradingView links · 0 Screenshots</p>
+
+          <div class="integration-actions">
+            <button class="button button-primary" id="downloadCsv" type="button">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-download"></use></svg>
+              ดาวน์โหลด CSV
+            </button>
+            <a class="button button-quiet" id="openPdfReport" href="report.html?range=all">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-printer"></use></svg>
+              เปิดรายงาน PDF
+            </a>
+          </div>
+
+          <p class="export-empty" id="exportEmpty" hidden>ยังไม่มี Trade แบบ ENTERED ในช่วงที่เลือก</p>
+          <p class="integration-note">CSV รวมข้อมูล Trade และ Journal ส่วนรายงาน PDF จะเปิดหน้าสำหรับพิมพ์ จากนั้นเลือก Save as PDF ในหน้าต่างพิมพ์ของอุปกรณ์</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="integration-workflow" aria-labelledby="workflowHeading">
+      <header class="integration-workflow-heading">
+        <h2 id="workflowHeading">Evidence Workflow</h2>
+        <p>ลำดับเดียวตั้งแต่เตรียมแผนจนถึงเก็บหลักฐานสำหรับทบทวน</p>
+      </header>
+      <div class="workflow-steps">
+        <article class="workflow-step">
+          <span>Step 1</span>
+          <strong>สร้างแผน</strong>
+          <p>ประเมิน Context, Confirmation และ Risk ก่อนเข้าเทรด</p>
+          <a href="trade.html">เปิด New Trade</a>
+        </article>
+        <article class="workflow-step">
+          <span>Step 2</span>
+          <strong>เปิดกราฟ</strong>
+          <p>ตรวจ Symbol และ Timeframe ใน TradingView จากแหล่งข้อมูลที่ใช้จริง</p>
+          <a href="#tvInstrument">ใช้ Chart Launcher</a>
+        </article>
+        <article class="workflow-step">
+          <span>Step 3</span>
+          <strong>เก็บหลักฐาน</strong>
+          <p>แนบ Screenshot, TradingView link, Emotion, Mistake และ Lesson</p>
+          <a href="journal.html">เปิด Journal</a>
+        </article>
+        <article class="workflow-step">
+          <span>Step 4</span>
+          <strong>ส่งออก</strong>
+          <p>เก็บสำเนา Journal เป็น CSV หรือรายงาน PDF สำหรับทบทวน</p>
+          <a href="#exportRange">ไปที่ Export</a>
+        </article>
+      </div>
+    </section>
+
+    <aside class="integration-limits">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-shield"></use></svg>
+      <p>Trading Companion ไม่ดึงราคา, Indicator หรือคำสั่งซื้อขายจาก TradingView โดยตรง และไม่ส่งคำสั่งเทรด ลิงก์จะเปิดเว็บไซต์ TradingView ภายนอก ส่วนข้อมูล Journal และไฟล์ส่งออกสร้างจากข้อมูลที่อยู่ในเบราว์เซอร์นี้เท่านั้น</p>
+    </aside>
+  </main>
+
+  <nav class="mobile-nav" aria-label="เมนูมือถือ">
+    <a class="nav-link" href="index.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-home"></use></svg>
+      Dashboard
+    </a>
+    <a class="nav-link" href="trade.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-plus"></use></svg>
+      New Trade
+    </a>
+    <a class="nav-link" href="journal.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+      Journal
+    </a>
+    <a class="nav-link" href="stats.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-chart"></use></svg>
+      Statistics
+    </a>
+    <details class="mobile-more">
+      <summary class="nav-link" aria-current="page">
+        <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-more"></use></svg>
+        More
+      </summary>
+      <div class="mobile-more-menu">
+        <a class="nav-link" href="database.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-database"></use></svg>
+          Database
+        </a>
+        <a class="nav-link" href="weekly.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calendar-check"></use></svg>
+          Weekly Review
+        </a>
+        <a class="nav-link" href="planner.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-clock"></use></svg>
+          Session Planner
+        </a>
+        <a class="nav-link" href="watchlist.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-eye"></use></svg>
+          Watchlist
+        </a>
+        <a class="nav-link" href="assistant.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-sparkles"></use></svg>
+          Decision Assistant
+        </a>
+        <a class="nav-link" href="tools.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calculator"></use></svg>
+          Advanced Tools
+        </a>
+        <a class="nav-link" href="integration.html" aria-current="page">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-external-link"></use></svg>
+          TradingView Hub
+        </a>
+        <a class="nav-link" href="checklist.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-list-checks"></use></svg>
+          Classic Checklist
+        </a>
+      </div>
+    </details>
+  </nav>
+
+  <script src="js/storage.js?v=0.10.0"></script>
+  <script src="js/app.js"></script>
+  <script src="js/integration.js?v=0.10.0"></script>
+</body>
+</html>
