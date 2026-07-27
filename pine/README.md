@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.2.0-alpha
+Version: v0.2.1-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -56,9 +56,16 @@ The script requests the previous completed HTF state. Confirmed pivots also requ
 
 ## TradingView Test
 
+Compile status:
+
+- Compiled successfully in TradingView Pine Editor on 2026-07-27.
+- Render smoke test passed on XAUUSD at 5M, 15M, 1H, and 4H.
+- The HTF Context table and selected FVG box rendered without a compiler error.
+- Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
+
 1. Open Pine Editor in TradingView.
 2. Paste the contents of `TradingOS.pine`.
-3. Save and add the indicator to a chart.
+3. Add the indicator to a chart.
 4. Test on 5M, 15M, 1H, and 4H charts.
 5. Compare the table with manually marked 4H and 1H swing structure.
 6. Compare the selected FVG candidate with manually marked three-candle imbalances.
@@ -73,4 +80,4 @@ The script requests the previous completed HTF state. Confirmed pivots also requ
 - No Entry FVG confirmation or setup-window validation.
 - No Entry grade or alert.
 - Premium/discount and displacement are not yet included in HTF confidence.
-- The file must still be compiled in TradingView Pine Editor before it is considered release-ready.
+- Compilation and rendering are confirmed, but manual comparison and heuristic calibration are still required before release readiness.

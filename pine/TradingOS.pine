@@ -6,7 +6,7 @@ indicator(
     max_boxes_count = 10
 )
 
-// Trading OS Pine Track v0.2.0-alpha
+// Trading OS Pine Track v0.2.1-alpha
 // Modules: confirmed 4H/1H Bias and aligned HTF FVG candidates.
 // This indicator is decision support. It does not generate Buy/Sell signals.
 
@@ -124,16 +124,7 @@ f_fvg_state() =>
         else if high[1] > bearishBottom
             bearishStatus := 2
 
-    [
-        bullishTop,
-        bullishBottom,
-        bullishStart,
-        bullishStatus,
-        bearishTop,
-        bearishBottom,
-        bearishStart,
-        bearishStatus
-    ]
+    [bullishTop, bullishBottom, bullishStart, bullishStatus, bearishTop, bearishBottom, bearishStart, bearishStatus]
 
 f_fvg_active(int status) =>
     status == 1 or status == 2
@@ -162,32 +153,14 @@ int secondaryState = request.security(
     lookahead = barmerge.lookahead_on
 )
 
-[
-    primaryBullTop,
-    primaryBullBottom,
-    primaryBullStart,
-    primaryBullStatus,
-    primaryBearTop,
-    primaryBearBottom,
-    primaryBearStart,
-    primaryBearStatus
-] = request.security(
+[primaryBullTop, primaryBullBottom, primaryBullStart, primaryBullStatus, primaryBearTop, primaryBearBottom, primaryBearStart, primaryBearStatus] = request.security(
     syminfo.tickerid,
     primaryTimeframe,
     f_fvg_state(),
     gaps = barmerge.gaps_off,
     lookahead = barmerge.lookahead_on
 )
-[
-    secondaryBullTop,
-    secondaryBullBottom,
-    secondaryBullStart,
-    secondaryBullStatus,
-    secondaryBearTop,
-    secondaryBearBottom,
-    secondaryBearStart,
-    secondaryBearStatus
-] = request.security(
+[secondaryBullTop, secondaryBullBottom, secondaryBullStart, secondaryBullStatus, secondaryBearTop, secondaryBearBottom, secondaryBearStart, secondaryBearStatus] = request.security(
     syminfo.tickerid,
     secondaryTimeframe,
     f_fvg_state(),
@@ -586,7 +559,7 @@ if barstate.islast
         biasPanel,
         1,
         10,
-        "SWING + FVG v0.2",
+        "SWING + FVG v0.2.1",
         bgcolor = panelColor,
         text_color = mutedTextColor
     )

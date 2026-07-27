@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.2.0-alpha
+Version: v0.11.1 / Pine v0.2.1-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -633,7 +633,8 @@ First milestone:
 - [x] Add Fresh, Partial, and Filled candidate status.
 - [x] Select only a Bias-aligned candidate with Primary HTF priority.
 - [x] Add a latest-candidate box and price-location status.
-- [ ] Compile the first file in TradingView Pine Editor.
+- [x] Compile the first file in TradingView Pine Editor.
+- [x] Smoke-test indicator rendering on XAUUSD at 5M, 15M, 1H, and 4H.
 - [ ] Compare the output against manually marked 4H/1H structure.
 - [ ] Compare FVG candidates and status transitions against manual markup.
 - [ ] Record disagreement examples before calibrating the heuristic.
@@ -685,4 +686,5 @@ Expected outputs:
 | v0.11.1 | Real-use Validation Center and v1.0 readiness |
 | Pine v0.1.0-alpha | Confirmed 4H/1H HTF Bias baseline |
 | Pine v0.2.0-alpha | Bias-aligned 4H/1H FVG candidate baseline |
+| Pine v0.2.1-alpha | TradingView compile compatibility and multi-timeframe render smoke test |
 | v1.0.0 | Trading OS MVP |

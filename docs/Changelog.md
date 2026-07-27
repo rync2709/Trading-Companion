@@ -2,6 +2,23 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.2.1-alpha - 2026-07-27
+
+### Fixed
+
+- Reformatted tuple returns and tuple declarations for TradingView Pine v6 compiler compatibility.
+
+### Validated
+
+- Compiled the indicator successfully in TradingView Pine Editor.
+- Confirmed the indicator renders on XAUUSD at 5M, 15M, 1H, and 4H.
+- Confirmed the HTF Context table and selected FVG box render without a compiler error.
+
+### Important
+
+- This was a compile and rendering smoke test, not semantic validation against a complete manual-markup sample.
+- Manual structure, FVG selection, and status-transition comparison remain pending.
+
 ## Pine v0.2.0-alpha - 2026-07-27
 
 ### Added
