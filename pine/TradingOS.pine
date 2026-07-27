@@ -6,7 +6,7 @@ indicator(
     max_boxes_count = 10
 )
 
-// Trading OS Pine Track v0.2.3-alpha
+// Trading OS Pine Track v0.2.4-alpha
 // Modules: confirmed 4H/1H Bias and aligned HTF FVG candidates.
 // This indicator is decision support. It does not generate Buy/Sell signals.
 
@@ -284,6 +284,7 @@ bool priceTouchesPoi = (
     high >= poiBottom and
     low <= poiTop
 )
+bool poiInteractionActive = priceInsidePoi or priceTouchesPoi
 string poiLocation = (
     priceInsidePoi ? "IN ZONE" :
     priceTouchesPoi ? "TOUCH" :
@@ -479,10 +480,10 @@ if barstate.islast
             poiTimeframe + " " + f_state_short(poiDirection) + " FVG" :
             "NONE"
         ),
-        bgcolor = poiActive ?
+        bgcolor = poiInteractionActive ?
             color.new(f_state_color(poiDirection), 84) :
             panelColor,
-        text_color = poiActive ?
+        text_color = poiInteractionActive ?
             f_state_color(poiDirection) :
             neutralColor,
         text_size = dashboardTextSize
@@ -502,13 +503,11 @@ if barstate.islast
         1,
         5,
         f_fvg_status_text(poiStatus) + " · " + poiLocation,
-        bgcolor = priceInsidePoi or priceTouchesPoi ?
+        bgcolor = poiInteractionActive ?
             color.new(warningColor, 86) :
             panelColor,
-        text_color = priceInsidePoi or priceTouchesPoi ?
+        text_color = poiInteractionActive ?
             warningColor :
-            poiStatus == 1 ? bullishColor :
-            poiStatus == 2 ? warningColor :
             neutralColor,
         text_size = dashboardTextSize
     )
@@ -526,7 +525,7 @@ if barstate.islast
         biasPanel,
         1,
         6,
-        "v0.2.3",
+        "v0.2.4",
         bgcolor = panelColor,
         text_color = mutedTextColor,
         text_size = dashboardTextSize

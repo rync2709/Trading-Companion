@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.2.3-alpha
+Version: v0.2.4-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -60,6 +60,8 @@ The dashboard uses seven rows to reduce chart obstruction. Its text size default
 - POI: selected timeframe, direction, and FVG type
 - Status: FVG status and current price location
 - Model: Pine version
+
+POI and Status rows remain neutral gray while price is `AWAY`. They receive active colors only when price is `TOUCH` or `IN ZONE`. Bias and Context colors remain directional because they describe market context rather than POI interaction.
 
 ## Non-Repainting Baseline
 

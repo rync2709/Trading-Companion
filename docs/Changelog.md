@@ -2,6 +2,18 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.2.4-alpha - 2026-07-27
+
+### Changed
+
+- Changed inactive POI and Status dashboard rows to neutral gray.
+- Applied active colors only when price touches or enters the selected FVG candidate.
+- Kept Bias and Context colors directional because they do not represent POI interaction.
+
+### Important
+
+- This is a presentation-state change only and does not alter FVG detection or selection.
+
 ## Pine v0.2.3-alpha - 2026-07-27
 
 ### Changed
