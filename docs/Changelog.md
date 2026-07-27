@@ -2,6 +2,22 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.5.3-alpha - 2026-07-27
+
+### Changed
+
+- Removed all armed and confirmed CISD lines from the price chart.
+- Removed the CISD line-display setting and line-object code.
+- Kept HTF, FVG, Liquidity, Structure, and CISD detection unchanged.
+- Kept Structure and CISD state in the Dashboard.
+- Kept exact candidate and confirmed values in the Data Window.
+
+### Validated
+
+- Compiled Pine v0.5.3-alpha successfully in TradingView Pine Editor.
+- Confirmed Trading OS renders the nine-row Dashboard without CISD or Structure chart drawings on XAUUSD 15M.
+- Saved the private TradingView script as `Trading OS HTF Context v0.5.3` without publishing.
+
 ## Pine v0.5.2-alpha - 2026-07-27
 
 ### Changed

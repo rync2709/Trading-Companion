@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.5.2-alpha
+Version: v0.5.3-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -91,9 +91,8 @@ The first Liquidity module uses the confirmed Previous Day High (`PDH`) and Prev
 - FVG candidate, price-location, and Liquidity states remain in the fixed Dashboard.
 - Exact FVG top/bottom and PDH/PDL values remain available in the Data Window.
 - The optional HTF Bias background remains the only full-chart visual.
-- CISD draws short price-level segments from the current chart timeframe.
-- Dashed segments are armed candidates; the solid segment is the latest active confirmed CISD.
-- Changing chart timeframe recalculates CISD and replaces the prior timeframe's levels.
+- Structure and CISD remain in the Dashboard and Data Window only.
+- No Structure or CISD lines or labels are drawn over the price chart.
 - Removing chart drawings changes presentation only. Detection and status logic remain unchanged.
 
 Interpretation remains manual:
@@ -137,9 +136,10 @@ The first CISD module runs on the current chart timeframe:
 - Context can strengthen after the CISD because the confirmation events may occur in different orders inside one setup window.
 - Exact candidate and confirmed event values remain available in the Data Window.
 - CISD automatically uses the current chart timeframe and has no separate timeframe setting.
-- Dashed candidate levels and one solid confirmed level use candles from the current chart.
 - Changing timeframe recalculates the complete CISD state.
 - CISD is not projected from the previous chart timeframe onto the new one.
+- Exact armed candidate and confirmed CISD values remain available in the Data Window.
+- No CISD lines or labels are drawn over the price chart.
 
 CISD remains context only. Displacement, follow-through, risk, and Entry readiness are not automated.
 
@@ -167,6 +167,8 @@ Compile status:
 - The v0.5.2 automatic chart-timeframe behavior compiled successfully in TradingView.
 - Confirmed XAUUSD 5M and 4H each calculate their own CISD state without cross-timeframe level projection.
 - Returned the chart to its original 15M timeframe after testing.
+- The v0.5.3 Dashboard-only presentation compiled successfully in TradingView.
+- Confirmed the nine-row Dashboard renders without Trading OS CISD or Structure drawings on XAUUSD 15M.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 
@@ -182,7 +184,8 @@ Compile status:
 10. Compare BOS, CHOCH, and MSS with manually marked execution structure.
 11. Compare Bullish and Bearish CISD with manually marked delivery changes.
 12. Confirm CISD recalculates from the current chart after every timeframe change.
-13. Record disagreements before changing the Structure, CISD, FVG, or Liquidity rules.
+13. Confirm Trading OS adds no CISD or Structure drawing to the price chart.
+14. Record disagreements before changing the Structure, CISD, FVG, or Liquidity rules.
 
 ## Current Limits
 

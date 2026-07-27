@@ -1,6 +1,6 @@
 # Trading OS Indicator Specification
 
-Version: v0.2.6
+Version: v0.2.7
 Phase: Pine Track - Modules 1, 2, 4, Structure, and CISD baselines
 
 ## Purpose
@@ -240,7 +240,7 @@ Current limitation:
 
 ## Module 6 - CISD
 
-Implementation status: `Pine v0.5.2-alpha - strict current-chart CISD with automatic timeframe behavior`
+Implementation status: `Pine v0.5.3-alpha - strict current-chart CISD in Dashboard and Data Window only`
 
 Input:
 
@@ -249,7 +249,6 @@ Input:
 - Delivery-leg high-to-low range
 - ATR length and minimum ATR multiple
 - Maximum confirmation bars
-- Show CISD levels setting
 - HTF Bias, POI interaction, Liquidity, and Structure context
 
 Process:
@@ -264,9 +263,7 @@ Process:
 - Keep the latest confirmed event active for the configured CISD context window.
 - Calculate CISD from the current chart timeframe automatically.
 - Recalculate candidates, confirmed events, and levels when the chart timeframe changes.
-- Draw dashed candidate levels for armed Bullish and Bearish CISD.
-- Draw one solid confirmed level for the latest active CISD.
-- Do not retain or project CISD levels from the previous chart timeframe.
+- Keep candidate and confirmed levels in the Data Window without drawing them over the price chart.
 - Assign Weak when only the mechanical event exists.
 - Assign Medium when direction matches HTF Bias and at least one matching POI, Sweep, or Structure context exists.
 - Assign Strong when direction matches HTF Bias and matching Structure is supported by a matching POI interaction or Sweep.
@@ -282,15 +279,13 @@ Output:
 - cisd_quality: weak, medium, strong, or none
 - armed_bullish_cisd_level
 - armed_bearish_cisd_level
-- bullish_cisd_candidate_line
-- bearish_cisd_candidate_line
-- confirmed_cisd_line
 
 Current limitation:
 
 - The baseline runs on the current chart timeframe.
 - CISD has no independent timeframe setting.
 - CISD is never projected from one chart timeframe onto another.
+- No CISD, Structure, FVG, or PDH/PDL line is drawn by Trading OS.
 - It uses a conservative delivery-series and body-close heuristic; manual comparison remains required.
 - Context may strengthen while the event remains active because Sweep, Structure, and CISD can occur in different orders inside one setup window.
 - Displacement and follow-through are not yet part of CISD quality.

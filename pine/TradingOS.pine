@@ -2,11 +2,10 @@
 indicator(
     "Trading OS - HTF Context",
     shorttitle = "Trading OS Context",
-    overlay = true,
-    max_lines_count = 10
+    overlay = true
 )
 
-// Trading OS Pine Track v0.5.2-alpha
+// Trading OS Pine Track v0.5.3-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG candidates, daily liquidity,
 // confirmed execution-chart BOS/CHOCH/MSS, and strict CISD context.
 // This indicator is decision support. It does not generate Buy/Sell signals.
@@ -83,12 +82,6 @@ int cisdContextBars = input.int(
     minval = 1,
     maxval = 200,
     tooltip = "Number of chart bars that the latest confirmed CISD remains active.",
-    group = "CISD"
-)
-bool showCisdLevels = input.bool(
-    true,
-    "Show CISD levels",
-    tooltip = "Draws armed candidate levels and the latest confirmed CISD level for the current chart timeframe.",
     group = "CISD"
 )
 bool showBiasBackground = input.bool(
@@ -427,7 +420,7 @@ f_cisd_state(
         bearishCandidateActive := false
         bearishCandidateLevel := na
 
-    [eventPulse, latestDirection, latestLevel, latestEventBar, latestLegCount, latestLegRange, bullishCandidateActive ? bullishCandidateLevel : na, bullishCandidateActive ? bullishCandidateBar : na, bearishCandidateActive ? bearishCandidateLevel : na, bearishCandidateActive ? bearishCandidateBar : na]
+    [eventPulse, latestDirection, latestLevel, latestEventBar, latestLegCount, latestLegRange, bullishCandidateActive ? bullishCandidateLevel : na, bearishCandidateActive ? bearishCandidateLevel : na]
 
 f_timeframe_label(string value) =>
     value == "240" ? "4H" :
@@ -651,7 +644,7 @@ color structureStateColor = (
     warningColor
 )
 
-[cisdEventPulse, latestCisdDirection, latestCisdLevel, latestCisdEventBar, latestCisdLegCount, latestCisdLegRange, bullishCisdCandidateLevel, bullishCisdCandidateBar, bearishCisdCandidateLevel, bearishCisdCandidateBar] = f_cisd_state(
+[cisdEventPulse, latestCisdDirection, latestCisdLevel, latestCisdEventBar, latestCisdLegCount, latestCisdLegRange, bullishCisdCandidateLevel, bearishCisdCandidateLevel] = f_cisd_state(
     cisdMinimumDeliveryCandles,
     cisdMaximumDeliveryCandles,
     cisdAtrLength,
@@ -729,96 +722,6 @@ color backgroundColor = (
     na
 )
 bgcolor(backgroundColor, title = "Confirmed HTF bias")
-
-var line bullishCisdCandidateLine = na
-var line bearishCisdCandidateLine = na
-var line confirmedCisdLine = na
-
-if (
-    showCisdLevels and
-    not na(bullishCisdCandidateLevel) and
-    not na(bullishCisdCandidateBar)
-)
-    if na(bullishCisdCandidateLine)
-        bullishCisdCandidateLine := line.new(
-            x1 = bullishCisdCandidateBar,
-            y1 = bullishCisdCandidateLevel,
-            x2 = bullishCisdCandidateBar + cisdConfirmationBars,
-            y2 = bullishCisdCandidateLevel,
-            xloc = xloc.bar_index,
-            extend = extend.none,
-            color = color.new(bullishColor, 28),
-            style = line.style_dashed,
-            width = 1
-        )
-    else
-        line.set_xy1(
-            bullishCisdCandidateLine,
-            bullishCisdCandidateBar,
-            bullishCisdCandidateLevel
-        )
-        line.set_xy2(
-            bullishCisdCandidateLine,
-            bullishCisdCandidateBar + cisdConfirmationBars,
-            bullishCisdCandidateLevel
-        )
-else if not na(bullishCisdCandidateLine)
-    line.delete(bullishCisdCandidateLine)
-    bullishCisdCandidateLine := na
-
-if (
-    showCisdLevels and
-    not na(bearishCisdCandidateLevel) and
-    not na(bearishCisdCandidateBar)
-)
-    if na(bearishCisdCandidateLine)
-        bearishCisdCandidateLine := line.new(
-            x1 = bearishCisdCandidateBar,
-            y1 = bearishCisdCandidateLevel,
-            x2 = bearishCisdCandidateBar + cisdConfirmationBars,
-            y2 = bearishCisdCandidateLevel,
-            xloc = xloc.bar_index,
-            extend = extend.none,
-            color = color.new(bearishColor, 28),
-            style = line.style_dashed,
-            width = 1
-        )
-    else
-        line.set_xy1(
-            bearishCisdCandidateLine,
-            bearishCisdCandidateBar,
-            bearishCisdCandidateLevel
-        )
-        line.set_xy2(
-            bearishCisdCandidateLine,
-            bearishCisdCandidateBar + cisdConfirmationBars,
-            bearishCisdCandidateLevel
-        )
-else if not na(bearishCisdCandidateLine)
-    line.delete(bearishCisdCandidateLine)
-    bearishCisdCandidateLine := na
-
-if showCisdLevels and cisdEventPulse != 0
-    if not na(confirmedCisdLine)
-        line.delete(confirmedCisdLine)
-    confirmedCisdLine := line.new(
-        x1 = latestCisdEventBar,
-        y1 = latestCisdLevel,
-        x2 = latestCisdEventBar + cisdContextBars,
-        y2 = latestCisdLevel,
-        xloc = xloc.bar_index,
-        extend = extend.none,
-        color = f_state_color(latestCisdDirection),
-        style = line.style_solid,
-        width = 2
-    )
-
-if (
-    (not showCisdLevels or not cisdEventActive) and
-    not na(confirmedCisdLine)
-)
-    line.delete(confirmedCisdLine)
-    confirmedCisdLine := na
 
 plot(
     primaryState,
@@ -979,7 +882,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.5.2",
+        "TRADING OS · HTF v0.5.3",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,
