@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.5.0-alpha
+Version: v0.11.1 / Pine v0.5.1-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -652,6 +652,9 @@ First milestone:
 - [x] Add a strict execution-chart CISD baseline.
 - [x] Add CISD quality and context state to the Dashboard and Data Window.
 - [x] Compile and smoke-test CISD on XAUUSD at 5M, 15M, 1H, and 4H.
+- [x] Add a selectable CISD timeframe with 5M as default.
+- [x] Draw armed and confirmed CISD levels only on the selected timeframe.
+- [x] Confirm CISD levels display on 5M and remain hidden on 4H.
 - [ ] Compare the output against manually marked 4H/1H structure.
 - [ ] Compare FVG candidates and status transitions against manual markup.
 - [ ] Compare execution BOS/CHOCH/MSS events against manual markup.
@@ -715,4 +718,5 @@ Expected outputs:
 | Pine v0.3.2-alpha | Dashboard-only FVG and liquidity context without chart drawings |
 | Pine v0.4.0-alpha | Confirmed execution-chart BOS/CHOCH/MSS baseline |
 | Pine v0.5.0-alpha | Strict execution-chart CISD and context-quality baseline |
+| Pine v0.5.1-alpha | Timeframe-scoped armed and confirmed CISD levels |
 | v1.0.0 | Trading OS MVP |

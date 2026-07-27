@@ -12,7 +12,7 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Phase: Validation Sprint after Phase 11
 - Validation target: 20 real-use outcomes with at least 80% R and review coverage
 - Version: v0.11.1
-- Pine indicator: v0.5.0-alpha - dashboard-only HTF, liquidity, structure, and CISD context
+- Pine indicator: v0.5.1-alpha - timeframe-scoped CISD levels with HTF, liquidity, and structure context
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -226,7 +226,16 @@ The fifth Pine milestone adds:
 - Configurable delivery length, ATR size filter, confirmation window, and active context window
 - Weak, Medium, and Strong CISD quality based on HTF, POI, Sweep, and Structure context
 - CISD state in the Dashboard and exact candidate/event values in the Data Window
-- No CISD lines, labels, Buy/Sell signals, or alerts on the price chart
+- The initial v0.5.0 baseline kept CISD in the Dashboard and Data Window without lines, labels, Buy/Sell signals, or alerts
+
+The CISD presentation update adds:
+
+- A selectable CISD timeframe with 5M as the default
+- Dashed armed Bullish and Bearish CISD candidate levels
+- A solid latest confirmed CISD level
+- Strict visibility gating so CISD levels appear only when the chart timeframe matches the selected CISD timeframe
+- A clear `5M ONLY`-style Dashboard state on non-matching timeframes
+- No cross-timeframe CISD projection
 
 The Pine source and TradingView test notes are stored under `pine/`.
 

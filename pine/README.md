@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.5.0-alpha
+Version: v0.5.1-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -22,6 +22,7 @@ Defaults:
 - Execution swing length: 3
 - Structure context window: 20 chart bars
 - CISD delivery candles: minimum 3, maximum 8
+- CISD timeframe: 5M
 - CISD minimum delivery leg: 0.8 ATR using ATR 14
 - CISD confirmation window: 8 chart bars
 - CISD active context window: 20 chart bars
@@ -91,6 +92,9 @@ The first Liquidity module uses the confirmed Previous Day High (`PDH`) and Prev
 - FVG candidate, price-location, and Liquidity states remain in the fixed Dashboard.
 - Exact FVG top/bottom and PDH/PDL values remain available in the Data Window.
 - The optional HTF Bias background remains the only full-chart visual.
+- CISD can draw short price-level segments only on the selected CISD timeframe.
+- Dashed segments are armed candidates; the solid segment is the latest active confirmed CISD.
+- CISD levels are removed on every non-matching chart timeframe.
 - Removing chart drawings changes presentation only. Detection and status logic remain unchanged.
 
 Interpretation remains manual:
@@ -132,8 +136,11 @@ The first CISD module runs on the current chart timeframe:
 - Medium requires HTF alignment plus matching POI, Sweep, or Structure context.
 - Strong requires HTF alignment and matching Structure supported by a matching POI interaction or Sweep.
 - Context can strengthen after the CISD because the confirmation events may occur in different orders inside one setup window.
-- Candidate levels and confirmed event values are available in the Data Window only.
-- No CISD lines or labels are drawn over the price chart.
+- Exact candidate and confirmed event values remain available in the Data Window.
+- `CISD timeframe` defaults to 5M and can be changed in the CISD settings.
+- Dashed candidate levels and one solid confirmed level are drawn only when the chart timeframe matches that setting.
+- A non-matching chart shows `5M ONLY` or the equivalent selected timeframe in the Dashboard.
+- CISD is not projected from one timeframe onto another.
 
 CISD remains context only. Displacement, follow-through, risk, and Entry readiness are not automated.
 
@@ -155,6 +162,9 @@ Compile status:
 - The v0.4.0 eight-row Dashboard displayed an active Structure state on XAUUSD 15M without adding chart drawings.
 - The v0.5.0 strict CISD baseline compiled successfully and passed render smoke tests on XAUUSD at 5M, 15M, 1H, and 4H.
 - The v0.5.0 nine-row Dashboard displayed CISD direction and quality without adding chart drawings.
+- The v0.5.1 timeframe-scoped CISD levels compiled successfully in TradingView.
+- Confirmed CISD levels render on XAUUSD 5M and remain hidden on XAUUSD 4H.
+- Confirmed the 4H Dashboard displays `5M ONLY` and returned the chart to 5M after testing.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 
@@ -169,7 +179,8 @@ Compile status:
 9. Confirm sweep state only after a candle crosses a level and closes back inside.
 10. Compare BOS, CHOCH, and MSS with manually marked execution structure.
 11. Compare Bullish and Bearish CISD with manually marked delivery changes.
-12. Record disagreements before changing the Structure, CISD, FVG, or Liquidity rules.
+12. Confirm CISD levels appear only on the selected CISD timeframe.
+13. Record disagreements before changing the Structure, CISD, FVG, or Liquidity rules.
 
 ## Current Limits
 

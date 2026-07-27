@@ -2,6 +2,29 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.5.1-alpha - 2026-07-27
+
+### Added
+
+- Added a selectable CISD timeframe with 5M as the default.
+- Added dashed Bullish and Bearish armed CISD candidate levels.
+- Added a solid level for the latest active confirmed CISD.
+- Added a `Show CISD levels` setting.
+
+### Changed
+
+- CISD state and Data Window values are active only when the chart timeframe matches the selected CISD timeframe.
+- Non-matching timeframes show the selected timeframe followed by `ONLY` in the Dashboard.
+- CISD is not projected across timeframes.
+
+### Validated
+
+- Compiled Pine v0.5.1-alpha successfully in TradingView Pine Editor.
+- Confirmed CISD levels render on XAUUSD 5M.
+- Confirmed CISD levels remain hidden and the Dashboard shows `5M ONLY` on XAUUSD 4H.
+- Returned the chart to the original 5M timeframe.
+- Saved the private TradingView script as `Trading OS HTF Context v0.5.1` without publishing.
+
 ## Pine v0.5.0-alpha - 2026-07-27
 
 ### Added
