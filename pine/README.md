@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.4.0-alpha
+Version: v0.5.0-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -12,6 +12,7 @@ The Pine track automates selected Trading OS context checks without replacing tr
 - Module 2 baseline: aligned HTF FVG candidate
 - Module 4 baseline: Previous Day High/Low liquidity
 - Module 5 baseline: execution-chart BOS/CHOCH/MSS
+- Module 6 baseline: strict execution-chart CISD
 
 Defaults:
 
@@ -20,6 +21,10 @@ Defaults:
 - Confirmed swing length: 3
 - Execution swing length: 3
 - Structure context window: 20 chart bars
+- CISD delivery candles: minimum 3, maximum 8
+- CISD minimum delivery leg: 0.8 ATR using ATR 14
+- CISD confirmation window: 8 chart bars
+- CISD active context window: 20 chart bars
 
 Structure heuristic:
 
@@ -52,11 +57,11 @@ Selection rules:
 - Neutral or conflicting Bias produces no selected candidate.
 - Only the latest Bullish and Bearish candidate on each HTF is tracked.
 
-This is a POI candidate, not a valid Entry FVG. Displacement, CISD, and complete setup-window confirmation are not implemented yet.
+This is a POI candidate, not a valid Entry FVG. Displacement and complete setup-window confirmation are not implemented yet.
 
 ## Compact Dashboard
 
-The dashboard uses eight rows to reduce chart obstruction. Its text size defaults to `Small` and can be changed under Display to `Tiny`, `Small`, or `Normal`.
+The dashboard uses nine rows to reduce chart obstruction. Its text size defaults to `Small` and can be changed under Display to `Tiny`, `Small`, or `Normal`.
 
 - HTF: grouped Primary and Secondary states
 - Bias: Combined Bias and Confidence
@@ -65,6 +70,7 @@ The dashboard uses eight rows to reduce chart obstruction. Its text size default
 - Status: FVG status and current price location
 - Liquidity: confirmed PDH/PDL sweep state
 - Structure: active BOS, CHOCH, MSS, or WAIT
+- CISD: active direction with Weak, Medium, Strong, or WAIT quality
 
 POI and Status rows remain neutral gray while price is `AWAY`. They receive active colors only when price is `TOUCH` or `IN ZONE`. Bias and Context colors remain directional because they describe market context rather than POI interaction.
 
@@ -110,6 +116,27 @@ The first Structure module runs on the current chart timeframe:
 
 This baseline does not yet know Reversal versus Continuation setup type, full POI proximity, or a complete setup-window state.
 
+## CISD Baseline
+
+The first CISD module runs on the current chart timeframe:
+
+- A delivery leg is an uninterrupted series of bullish or bearish candles.
+- The first retained delivery candle's opening price becomes the candidate level.
+- The leg must contain at least three candles and span at least 0.8 ATR by default.
+- A Bullish CISD requires a confirmed bullish body close above the Bearish delivery level.
+- A Bearish CISD requires a confirmed bearish body close below the Bullish delivery level.
+- Wick-only violations do not confirm CISD.
+- Unconfirmed candidate levels expire after eight chart bars by default.
+- Confirmed CISD remains active for 20 chart bars by default.
+- Weak means the mechanical CISD exists without enough aligned context.
+- Medium requires HTF alignment plus matching POI, Sweep, or Structure context.
+- Strong requires HTF alignment and matching Structure supported by a matching POI interaction or Sweep.
+- Context can strengthen after the CISD because the confirmation events may occur in different orders inside one setup window.
+- Candidate levels and confirmed event values are available in the Data Window only.
+- No CISD lines or labels are drawn over the price chart.
+
+CISD remains context only. Displacement, follow-through, risk, and Entry readiness are not automated.
+
 ## Non-Repainting Baseline
 
 The script requests the previous completed HTF state. Confirmed pivots also require bars on both sides, so the output intentionally lags live price. This tradeoff avoids treating a still-forming HTF structure as confirmed.
@@ -126,6 +153,8 @@ Compile status:
 - The v0.3.2 dashboard-only chart presentation compiled successfully and visually confirmed that Trading OS draws no FVG box or PDH/PDL chart lines on XAUUSD 15M.
 - The v0.4.0 execution Structure baseline compiled successfully and passed render smoke tests on XAUUSD at 5M, 15M, 1H, and 4H.
 - The v0.4.0 eight-row Dashboard displayed an active Structure state on XAUUSD 15M without adding chart drawings.
+- The v0.5.0 strict CISD baseline compiled successfully and passed render smoke tests on XAUUSD at 5M, 15M, 1H, and 4H.
+- The v0.5.0 nine-row Dashboard displayed CISD direction and quality without adding chart drawings.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 
@@ -139,7 +168,8 @@ Compile status:
 8. Compare PDH and PDL with the previous completed Daily candle.
 9. Confirm sweep state only after a candle crosses a level and closes back inside.
 10. Compare BOS, CHOCH, and MSS with manually marked execution structure.
-11. Record disagreements before changing the structure, FVG, or Liquidity rules.
+11. Compare Bullish and Bearish CISD with manually marked delivery changes.
+12. Record disagreements before changing the Structure, CISD, FVG, or Liquidity rules.
 
 ## Current Limits
 
@@ -148,7 +178,8 @@ Compile status:
 - Liquidity currently supports PDH and PDL only.
 - No Asia High/Low, Equal High/Low, or Internal/External Liquidity.
 - Structure is a baseline without automated setup type, POI proximity, or a complete setup window.
-- No CISD or displacement module.
+- CISD is a baseline without displacement or follow-through confirmation.
+- No displacement module.
 - No Entry FVG confirmation or setup-window validation.
 - No Entry grade or alert.
 - Premium/discount and displacement are not yet included in HTF confidence.

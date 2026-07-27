@@ -2,6 +2,32 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.5.0-alpha - 2026-07-27
+
+### Added
+
+- Added strict CISD detection from consecutive bullish and bearish delivery candles.
+- Added configurable minimum and maximum delivery candles.
+- Added an ATR-based minimum delivery-leg range.
+- Added expiring Bullish and Bearish CISD candidate levels.
+- Added body-close confirmation through the opening price of the first retained delivery candle.
+- Added Weak, Medium, and Strong CISD context quality.
+- Added a CISD row to the Dashboard and detailed values to the Data Window.
+
+### Important
+
+- CISD quality uses HTF Bias, POI interaction, confirmed PDH/PDL Sweep, and Structure context.
+- Displacement and follow-through are not yet included.
+- No CISD lines or labels are drawn over the price chart.
+- CISD does not generate Buy/Sell signals or alerts.
+
+### Validated
+
+- Compiled Pine v0.5.0-alpha successfully in TradingView Pine Editor.
+- Smoke-tested XAUUSD at 5M, 15M, 1H, and 4H without a runtime error.
+- Confirmed the nine-row Dashboard renders CISD direction and quality.
+- Saved the private TradingView script as `Trading OS HTF Context v0.5.0` without publishing.
+
 ## Pine v0.4.0-alpha - 2026-07-27
 
 ### Added

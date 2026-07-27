@@ -1,7 +1,7 @@
 # Trading OS Indicator Specification
 
-Version: v0.2.3
-Phase: Pine Track - Modules 1, 2, 4, and Structure baseline
+Version: v0.2.4
+Phase: Pine Track - Modules 1, 2, 4, Structure, and CISD baselines
 
 ## Purpose
 
@@ -240,24 +240,50 @@ Current limitation:
 
 ## Module 6 - CISD
 
+Implementation status: `Pine v0.5.0-alpha - strict execution-chart CISD baseline`
+
 Input:
 
-- Candle open and close
-- Prior candle ranges
-- Local dealing range
-- Structure and liquidity events
+- Consecutive bullish or bearish delivery candles
+- Opening price of the first retained candle in the delivery series
+- Delivery-leg high-to-low range
+- ATR length and minimum ATR multiple
+- Maximum confirmation bars
+- HTF Bias, POI interaction, Liquidity, and Structure context
 
 Process:
 
-- Detect bullish or bearish CISD.
-- Check proximity to sweep, POI, or structure event.
-- Confirm alignment with trade direction.
+- Track the latest uninterrupted bullish and bearish delivery series.
+- Require the configured minimum number of candles and minimum ATR range.
+- Retain at most the configured maximum number of delivery candles.
+- Arm a Bullish CISD level at the opening of the first retained Bearish delivery candle.
+- Arm a Bearish CISD level at the opening of the first retained Bullish delivery candle.
+- Require a confirmed bullish body close above the Bullish level or bearish body close below the Bearish level.
+- Expire an unconfirmed level after the configured confirmation window.
+- Keep the latest confirmed event active for the configured CISD context window.
+- Assign Weak when only the mechanical event exists.
+- Assign Medium when direction matches HTF Bias and at least one matching POI, Sweep, or Structure context exists.
+- Assign Strong when direction matches HTF Bias and matching Structure is supported by a matching POI interaction or Sweep.
 
 Output:
 
-- cisd_event: BULLISH, BEARISH, or NONE
+- cisd_event_pulse: BULLISH, BEARISH, or NONE
+- active_cisd_direction: BULLISH, BEARISH, or NEUTRAL
+- active_cisd_level
+- active_delivery_candle_count
+- active_delivery_leg_range
 - cisd_valid: true or false
-- cisd_quality: weak, medium, or strong
+- cisd_quality: weak, medium, strong, or none
+- armed_bullish_cisd_level
+- armed_bearish_cisd_level
+
+Current limitation:
+
+- The baseline runs on the current chart timeframe.
+- It uses a conservative delivery-series and body-close heuristic; manual comparison remains required.
+- Context may strengthen while the event remains active because Sweep, Structure, and CISD can occur in different orders inside one setup window.
+- Displacement and follow-through are not yet part of CISD quality.
+- CISD is decision-support context, not an Entry Signal.
 
 ## Module 7 - Displacement
 

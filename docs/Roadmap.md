@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.4.0-alpha
+Version: v0.11.1 / Pine v0.5.0-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -649,9 +649,13 @@ First milestone:
 - [x] Add a confirmed execution-chart BOS/CHOCH/MSS baseline.
 - [x] Add Structure state to the Dashboard and Data Window without chart drawings.
 - [x] Compile and smoke-test Structure on XAUUSD at 5M, 15M, 1H, and 4H.
+- [x] Add a strict execution-chart CISD baseline.
+- [x] Add CISD quality and context state to the Dashboard and Data Window.
+- [x] Compile and smoke-test CISD on XAUUSD at 5M, 15M, 1H, and 4H.
 - [ ] Compare the output against manually marked 4H/1H structure.
 - [ ] Compare FVG candidates and status transitions against manual markup.
 - [ ] Compare execution BOS/CHOCH/MSS events against manual markup.
+- [ ] Compare Bullish and Bearish CISD events against manual markup.
 - [ ] Record disagreement examples before calibrating the heuristic.
 
 Planned modules:
@@ -662,7 +666,7 @@ Planned modules:
 - [x] Liquidity - Previous Day High/Low baseline
 - [ ] Liquidity - Asia, Equal High/Low, and Internal/External expansion
 - [x] Structure: MSS, CHOCH, BOS baseline
-- [ ] CISD
+- [x] CISD baseline
 - [ ] Displacement
 - [ ] FVG / Entry Zone
 - [ ] Score Engine
@@ -710,4 +714,5 @@ Expected outputs:
 | Pine v0.3.1-alpha | Viewport-pinned current FVG and PDH/PDL display |
 | Pine v0.3.2-alpha | Dashboard-only FVG and liquidity context without chart drawings |
 | Pine v0.4.0-alpha | Confirmed execution-chart BOS/CHOCH/MSS baseline |
+| Pine v0.5.0-alpha | Strict execution-chart CISD and context-quality baseline |
 | v1.0.0 | Trading OS MVP |

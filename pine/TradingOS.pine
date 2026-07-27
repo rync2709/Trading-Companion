@@ -5,9 +5,9 @@ indicator(
     overlay = true
 )
 
-// Trading OS Pine Track v0.4.0-alpha
+// Trading OS Pine Track v0.5.0-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG candidates, daily liquidity,
-// and confirmed execution-chart BOS/CHOCH/MSS structure events.
+// confirmed execution-chart BOS/CHOCH/MSS, and strict CISD context.
 // This indicator is decision support. It does not generate Buy/Sell signals.
 
 string primaryTimeframe = input.timeframe("240", "Primary HTF", group = "HTF Bias")
@@ -35,6 +35,54 @@ int structureContextBars = input.int(
     maxval = 200,
     tooltip = "Maximum chart bars used to connect a liquidity sweep to MSS and keep the latest structure event active in the Dashboard.",
     group = "Market Structure"
+)
+int cisdMinimumDeliveryCandles = input.int(
+    3,
+    "Minimum delivery candles",
+    minval = 1,
+    maxval = 20,
+    tooltip = "Minimum consecutive directional candles required to arm a CISD level.",
+    group = "CISD"
+)
+int cisdMaximumDeliveryCandles = input.int(
+    8,
+    "Maximum delivery candles",
+    minval = 1,
+    maxval = 50,
+    tooltip = "Maximum consecutive candles retained when a delivery leg is longer.",
+    group = "CISD"
+)
+int cisdAtrLength = input.int(
+    14,
+    "ATR length",
+    minval = 1,
+    maxval = 200,
+    group = "CISD"
+)
+float cisdMinimumLegAtr = input.float(
+    0.8,
+    "Minimum delivery leg, ATR",
+    minval = 0.0,
+    maxval = 10.0,
+    step = 0.1,
+    tooltip = "Minimum high-to-low range of the delivery leg relative to ATR.",
+    group = "CISD"
+)
+int cisdConfirmationBars = input.int(
+    8,
+    "Confirmation bars",
+    minval = 1,
+    maxval = 100,
+    tooltip = "Maximum bars allowed for price to close through an armed CISD level.",
+    group = "CISD"
+)
+int cisdContextBars = input.int(
+    20,
+    "CISD context bars",
+    minval = 1,
+    maxval = 200,
+    tooltip = "Number of chart bars that the latest confirmed CISD remains active.",
+    group = "CISD"
 )
 bool showBiasBackground = input.bool(
     true,
@@ -160,6 +208,12 @@ f_structure_event_text(int eventCode) =>
      eventCode == 3 ? "MSS" :
      "WAIT"
 
+f_quality_text(int quality) =>
+    quality == 3 ? "STRONG" :
+     quality == 2 ? "MEDIUM" :
+     quality == 1 ? "WEAK" :
+     "WAIT"
+
 f_execution_structure(int length, bool recentPdhSweep, bool recentPdlSweep) =>
     float pivotHigh = ta.pivothigh(high, length, length)
     float pivotLow = ta.pivotlow(low, length, length)
@@ -215,6 +269,158 @@ f_execution_structure(int length, bool recentPdhSweep, bool recentPdlSweep) =>
         latestLowBroken := false
 
     [eventPulse, latestEvent, latestDirection, trendState, latestBreakLevel, latestEventBar, latestSwingHigh, latestSwingLow]
+
+f_cisd_state(
+    int minimumDeliveryCandles,
+    int maximumDeliveryCandles,
+    int atrLength,
+    float minimumLegAtr,
+    int confirmationBars
+) =>
+    int requiredCandles = math.min(minimumDeliveryCandles, maximumDeliveryCandles)
+    float atrValue = ta.atr(atrLength)
+    float rollingHigh = ta.highest(high, maximumDeliveryCandles)
+    float rollingLow = ta.lowest(low, maximumDeliveryCandles)
+    bool bullishCandle = close > open
+    bool bearishCandle = close < open
+    var int bearishRunCount = 0
+    var float bearishRunOpen = na
+    var float bearishRunHigh = na
+    var float bearishRunLow = na
+    var int bullishRunCount = 0
+    var float bullishRunOpen = na
+    var float bullishRunHigh = na
+    var float bullishRunLow = na
+    var bool bullishCandidateActive = false
+    var float bullishCandidateLevel = na
+    var int bullishCandidateBar = na
+    var int bullishCandidateLegCount = 0
+    var float bullishCandidateLegRange = na
+    var bool bearishCandidateActive = false
+    var float bearishCandidateLevel = na
+    var int bearishCandidateBar = na
+    var int bearishCandidateLegCount = 0
+    var float bearishCandidateLegRange = na
+    var int latestDirection = 0
+    var float latestLevel = na
+    var int latestEventBar = na
+    var int latestLegCount = 0
+    var float latestLegRange = na
+
+    if not bearishCandle and bearishRunCount > 0
+        float bearishLegRange = bearishRunHigh - bearishRunLow
+        bool bearishLegQualified = (
+            bearishRunCount >= requiredCandles and
+            bearishLegRange >= atrValue * minimumLegAtr
+        )
+        if bearishLegQualified
+            bullishCandidateActive := true
+            bullishCandidateLevel := bearishRunOpen
+            bullishCandidateBar := bar_index
+            bullishCandidateLegCount := bearishRunCount
+            bullishCandidateLegRange := bearishLegRange
+        bearishRunCount := 0
+        bearishRunOpen := na
+        bearishRunHigh := na
+        bearishRunLow := na
+
+    if not bullishCandle and bullishRunCount > 0
+        float bullishLegRange = bullishRunHigh - bullishRunLow
+        bool bullishLegQualified = (
+            bullishRunCount >= requiredCandles and
+            bullishLegRange >= atrValue * minimumLegAtr
+        )
+        if bullishLegQualified
+            bearishCandidateActive := true
+            bearishCandidateLevel := bullishRunOpen
+            bearishCandidateBar := bar_index
+            bearishCandidateLegCount := bullishRunCount
+            bearishCandidateLegRange := bullishLegRange
+        bullishRunCount := 0
+        bullishRunOpen := na
+        bullishRunHigh := na
+        bullishRunLow := na
+
+    if bearishCandle
+        if bearishRunCount == 0
+            bearishRunCount := 1
+            bearishRunOpen := open
+            bearishRunHigh := high
+            bearishRunLow := low
+        else
+            bearishRunCount += 1
+            bearishRunHigh := math.max(bearishRunHigh, high)
+            bearishRunLow := math.min(bearishRunLow, low)
+            if bearishRunCount > maximumDeliveryCandles
+                bearishRunCount := maximumDeliveryCandles
+                bearishRunOpen := open[maximumDeliveryCandles - 1]
+                bearishRunHigh := rollingHigh
+                bearishRunLow := rollingLow
+
+    if bullishCandle
+        if bullishRunCount == 0
+            bullishRunCount := 1
+            bullishRunOpen := open
+            bullishRunHigh := high
+            bullishRunLow := low
+        else
+            bullishRunCount += 1
+            bullishRunHigh := math.max(bullishRunHigh, high)
+            bullishRunLow := math.min(bullishRunLow, low)
+            if bullishRunCount > maximumDeliveryCandles
+                bullishRunCount := maximumDeliveryCandles
+                bullishRunOpen := open[maximumDeliveryCandles - 1]
+                bullishRunHigh := rollingHigh
+                bullishRunLow := rollingLow
+
+    if (
+        bullishCandidateActive and
+        bar_index - bullishCandidateBar > confirmationBars
+    )
+        bullishCandidateActive := false
+        bullishCandidateLevel := na
+
+    if (
+        bearishCandidateActive and
+        bar_index - bearishCandidateBar > confirmationBars
+    )
+        bearishCandidateActive := false
+        bearishCandidateLevel := na
+
+    bool bullishEvent = (
+        barstate.isconfirmed and
+        bullishCandle and
+        bullishCandidateActive and
+        close > bullishCandidateLevel
+    )
+    bool bearishEvent = (
+        barstate.isconfirmed and
+        bearishCandle and
+        bearishCandidateActive and
+        close < bearishCandidateLevel
+    )
+    int eventPulse = 0
+
+    if bullishEvent
+        eventPulse := 1
+        latestDirection := 1
+        latestLevel := bullishCandidateLevel
+        latestEventBar := bar_index
+        latestLegCount := bullishCandidateLegCount
+        latestLegRange := bullishCandidateLegRange
+        bullishCandidateActive := false
+        bullishCandidateLevel := na
+    else if bearishEvent
+        eventPulse := -1
+        latestDirection := -1
+        latestLevel := bearishCandidateLevel
+        latestEventBar := bar_index
+        latestLegCount := bearishCandidateLegCount
+        latestLegRange := bearishCandidateLegRange
+        bearishCandidateActive := false
+        bearishCandidateLevel := na
+
+    [eventPulse, latestDirection, latestLevel, latestEventBar, latestLegCount, latestLegRange, bullishCandidateActive ? bullishCandidateLevel : na, bearishCandidateActive ? bearishCandidateLevel : na]
 
 f_timeframe_label(string value) =>
     value == "240" ? "4H" :
@@ -438,6 +644,65 @@ color structureStateColor = (
     warningColor
 )
 
+[cisdEventPulse, latestCisdDirection, latestCisdLevel, latestCisdEventBar, latestCisdLegCount, latestCisdLegRange, bullishCisdCandidateLevel, bearishCisdCandidateLevel] = f_cisd_state(
+    cisdMinimumDeliveryCandles,
+    cisdMaximumDeliveryCandles,
+    cisdAtrLength,
+    cisdMinimumLegAtr,
+    cisdConfirmationBars
+)
+
+bool cisdEventActive = (
+    latestCisdDirection != 0 and
+    not na(latestCisdEventBar) and
+    bar_index - latestCisdEventBar <= cisdContextBars
+)
+bool cisdAligned = (
+    cisdEventActive and
+    combinedState != 0 and
+    latestCisdDirection == combinedState
+)
+bool cisdMatchingSweep = (
+    latestCisdDirection == 1 ? recentPdlSweep :
+    latestCisdDirection == -1 ? recentPdhSweep :
+    false
+)
+bool cisdMatchingStructure = (
+    structureEventActive and
+    latestCisdDirection == latestStructureDirection
+)
+bool cisdMatchingPoi = (
+    poiInteractionActive and
+    latestCisdDirection == poiDirection
+)
+bool cisdContextAvailable = (
+    cisdMatchingSweep or
+    cisdMatchingStructure or
+    cisdMatchingPoi
+)
+int cisdQuality = (
+    not cisdEventActive ? 0 :
+    (
+        cisdAligned and
+        cisdMatchingStructure and
+        (cisdMatchingSweep or cisdMatchingPoi)
+    ) ? 3 :
+    cisdAligned and cisdContextAvailable ? 2 :
+    1
+)
+bool cisdValid = cisdQuality >= 2
+string cisdState = (
+    cisdEventActive ?
+    f_state_short(latestCisdDirection) + " · " +
+    f_quality_text(cisdQuality) :
+    "WAIT"
+)
+color cisdStateColor = (
+    not cisdEventActive ? neutralColor :
+    cisdValid ? f_state_color(latestCisdDirection) :
+    warningColor
+)
+
 string liquidityState = (
     pdhSweptToday and pdlSweptToday ? "PDH + PDL SWEPT" :
     pdhSweptToday ? "PDH SWEPT" :
@@ -553,11 +818,56 @@ plot(
     title = "Latest confirmed execution swing low",
     display = display.data_window
 )
+plot(
+    cisdEventPulse,
+    title = "CISD event pulse",
+    display = display.data_window
+)
+plot(
+    cisdEventActive ? latestCisdDirection : 0,
+    title = "Active CISD direction",
+    display = display.data_window
+)
+plot(
+    cisdEventActive ? latestCisdLevel : na,
+    title = "Active CISD level",
+    display = display.data_window
+)
+plot(
+    cisdEventActive ? latestCisdLegCount : 0,
+    title = "Active CISD delivery candle count",
+    display = display.data_window
+)
+plot(
+    cisdEventActive ? latestCisdLegRange : na,
+    title = "Active CISD delivery leg range",
+    display = display.data_window
+)
+plot(
+    cisdQuality,
+    title = "Active CISD quality",
+    display = display.data_window
+)
+plot(
+    cisdValid ? 1 : 0,
+    title = "Active CISD valid",
+    display = display.data_window
+)
+plot(
+    bullishCisdCandidateLevel,
+    title = "Armed bullish CISD level",
+    display = display.data_window
+)
+plot(
+    bearishCisdCandidateLevel,
+    title = "Armed bearish CISD level",
+    display = display.data_window
+)
 
 var table biasPanel = table.new(
     position.top_right,
     2,
-    8,
+    9,
     frame_color = panelBorderColor,
     frame_width = 1,
     border_color = panelBorderColor,
@@ -572,7 +882,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.4.0",
+        "TRADING OS · HTF v0.5.0",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,
@@ -730,5 +1040,26 @@ if barstate.islast
             color.new(structureStateColor, 86) :
             panelColor,
         text_color = structureStateColor,
+        text_size = dashboardTextSize
+    )
+    table.cell(
+        biasPanel,
+        0,
+        8,
+        "CISD",
+        bgcolor = panelColor,
+        text_color = mutedTextColor,
+        text_halign = text.align_left,
+        text_size = dashboardTextSize
+    )
+    table.cell(
+        biasPanel,
+        1,
+        8,
+        cisdState,
+        bgcolor = cisdEventActive ?
+            color.new(cisdStateColor, 86) :
+            panelColor,
+        text_color = cisdStateColor,
         text_size = dashboardTextSize
     )

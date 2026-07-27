@@ -12,7 +12,7 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Phase: Validation Sprint after Phase 11
 - Validation target: 20 real-use outcomes with at least 80% R and review coverage
 - Version: v0.11.1
-- Pine indicator: v0.4.0-alpha - dashboard-only HTF context, daily liquidity, and execution structure baseline
+- Pine indicator: v0.5.0-alpha - dashboard-only HTF, liquidity, structure, and CISD context
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -218,6 +218,15 @@ The fourth Pine milestone adds:
 - MSS classification when a CHOCH follows the matching PDH/PDL sweep within the configured context window
 - Active Structure state in the Dashboard and exact numeric outputs in the Data Window
 - No structure lines, labels, Buy/Sell signals, or alerts on the price chart
+
+The fifth Pine milestone adds:
+
+- Strict CISD detection from consecutive bullish or bearish delivery candles
+- Body-close confirmation through the opening price of the first retained delivery candle
+- Configurable delivery length, ATR size filter, confirmation window, and active context window
+- Weak, Medium, and Strong CISD quality based on HTF, POI, Sweep, and Structure context
+- CISD state in the Dashboard and exact candidate/event values in the Data Window
+- No CISD lines, labels, Buy/Sell signals, or alerts on the price chart
 
 The Pine source and TradingView test notes are stored under `pine/`.
 
