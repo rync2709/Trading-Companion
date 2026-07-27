@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.5.3-alpha
+Version: v0.6.0-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -13,6 +13,7 @@ The Pine track automates selected Trading OS context checks without replacing tr
 - Module 4 baseline: Previous Day High/Low liquidity
 - Module 5 baseline: execution-chart BOS/CHOCH/MSS
 - Module 6 baseline: strict execution-chart CISD
+- Module 7 baseline: execution-chart Displacement and follow-through
 
 Defaults:
 
@@ -25,6 +26,12 @@ Defaults:
 - CISD minimum delivery leg: 0.8 ATR using ATR 14
 - CISD confirmation window: 8 chart bars
 - CISD active context window: 20 chart bars
+- Displacement body baseline: 20 completed chart candles
+- Displacement minimum body: 1.5 times average body
+- Displacement minimum range: 1.0 ATR using ATR 14
+- Displacement minimum body share: 60%
+- Displacement follow-through window: 2 chart bars
+- Displacement active context window: 20 chart bars
 
 Structure heuristic:
 
@@ -61,7 +68,7 @@ This is a POI candidate, not a valid Entry FVG. Displacement and complete setup-
 
 ## Compact Dashboard
 
-The dashboard uses nine rows to reduce chart obstruction. Its text size defaults to `Small` and can be changed under Display to `Tiny`, `Small`, or `Normal`.
+The dashboard uses ten rows to reduce chart obstruction. Its text size defaults to `Small` and can be changed under Display to `Tiny`, `Small`, or `Normal`.
 
 - HTF: grouped Primary and Secondary states
 - Bias: Combined Bias and Confidence
@@ -71,6 +78,7 @@ The dashboard uses nine rows to reduce chart obstruction. Its text size defaults
 - Liquidity: confirmed PDH/PDL sweep state
 - Structure: active BOS, CHOCH, MSS, or WAIT
 - CISD: active direction with Weak, Medium, Strong, or WAIT quality
+- Displacement: Watch candidate, confirmed Medium/Strong direction, conflict, or WAIT
 
 POI and Status rows remain neutral gray while price is `AWAY`. They receive active colors only when price is `TOUCH` or `IN ZONE`. Bias and Context colors remain directional because they describe market context rather than POI interaction.
 
@@ -93,6 +101,7 @@ The first Liquidity module uses the confirmed Previous Day High (`PDH`) and Prev
 - The optional HTF Bias background remains the only full-chart visual.
 - Structure and CISD remain in the Dashboard and Data Window only.
 - No Structure or CISD lines or labels are drawn over the price chart.
+- Displacement remains in the Dashboard and Data Window without lines, boxes, or labels.
 - Removing chart drawings changes presentation only. Detection and status logic remain unchanged.
 
 Interpretation remains manual:
@@ -141,7 +150,26 @@ The first CISD module runs on the current chart timeframe:
 - Exact armed candidate and confirmed CISD values remain available in the Data Window.
 - No CISD lines or labels are drawn over the price chart.
 
-CISD remains context only. Displacement, follow-through, risk, and Entry readiness are not automated.
+CISD remains context only. Displacement is evaluated by a separate module; risk and Entry readiness are not automated.
+
+## Displacement Baseline
+
+The first Displacement module runs on the current chart timeframe:
+
+- The expansion candle must be confirmed and directional.
+- Its body must be at least 1.5 times the average body of the prior 20 completed chart candles by default.
+- Its range must be at least 1.0 ATR using the prior completed ATR baseline.
+- Its body must occupy at least 60% of the candle range to reduce isolated-wick candidates.
+- Direction must match combined HTF Bias, active Structure, and valid CISD.
+- The expansion candle must close beyond the latest Structure break level.
+- The Dashboard shows `WATCH` while waiting up to two confirmed chart bars for a close beyond the expansion candle close.
+- A candidate expires after that window or invalidates when price closes back through its Structure level.
+- Confirmed displacement is Medium by default and Strong when expansion is materially larger while CISD is Strong.
+- The confirmed state remains active for 20 chart bars by default.
+- Exact direction, quality, Structure level, body multiple, range/ATR multiple, body share, and candidate state remain available in the Data Window.
+- No Displacement line, box, or label is drawn over the price chart.
+
+Displacement remains decision-support context. It does not generate a Buy/Sell signal, grade, alert, or automatic Entry.
 
 ## Non-Repainting Baseline
 
@@ -169,8 +197,13 @@ Compile status:
 - Returned the chart to its original 15M timeframe after testing.
 - The v0.5.3 Dashboard-only presentation compiled successfully in TradingView.
 - Confirmed the nine-row Dashboard renders without Trading OS CISD or Structure drawings on XAUUSD 15M.
+- The v0.6.0 Displacement baseline compiled successfully in TradingView.
+- Confirmed the updated indicator and Displacement settings load without a runtime error on XAUUSD at 5M, 15M, 1H, and 4H.
+- Returned the chart to its original 15M timeframe.
+- Saved the private TradingView script as `Trading OS HTF Context v0.6.0` without publishing.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
+- Manual Displacement candidate and follow-through comparison remains pending.
 
 1. Open Pine Editor in TradingView.
 2. Paste the contents of `TradingOS.pine`.
@@ -185,7 +218,9 @@ Compile status:
 11. Compare Bullish and Bearish CISD with manually marked delivery changes.
 12. Confirm CISD recalculates from the current chart after every timeframe change.
 13. Confirm Trading OS adds no CISD or Structure drawing to the price chart.
-14. Record disagreements before changing the Structure, CISD, FVG, or Liquidity rules.
+14. Compare Watch, Medium, and Strong Displacement states with manually marked expansion and follow-through.
+15. Confirm Trading OS adds no Displacement drawing to the price chart.
+16. Record disagreements before changing the Structure, CISD, Displacement, FVG, or Liquidity rules.
 
 ## Current Limits
 
@@ -194,8 +229,8 @@ Compile status:
 - Liquidity currently supports PDH and PDL only.
 - No Asia High/Low, Equal High/Low, or Internal/External Liquidity.
 - Structure is a baseline without automated setup type, POI proximity, or a complete setup window.
-- CISD is a baseline without displacement or follow-through confirmation.
-- No displacement module.
+- CISD and Displacement remain separate conservative baselines without a complete setup-window state machine.
+- Displacement has not been calibrated against a manual sample.
 - No Entry FVG confirmation or setup-window validation.
 - No Entry grade or alert.
 - Premium/discount and displacement are not yet included in HTF confidence.

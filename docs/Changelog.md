@@ -2,6 +2,30 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.6.0-alpha - 2026-07-27
+
+### Added
+
+- Added confirmed current-chart candle body and range expansion checks.
+- Added configurable average-body, ATR, body-share, follow-through, and active-context settings.
+- Added directional alignment with combined HTF Bias, active Structure, and valid CISD.
+- Added a Watch candidate that requires a later confirmed close beyond the expansion candle close.
+- Added Medium and Strong Displacement quality.
+- Added a Displacement row to the Dashboard and detailed evidence to the Data Window.
+
+### Important
+
+- Displacement remains decision-support context and does not generate a Buy/Sell signal, grade, or alert.
+- No Displacement line, box, or label is drawn over the price chart.
+- Manual comparison and calibration remain required.
+
+### Validated
+
+- Compiled Pine v0.6.0-alpha successfully in TradingView Pine Editor.
+- Confirmed the Displacement settings and updated indicator load without a runtime error on XAUUSD at 5M, 15M, 1H, and 4H.
+- Returned the chart to its original 15M timeframe.
+- Saved the private TradingView script as `Trading OS HTF Context v0.6.0` without publishing.
+
 ## Pine v0.5.3-alpha - 2026-07-27
 
 ### Changed

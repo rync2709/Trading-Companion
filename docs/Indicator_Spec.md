@@ -293,25 +293,52 @@ Current limitation:
 
 ## Module 7 - Displacement
 
+Implementation status: `Pine v0.6.0-alpha - current-chart expansion and follow-through baseline`
+
 Input:
 
 - Candle body size
 - Candle range
-- ATR or average range
-- Close relative to structure
-- Follow-through candles
+- Average body size from completed chart candles
+- ATR from completed chart candles
+- Body share of the candle range
+- Active HTF, Structure, and valid CISD context
+- Close relative to the latest Structure break level
+- Configurable follow-through window
 
 Process:
 
-- Measure whether movement is stronger than recent average.
-- Check whether displacement closes beyond relevant structure.
-- Reject isolated wick or news-spike behavior when no follow-through exists.
+- Run automatically on the current chart timeframe.
+- Require a confirmed directional candle body to exceed the configured average-body multiple.
+- Require the candle range to exceed the configured ATR multiple.
+- Require the candle body to occupy the configured minimum share of the range.
+- Require direction to match combined HTF Bias, active Structure, and valid CISD.
+- Require the expansion candle to close beyond the latest Structure break level.
+- Keep the expansion as a Watch candidate until a later confirmed candle closes beyond the expansion close.
+- Expire or invalidate the candidate when follow-through does not occur inside the configured window or price closes back through the Structure level.
+- Classify confirmed displacement as Medium by default.
+- Classify it as Strong only when expansion exceeds the stronger body, range, and body-share thresholds while CISD quality is Strong.
+- Keep all exact values in the Data Window without drawing lines, boxes, or labels.
 
 Output:
 
+- displacement_event_pulse: BULLISH, BEARISH, or NONE
 - displacement_valid: true or false
 - displacement_direction: BULLISH, BEARISH, or NEUTRAL
-- displacement_quality: weak, medium, or strong
+- displacement_quality: watch/weak, medium, strong, or none
+- displacement_structure_level
+- displacement_body_multiple
+- displacement_range_atr_multiple
+- displacement_body_share
+- displacement_candidate_direction
+
+Current limitation:
+
+- The baseline uses the current chart timeframe and has no independent execution-timeframe setting.
+- It requires an active aligned Structure event and valid CISD, so valid displacement is intentionally conservative.
+- Follow-through uses a confirmed close beyond the expansion candle close; it does not classify news events directly.
+- Manual comparison against marked displacement examples remains required.
+- Displacement is decision-support context, not an Entry Signal.
 
 ## Module 8 - FVG / Entry Zone
 
@@ -414,4 +441,4 @@ Output:
 
 ## Phase 0 Decision
 
-No automation is implemented yet. This document defines the target behavior for future Pine Script and web-app refactors.
+The web app and selected Pine modules now implement parts of this specification. Unimplemented sections remain target behavior and require manual validation before release readiness.

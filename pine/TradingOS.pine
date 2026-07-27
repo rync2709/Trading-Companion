@@ -5,9 +5,10 @@ indicator(
     overlay = true
 )
 
-// Trading OS Pine Track v0.5.3-alpha
+// Trading OS Pine Track v0.6.0-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG candidates, daily liquidity,
-// confirmed execution-chart BOS/CHOCH/MSS, and strict CISD context.
+// confirmed execution-chart BOS/CHOCH/MSS, strict CISD context, and
+// execution-chart displacement with follow-through confirmation.
 // This indicator is decision support. It does not generate Buy/Sell signals.
 
 string primaryTimeframe = input.timeframe("240", "Primary HTF", group = "HTF Bias")
@@ -83,6 +84,62 @@ int cisdContextBars = input.int(
     maxval = 200,
     tooltip = "Number of chart bars that the latest confirmed CISD remains active.",
     group = "CISD"
+)
+int displacementBodyLength = input.int(
+    20,
+    "Average body length",
+    minval = 2,
+    maxval = 200,
+    tooltip = "Number of completed chart candles used as the body-size baseline.",
+    group = "Displacement"
+)
+int displacementAtrLength = input.int(
+    14,
+    "ATR length",
+    minval = 1,
+    maxval = 200,
+    group = "Displacement"
+)
+float displacementMinimumBodyMultiple = input.float(
+    1.5,
+    "Minimum body / average body",
+    minval = 0.1,
+    maxval = 10.0,
+    step = 0.1,
+    group = "Displacement"
+)
+float displacementMinimumRangeAtr = input.float(
+    1.0,
+    "Minimum range / ATR",
+    minval = 0.1,
+    maxval = 10.0,
+    step = 0.1,
+    group = "Displacement"
+)
+float displacementMinimumBodyShare = input.float(
+    0.6,
+    "Minimum body share of range",
+    minval = 0.1,
+    maxval = 1.0,
+    step = 0.05,
+    tooltip = "Rejects expansion candles dominated by wicks.",
+    group = "Displacement"
+)
+int displacementFollowThroughBars = input.int(
+    2,
+    "Follow-through bars",
+    minval = 1,
+    maxval = 10,
+    tooltip = "Maximum confirmed chart bars allowed to close beyond the expansion candle close.",
+    group = "Displacement"
+)
+int displacementContextBars = input.int(
+    20,
+    "Displacement context bars",
+    minval = 1,
+    maxval = 200,
+    tooltip = "Number of chart bars that the latest confirmed displacement remains active.",
+    group = "Displacement"
 )
 bool showBiasBackground = input.bool(
     true,
@@ -422,6 +479,96 @@ f_cisd_state(
 
     [eventPulse, latestDirection, latestLevel, latestEventBar, latestLegCount, latestLegRange, bullishCandidateActive ? bullishCandidateLevel : na, bearishCandidateActive ? bearishCandidateLevel : na]
 
+f_displacement_state(
+    bool bullishExpansion,
+    bool bearishExpansion,
+    bool strongExpansion,
+    bool bullishContext,
+    bool bearishContext,
+    float structureLevel,
+    float bodyMultiple,
+    float rangeAtrMultiple,
+    float bodyShare,
+    int cisdQuality,
+    int followThroughBars
+) =>
+    var int candidateDirection = 0
+    var int candidateBar = na
+    var float candidateClose = na
+    var float candidateStructureLevel = na
+    var float candidateBodyMultiple = na
+    var float candidateRangeAtrMultiple = na
+    var float candidateBodyShare = na
+    var int candidateCisdQuality = 0
+    var bool candidateStrong = false
+    var int latestDirection = 0
+    var int latestQuality = 0
+    var int latestEventBar = na
+    var int latestExpansionBar = na
+    var float latestStructureLevel = na
+    var float latestBodyMultiple = na
+    var float latestRangeAtrMultiple = na
+    var float latestBodyShare = na
+    int eventPulse = 0
+
+    if candidateDirection != 0
+        int candidateAge = bar_index - candidateBar
+        bool candidateInvalidated = (
+            candidateDirection == 1 ?
+            close < candidateStructureLevel :
+            close > candidateStructureLevel
+        )
+        bool candidateFollowedThrough = (
+            candidateAge > 0 and
+            candidateAge <= followThroughBars and
+            (
+                candidateDirection == 1 ?
+                close > candidateClose :
+                close < candidateClose
+            )
+        )
+
+        if barstate.isconfirmed and candidateFollowedThrough and not candidateInvalidated
+            eventPulse := candidateDirection
+            latestDirection := candidateDirection
+            latestQuality := candidateStrong and candidateCisdQuality == 3 ? 3 : 2
+            latestEventBar := bar_index
+            latestExpansionBar := candidateBar
+            latestStructureLevel := candidateStructureLevel
+            latestBodyMultiple := candidateBodyMultiple
+            latestRangeAtrMultiple := candidateRangeAtrMultiple
+            latestBodyShare := candidateBodyShare
+            candidateDirection := 0
+        else if barstate.isconfirmed and (candidateInvalidated or candidateAge > followThroughBars)
+            candidateDirection := 0
+
+    if eventPulse == 0 and candidateDirection == 0 and barstate.isconfirmed
+        bool bullishCandidate = (
+            bullishExpansion and
+            bullishContext and
+            not na(structureLevel) and
+            close > structureLevel
+        )
+        bool bearishCandidate = (
+            bearishExpansion and
+            bearishContext and
+            not na(structureLevel) and
+            close < structureLevel
+        )
+
+        if bullishCandidate or bearishCandidate
+            candidateDirection := bullishCandidate ? 1 : -1
+            candidateBar := bar_index
+            candidateClose := close
+            candidateStructureLevel := structureLevel
+            candidateBodyMultiple := bodyMultiple
+            candidateRangeAtrMultiple := rangeAtrMultiple
+            candidateBodyShare := bodyShare
+            candidateCisdQuality := cisdQuality
+            candidateStrong := strongExpansion
+
+    [eventPulse, latestDirection, latestQuality, latestEventBar, latestExpansionBar, latestStructureLevel, latestBodyMultiple, latestRangeAtrMultiple, latestBodyShare, candidateDirection, candidateBar]
+
 f_timeframe_label(string value) =>
     value == "240" ? "4H" :
      value == "60" ? "1H" :
@@ -703,6 +850,110 @@ color cisdStateColor = (
     warningColor
 )
 
+float displacementBody = math.abs(close - open)
+float displacementRange = high - low
+float displacementAverageBody = ta.sma(displacementBody, displacementBodyLength)[1]
+float displacementAtr = ta.atr(displacementAtrLength)[1]
+float displacementBodyMultiple = (
+    not na(displacementAverageBody) and displacementAverageBody > 0.0 ?
+    displacementBody / displacementAverageBody :
+    0.0
+)
+float displacementRangeAtr = (
+    not na(displacementAtr) and displacementAtr > 0.0 ?
+    displacementRange / displacementAtr :
+    0.0
+)
+float displacementBodyShare = (
+    displacementRange > 0.0 ?
+    displacementBody / displacementRange :
+    0.0
+)
+bool bullishDisplacementExpansion = (
+    barstate.isconfirmed and
+    close > open and
+    displacementBodyMultiple >= displacementMinimumBodyMultiple and
+    displacementRangeAtr >= displacementMinimumRangeAtr and
+    displacementBodyShare >= displacementMinimumBodyShare
+)
+bool bearishDisplacementExpansion = (
+    barstate.isconfirmed and
+    close < open and
+    displacementBodyMultiple >= displacementMinimumBodyMultiple and
+    displacementRangeAtr >= displacementMinimumRangeAtr and
+    displacementBodyShare >= displacementMinimumBodyShare
+)
+bool strongDisplacementExpansion = (
+    displacementBodyMultiple >= displacementMinimumBodyMultiple * 1.5 and
+    displacementRangeAtr >= displacementMinimumRangeAtr * 1.25 and
+    displacementBodyShare >= math.max(displacementMinimumBodyShare, 0.7)
+)
+bool bullishDisplacementContext = (
+    combinedState == 1 and
+    structureEventActive and
+    latestStructureDirection == 1 and
+    cisdValid and
+    latestCisdDirection == 1
+)
+bool bearishDisplacementContext = (
+    combinedState == -1 and
+    structureEventActive and
+    latestStructureDirection == -1 and
+    cisdValid and
+    latestCisdDirection == -1
+)
+
+[displacementEventPulse, latestDisplacementDirection, latestDisplacementQuality, latestDisplacementEventBar, latestDisplacementExpansionBar, latestDisplacementStructureLevel, latestDisplacementBodyMultiple, latestDisplacementRangeAtr, latestDisplacementBodyShare, displacementCandidateDirection, displacementCandidateBar] = f_displacement_state(
+    bullishDisplacementExpansion,
+    bearishDisplacementExpansion,
+    strongDisplacementExpansion,
+    bullishDisplacementContext,
+    bearishDisplacementContext,
+    latestStructureLevel,
+    displacementBodyMultiple,
+    displacementRangeAtr,
+    displacementBodyShare,
+    cisdQuality,
+    displacementFollowThroughBars
+)
+
+bool displacementEventActive = (
+    latestDisplacementDirection != 0 and
+    not na(latestDisplacementEventBar) and
+    bar_index - latestDisplacementEventBar <= displacementContextBars
+)
+bool displacementCandidateActive = (
+    displacementCandidateDirection != 0 and
+    not na(displacementCandidateBar) and
+    bar_index - displacementCandidateBar <= displacementFollowThroughBars
+)
+bool displacementAligned = (
+    displacementEventActive and
+    combinedState != 0 and
+    latestDisplacementDirection == combinedState
+)
+bool displacementValid = (
+    displacementAligned and
+    latestDisplacementQuality >= 2
+)
+string displacementState = (
+    displacementEventActive ?
+    (
+        displacementAligned ?
+        f_state_short(latestDisplacementDirection) + " · " +
+        f_quality_text(latestDisplacementQuality) :
+        f_state_short(latestDisplacementDirection) + " · CONFLICT"
+    ) :
+    displacementCandidateActive ?
+    f_state_short(displacementCandidateDirection) + " · WATCH" :
+    "WAIT"
+)
+color displacementStateColor = (
+    displacementValid ? f_state_color(latestDisplacementDirection) :
+    displacementCandidateActive or displacementEventActive ? warningColor :
+    neutralColor
+)
+
 string liquidityState = (
     pdhSweptToday and pdlSweptToday ? "PDH + PDL SWEPT" :
     pdhSweptToday ? "PDH SWEPT" :
@@ -863,11 +1114,61 @@ plot(
     title = "Armed bearish CISD level",
     display = display.data_window
 )
+plot(
+    displacementEventPulse,
+    title = "Displacement event pulse",
+    display = display.data_window
+)
+plot(
+    displacementEventActive ? latestDisplacementDirection : 0,
+    title = "Active displacement direction",
+    display = display.data_window
+)
+plot(
+    displacementEventActive ? latestDisplacementQuality : 0,
+    title = "Active displacement quality",
+    display = display.data_window
+)
+plot(
+    displacementValid ? 1 : 0,
+    title = "Active displacement valid",
+    display = display.data_window
+)
+plot(
+    displacementEventActive ? latestDisplacementStructureLevel : na,
+    title = "Active displacement structure level",
+    display = display.data_window
+)
+plot(
+    displacementEventActive ? latestDisplacementBodyMultiple : na,
+    title = "Active displacement body / average body",
+    display = display.data_window
+)
+plot(
+    displacementEventActive ? latestDisplacementRangeAtr : na,
+    title = "Active displacement range / ATR",
+    display = display.data_window
+)
+plot(
+    displacementEventActive ? latestDisplacementBodyShare : na,
+    title = "Active displacement body share",
+    display = display.data_window
+)
+plot(
+    displacementCandidateActive ? displacementCandidateDirection : 0,
+    title = "Displacement candidate direction",
+    display = display.data_window
+)
+plot(
+    displacementEventActive ? latestDisplacementExpansionBar : na,
+    title = "Active displacement expansion bar",
+    display = display.data_window
+)
 
 var table biasPanel = table.new(
     position.top_right,
     2,
-    9,
+    10,
     frame_color = panelBorderColor,
     frame_width = 1,
     border_color = panelBorderColor,
@@ -882,7 +1183,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.5.3",
+        "TRADING OS · HTF v0.6.0",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,
@@ -1061,5 +1362,26 @@ if barstate.islast
             color.new(cisdStateColor, 86) :
             panelColor,
         text_color = cisdStateColor,
+        text_size = dashboardTextSize
+    )
+    table.cell(
+        biasPanel,
+        0,
+        9,
+        "Displacement",
+        bgcolor = panelColor,
+        text_color = mutedTextColor,
+        text_halign = text.align_left,
+        text_size = dashboardTextSize
+    )
+    table.cell(
+        biasPanel,
+        1,
+        9,
+        displacementState,
+        bgcolor = displacementCandidateActive or displacementEventActive ?
+            color.new(displacementStateColor, 86) :
+            panelColor,
+        text_color = displacementStateColor,
         text_size = dashboardTextSize
     )

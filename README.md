@@ -12,7 +12,7 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Phase: Validation Sprint after Phase 11
 - Validation target: 20 real-use outcomes with at least 80% R and review coverage
 - Version: v0.11.1
-- Pine indicator: v0.5.3-alpha - dashboard-only HTF, liquidity, structure, and CISD context
+- Pine indicator: v0.6.0-alpha - dashboard-only HTF, liquidity, structure, CISD, and Displacement context
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -249,7 +249,16 @@ The current presentation returns to Dashboard-only:
 - Removed all CISD candidate and confirmed lines
 - Kept Structure and CISD detection unchanged
 - Kept exact values in the Data Window
-- Trading OS does not draw FVG, PDH/PDL, Structure, or CISD objects over the price chart
+- Trading OS does not draw FVG, PDH/PDL, Structure, CISD, or Displacement objects over the price chart
+
+The sixth Pine milestone adds:
+
+- Current-chart candle body and range expansion relative to completed average body and ATR baselines
+- Wick filtering through a configurable minimum body share
+- Directional alignment with HTF Bias, active Structure, and valid CISD
+- A Watch candidate followed by confirmed close-based follow-through
+- Medium and Strong Displacement quality in a ten-row Dashboard
+- Exact Displacement evidence in the Data Window without chart drawings, Buy/Sell signals, or alerts
 
 The Pine source and TradingView test notes are stored under `pine/`.
 

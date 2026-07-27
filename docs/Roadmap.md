@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.5.3-alpha
+Version: v0.11.1 / Pine v0.6.0-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -660,10 +660,13 @@ First milestone:
 - [x] Confirm 5M and 4H each use their own CISD state without cross-timeframe projection.
 - [x] Remove CISD lines and return Trading OS to Dashboard-only presentation.
 - [x] Confirm Structure and CISD remain available in Dashboard and Data Window.
+- [x] Add a confirmed current-chart Displacement baseline.
+- [x] Add Displacement Watch, Medium, and Strong state to the Dashboard and Data Window without chart drawings.
 - [ ] Compare the output against manually marked 4H/1H structure.
 - [ ] Compare FVG candidates and status transitions against manual markup.
 - [ ] Compare execution BOS/CHOCH/MSS events against manual markup.
 - [ ] Compare Bullish and Bearish CISD events against manual markup.
+- [ ] Compare Displacement candidates and confirmed follow-through against manual markup.
 - [ ] Record disagreement examples before calibrating the heuristic.
 
 Planned modules:
@@ -675,7 +678,7 @@ Planned modules:
 - [ ] Liquidity - Asia, Equal High/Low, and Internal/External expansion
 - [x] Structure: MSS, CHOCH, BOS baseline
 - [x] CISD baseline
-- [ ] Displacement
+- [x] Displacement baseline
 - [ ] FVG / Entry Zone
 - [ ] Score Engine
 - [ ] Alert System
@@ -726,4 +729,5 @@ Expected outputs:
 | Pine v0.5.1-alpha | Timeframe-scoped armed and confirmed CISD levels |
 | Pine v0.5.2-alpha | Automatic current-chart CISD timeframe behavior |
 | Pine v0.5.3-alpha | Dashboard-only Structure and CISD presentation |
+| Pine v0.6.0-alpha | Current-chart Displacement and follow-through baseline |
 | v1.0.0 | Trading OS MVP |
