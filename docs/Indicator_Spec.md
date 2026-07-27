@@ -1,7 +1,7 @@
 # Trading OS Indicator Specification
 
-Version: v0.2.2
-Phase: Pine Track - Modules 1, 2, and Liquidity baseline
+Version: v0.2.3
+Phase: Pine Track - Modules 1, 2, 4, and Structure baseline
 
 ## Purpose
 
@@ -199,24 +199,44 @@ Current limitation:
 
 ## Module 5 - Structure
 
+Implementation status: `Pine v0.4.0-alpha - execution-chart BOS/CHOCH/MSS baseline`
+
 Input:
 
-- LTF swing structure
-- Prior highs and lows
-- Setup type
-- Current close
+- Confirmed execution-chart swing highs and lows
+- Current and previous closes
+- Prior execution structure direction
+- Recent confirmed PDH or PDL sweep
+- Configurable swing length and context window
 
 Process:
 
-- For reversal, detect MSS or CHOCH toward trade direction.
-- For continuation, detect BOS toward trade direction.
-- Reject structure signals outside the setup window.
+- Confirm a swing only after the configured number of bars on both sides.
+- Require a confirmed candle close through an unbroken swing level.
+- Classify a break in the current direction as BOS.
+- Classify the first break against the prior direction as CHOCH.
+- Upgrade CHOCH to MSS when the matching confirmed PDH/PDL sweep occurred within the context window.
+- Keep the latest event active in the Dashboard for the configured number of chart bars.
+- Compare the event direction with combined HTF Bias for display context only.
 
 Output:
 
-- structure_event: MSS, CHOCH, BOS, or NONE
+- structure_event_pulse: MSS, CHOCH, BOS, or NONE
+- active_structure_event: MSS, CHOCH, BOS, or NONE
 - structure_direction: BULLISH, BEARISH, or NEUTRAL
-- structure_valid: true or false
+- execution_structure_trend: BULLISH, BEARISH, or NEUTRAL
+- structure_break_level
+- latest_confirmed_swing_high
+- latest_confirmed_swing_low
+- structure_aligned_with_htf: true or false
+
+Current limitation:
+
+- The baseline runs on the current chart timeframe and should be used on the intended execution chart.
+- MSS context currently recognizes PDH/PDL sweeps only.
+- Setup type, POI proximity, and a complete setup-window state machine are not automated.
+- A Structure event is decision-support context, not an Entry Signal.
+- Manual comparison against marked BOS/CHOCH/MSS examples remains required.
 
 ## Module 6 - CISD
 

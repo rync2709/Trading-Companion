@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.3.2-alpha
+Version: v0.11.1 / Pine v0.4.0-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -646,8 +646,12 @@ First milestone:
 - [x] Compile and scroll/zoom test the viewport-pinned display in TradingView.
 - [x] Remove the FVG box and PDH/PDL chart lines after mobile usability review.
 - [x] Compile and visually confirm the dashboard-only presentation in TradingView.
+- [x] Add a confirmed execution-chart BOS/CHOCH/MSS baseline.
+- [x] Add Structure state to the Dashboard and Data Window without chart drawings.
+- [x] Compile and smoke-test Structure on XAUUSD at 5M, 15M, 1H, and 4H.
 - [ ] Compare the output against manually marked 4H/1H structure.
 - [ ] Compare FVG candidates and status transitions against manual markup.
+- [ ] Compare execution BOS/CHOCH/MSS events against manual markup.
 - [ ] Record disagreement examples before calibrating the heuristic.
 
 Planned modules:
@@ -657,7 +661,7 @@ Planned modules:
 - [ ] HTF POI - OB, Breaker, Liquidity, and Premium/Discount
 - [x] Liquidity - Previous Day High/Low baseline
 - [ ] Liquidity - Asia, Equal High/Low, and Internal/External expansion
-- [ ] Structure: MSS, CHOCH, BOS
+- [x] Structure: MSS, CHOCH, BOS baseline
 - [ ] CISD
 - [ ] Displacement
 - [ ] FVG / Entry Zone
@@ -705,4 +709,5 @@ Expected outputs:
 | Pine v0.3.0-alpha | Previous Day High/Low liquidity and sweep baseline |
 | Pine v0.3.1-alpha | Viewport-pinned current FVG and PDH/PDL display |
 | Pine v0.3.2-alpha | Dashboard-only FVG and liquidity context without chart drawings |
+| Pine v0.4.0-alpha | Confirmed execution-chart BOS/CHOCH/MSS baseline |
 | v1.0.0 | Trading OS MVP |

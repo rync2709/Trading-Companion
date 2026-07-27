@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.3.2-alpha
+Version: v0.4.0-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -11,12 +11,15 @@ The Pine track automates selected Trading OS context checks without replacing tr
 - Module 1: HTF Bias baseline
 - Module 2 baseline: aligned HTF FVG candidate
 - Module 4 baseline: Previous Day High/Low liquidity
+- Module 5 baseline: execution-chart BOS/CHOCH/MSS
 
 Defaults:
 
 - Primary HTF: 4H
 - Secondary HTF: 1H
 - Confirmed swing length: 3
+- Execution swing length: 3
+- Structure context window: 20 chart bars
 
 Structure heuristic:
 
@@ -49,18 +52,19 @@ Selection rules:
 - Neutral or conflicting Bias produces no selected candidate.
 - Only the latest Bullish and Bearish candidate on each HTF is tracked.
 
-This is a POI candidate, not a valid Entry FVG. Displacement, Structure, CISD, and setup-window confirmation are not implemented yet.
+This is a POI candidate, not a valid Entry FVG. Displacement, CISD, and complete setup-window confirmation are not implemented yet.
 
 ## Compact Dashboard
 
-The dashboard uses seven rows to reduce chart obstruction. Its text size defaults to `Small` and can be changed under Display to `Tiny`, `Small`, or `Normal`.
+The dashboard uses eight rows to reduce chart obstruction. Its text size defaults to `Small` and can be changed under Display to `Tiny`, `Small`, or `Normal`.
 
 - HTF: grouped Primary and Secondary states
 - Bias: Combined Bias and Confidence
 - Context: HTF alignment
 - POI: selected timeframe, direction, and FVG type
 - Status: FVG status and current price location
-- Model: Pine version
+- Liquidity: confirmed PDH/PDL sweep state
+- Structure: active BOS, CHOCH, MSS, or WAIT
 
 POI and Status rows remain neutral gray while price is `AWAY`. They receive active colors only when price is `TOUCH` or `IN ZONE`. Bias and Context colors remain directional because they describe market context rather than POI interaction.
 
@@ -89,6 +93,23 @@ Interpretation remains manual:
 - PDL sweep is a potential bullish liquidity event.
 - A sweep is not an Entry Signal and still requires POI, Structure, CISD, Displacement, and risk confirmation.
 
+## Execution Structure Baseline
+
+The first Structure module runs on the current chart timeframe:
+
+- Swing levels use symmetric confirmed pivots with three bars on each side by default.
+- A break requires a confirmed candle close through an unbroken swing level.
+- BOS means the break continues the current execution structure direction.
+- CHOCH means the break is the first confirmed change against the prior structure direction.
+- MSS means the CHOCH follows the matching confirmed liquidity sweep within 20 chart bars by default.
+- Bullish MSS requires a recent PDL sweep; Bearish MSS requires a recent PDH sweep.
+- The active Structure event expires from the Dashboard after the configured context window.
+- Direction matching the combined HTF Bias uses directional color; conflict uses the warning color.
+- Exact event codes, direction, trend, break level, and swing values remain available in the Data Window.
+- No structure lines or labels are drawn over the price chart.
+
+This baseline does not yet know Reversal versus Continuation setup type, full POI proximity, or a complete setup-window state.
+
 ## Non-Repainting Baseline
 
 The script requests the previous completed HTF state. Confirmed pivots also require bars on both sides, so the output intentionally lags live price. This tradeoff avoids treating a still-forming HTF structure as confirmed.
@@ -103,6 +124,8 @@ Compile status:
 - The v0.3.0 PDH/PDL levels and Liquidity dashboard state rendered without a runtime error at 5M, 15M, 1H, and 4H.
 - The v0.3.1 pinned current-context display compiled successfully and passed horizontal scroll and zoom checks on XAUUSD 15M.
 - The v0.3.2 dashboard-only chart presentation compiled successfully and visually confirmed that Trading OS draws no FVG box or PDH/PDL chart lines on XAUUSD 15M.
+- The v0.4.0 execution Structure baseline compiled successfully and passed render smoke tests on XAUUSD at 5M, 15M, 1H, and 4H.
+- The v0.4.0 eight-row Dashboard displayed an active Structure state on XAUUSD 15M without adding chart drawings.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 
@@ -115,14 +138,17 @@ Compile status:
 7. Confirm Fresh, Partial, and Filled transitions on completed HTF candles.
 8. Compare PDH and PDL with the previous completed Daily candle.
 9. Confirm sweep state only after a candle crosses a level and closes back inside.
-10. Record disagreements before changing the structure, FVG, or Liquidity rules.
+10. Compare BOS, CHOCH, and MSS with manually marked execution structure.
+11. Record disagreements before changing the structure, FVG, or Liquidity rules.
 
 ## Current Limits
 
 - HTF POI currently supports FVG candidates only.
 - No Order Block, Breaker, mitigation block, or liquidity POI.
 - Liquidity currently supports PDH and PDL only.
-- No Asia High/Low, Equal High/Low, Internal/External Liquidity, MSS/CHOCH/BOS, CISD, or displacement module.
+- No Asia High/Low, Equal High/Low, or Internal/External Liquidity.
+- Structure is a baseline without automated setup type, POI proximity, or a complete setup window.
+- No CISD or displacement module.
 - No Entry FVG confirmation or setup-window validation.
 - No Entry grade or alert.
 - Premium/discount and displacement are not yet included in HTF confidence.

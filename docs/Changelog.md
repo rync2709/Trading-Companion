@@ -2,6 +2,31 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.4.0-alpha - 2026-07-27
+
+### Added
+
+- Added configurable confirmed swing detection on the current execution chart.
+- Added close-confirmed BOS when price breaks structure in the current direction.
+- Added CHOCH when price closes through structure against the prior direction.
+- Added MSS when a CHOCH follows the matching confirmed PDH/PDL sweep within the configured context window.
+- Added active Structure state to the Dashboard.
+- Added structure event, direction, trend, break level, and confirmed swing values to the Data Window.
+
+### Important
+
+- Structure uses confirmed pivots and confirmed candle closes, so signals intentionally lag live price.
+- The baseline does not automate setup type, POI proximity, or the complete setup window.
+- Structure remains decision-support context and does not produce Buy/Sell signals or alerts.
+- No structure lines or labels are drawn on the price chart.
+
+### Validated
+
+- Compiled Pine v0.4.0-alpha successfully in TradingView Pine Editor.
+- Smoke-tested XAUUSD at 5M, 15M, 1H, and 4H without a runtime error.
+- Confirmed the eight-row Dashboard renders the active Structure state on XAUUSD 15M.
+- Saved the private TradingView script as `Trading OS HTF Context v0.4.0` without publishing.
+
 ## Pine v0.3.2-alpha - 2026-07-27
 
 ### Changed

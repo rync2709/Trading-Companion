@@ -5,8 +5,9 @@ indicator(
     overlay = true
 )
 
-// Trading OS Pine Track v0.3.2-alpha
-// Modules: confirmed 4H/1H Bias, aligned HTF FVG candidates, and daily liquidity.
+// Trading OS Pine Track v0.4.0-alpha
+// Modules: confirmed 4H/1H Bias, aligned HTF FVG candidates, daily liquidity,
+// and confirmed execution-chart BOS/CHOCH/MSS structure events.
 // This indicator is decision support. It does not generate Buy/Sell signals.
 
 string primaryTimeframe = input.timeframe("240", "Primary HTF", group = "HTF Bias")
@@ -18,6 +19,22 @@ int swingLength = input.int(
     maxval = 20,
     tooltip = "A pivot is confirmed after this many bars on both sides.",
     group = "HTF Bias"
+)
+int structureSwingLength = input.int(
+    3,
+    "Execution swing length",
+    minval = 1,
+    maxval = 20,
+    tooltip = "Confirms execution-chart swing levels after this many bars on both sides.",
+    group = "Market Structure"
+)
+int structureContextBars = input.int(
+    20,
+    "Structure context bars",
+    minval = 1,
+    maxval = 200,
+    tooltip = "Maximum chart bars used to connect a liquidity sweep to MSS and keep the latest structure event active in the Dashboard.",
+    group = "Market Structure"
 )
 bool showBiasBackground = input.bool(
     true,
@@ -136,6 +153,68 @@ f_fvg_state() =>
 
 f_fvg_active(int status) =>
     status == 1 or status == 2
+
+f_structure_event_text(int eventCode) =>
+    eventCode == 1 ? "BOS" :
+     eventCode == 2 ? "CHOCH" :
+     eventCode == 3 ? "MSS" :
+     "WAIT"
+
+f_execution_structure(int length, bool recentPdhSweep, bool recentPdlSweep) =>
+    float pivotHigh = ta.pivothigh(high, length, length)
+    float pivotLow = ta.pivotlow(low, length, length)
+    var float latestSwingHigh = na
+    var float latestSwingLow = na
+    var bool latestHighBroken = false
+    var bool latestLowBroken = false
+    var int trendState = 0
+    var int latestEvent = 0
+    var int latestDirection = 0
+    var float latestBreakLevel = na
+    var int latestEventBar = na
+
+    bool bullishBreak = (
+        barstate.isconfirmed and
+        not latestHighBroken and
+        not na(latestSwingHigh) and
+        close > latestSwingHigh and
+        close[1] <= latestSwingHigh
+    )
+    bool bearishBreak = (
+        barstate.isconfirmed and
+        not latestLowBroken and
+        not na(latestSwingLow) and
+        close < latestSwingLow and
+        close[1] >= latestSwingLow
+    )
+    int eventPulse = 0
+
+    if bullishBreak
+        eventPulse := trendState == -1 ? (recentPdlSweep ? 3 : 2) : 1
+        latestEvent := eventPulse
+        latestDirection := 1
+        latestBreakLevel := latestSwingHigh
+        latestEventBar := bar_index
+        trendState := 1
+        latestHighBroken := true
+    else if bearishBreak
+        eventPulse := trendState == 1 ? (recentPdhSweep ? 3 : 2) : 1
+        latestEvent := eventPulse
+        latestDirection := -1
+        latestBreakLevel := latestSwingLow
+        latestEventBar := bar_index
+        trendState := -1
+        latestLowBroken := true
+
+    if not na(pivotHigh)
+        latestSwingHigh := pivotHigh
+        latestHighBroken := false
+
+    if not na(pivotLow)
+        latestSwingLow := pivotLow
+        latestLowBroken := false
+
+    [eventPulse, latestEvent, latestDirection, trendState, latestBreakLevel, latestEventBar, latestSwingHigh, latestSwingLow]
 
 f_timeframe_label(string value) =>
     value == "240" ? "4H" :
@@ -320,6 +399,45 @@ if pdhSweepEvent
 if pdlSweepEvent
     pdlSweptToday := true
 
+int barsSincePdhSweep = ta.barssince(pdhSweepEvent)
+int barsSincePdlSweep = ta.barssince(pdlSweepEvent)
+bool recentPdhSweep = (
+    not na(barsSincePdhSweep) and
+    barsSincePdhSweep <= structureContextBars
+)
+bool recentPdlSweep = (
+    not na(barsSincePdlSweep) and
+    barsSincePdlSweep <= structureContextBars
+)
+
+[structureEventPulse, latestStructureEvent, latestStructureDirection, executionTrendState, latestStructureLevel, latestStructureEventBar, latestExecutionSwingHigh, latestExecutionSwingLow] = f_execution_structure(
+    structureSwingLength,
+    recentPdhSweep,
+    recentPdlSweep
+)
+
+bool structureEventActive = (
+    latestStructureEvent != 0 and
+    not na(latestStructureEventBar) and
+    bar_index - latestStructureEventBar <= structureContextBars
+)
+bool structureAligned = (
+    structureEventActive and
+    combinedState != 0 and
+    latestStructureDirection == combinedState
+)
+string structureState = (
+    structureEventActive ?
+    f_structure_event_text(latestStructureEvent) + " " +
+    f_state_short(latestStructureDirection) :
+    "WAIT"
+)
+color structureStateColor = (
+    not structureEventActive ? neutralColor :
+    structureAligned ? f_state_color(latestStructureDirection) :
+    warningColor
+)
+
 string liquidityState = (
     pdhSweptToday and pdlSweptToday ? "PDH + PDL SWEPT" :
     pdhSweptToday ? "PDH SWEPT" :
@@ -395,11 +513,51 @@ plot(
     title = "Previous Day Low sweep event",
     display = display.data_window
 )
+plot(
+    structureEventPulse,
+    title = "Execution structure event pulse",
+    display = display.data_window
+)
+plot(
+    structureEventActive ? latestStructureEvent : 0,
+    title = "Active execution structure event",
+    display = display.data_window
+)
+plot(
+    structureEventActive ? latestStructureDirection : 0,
+    title = "Active execution structure direction",
+    display = display.data_window
+)
+plot(
+    executionTrendState,
+    title = "Execution structure trend",
+    display = display.data_window
+)
+plot(
+    structureAligned ? 1 : 0,
+    title = "Execution structure aligned with HTF",
+    display = display.data_window
+)
+plot(
+    structureEventActive ? latestStructureLevel : na,
+    title = "Active execution structure break level",
+    display = display.data_window
+)
+plot(
+    latestExecutionSwingHigh,
+    title = "Latest confirmed execution swing high",
+    display = display.data_window
+)
+plot(
+    latestExecutionSwingLow,
+    title = "Latest confirmed execution swing low",
+    display = display.data_window
+)
 
 var table biasPanel = table.new(
     position.top_right,
     2,
-    7,
+    8,
     frame_color = panelBorderColor,
     frame_width = 1,
     border_color = panelBorderColor,
@@ -414,7 +572,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.3.2",
+        "TRADING OS · HTF v0.4.0",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,
@@ -551,5 +709,26 @@ if barstate.islast
             color.new(liquidityStateColor, 86) :
             panelColor,
         text_color = liquidityStateColor,
+        text_size = dashboardTextSize
+    )
+    table.cell(
+        biasPanel,
+        0,
+        7,
+        "Structure",
+        bgcolor = panelColor,
+        text_color = mutedTextColor,
+        text_halign = text.align_left,
+        text_size = dashboardTextSize
+    )
+    table.cell(
+        biasPanel,
+        1,
+        7,
+        structureState,
+        bgcolor = structureEventActive ?
+            color.new(structureStateColor, 86) :
+            panelColor,
+        text_color = structureStateColor,
         text_size = dashboardTextSize
     )
