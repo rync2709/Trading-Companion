@@ -1,0 +1,290 @@
+//@version=6
+indicator(
+    "Trading OS - HTF Bias",
+    shorttitle = "Trading OS Bias",
+    overlay = true
+)
+
+// Trading OS Pine Track v0.1.0-alpha
+// Module 1 only: confirmed 4H/1H swing-structure context.
+// This indicator is decision support. It does not generate Buy/Sell signals.
+
+string primaryTimeframe = input.timeframe("240", "Primary HTF", group = "HTF Bias")
+string secondaryTimeframe = input.timeframe("60", "Secondary HTF", group = "HTF Bias")
+int swingLength = input.int(
+    3,
+    "Confirmed swing length",
+    minval = 1,
+    maxval = 20,
+    tooltip = "A pivot is confirmed after this many bars on both sides.",
+    group = "HTF Bias"
+)
+bool showBiasBackground = input.bool(
+    true,
+    "Show bias background",
+    group = "Display"
+)
+
+color bullishColor = color.rgb(82, 212, 147)
+color bearishColor = color.rgb(239, 105, 118)
+color neutralColor = color.rgb(142, 151, 154)
+color warningColor = color.rgb(237, 189, 91)
+color panelColor = color.rgb(18, 23, 24)
+color panelBorderColor = color.rgb(55, 64, 66)
+color textColor = color.rgb(238, 242, 241)
+color mutedTextColor = color.rgb(161, 170, 172)
+
+f_structure_state(int length) =>
+    float pivotHigh = ta.pivothigh(high, length, length)
+    float pivotLow = ta.pivotlow(low, length, length)
+    var float latestHigh = na
+    var float previousHigh = na
+    var float latestLow = na
+    var float previousLow = na
+
+    if not na(pivotHigh)
+        previousHigh := latestHigh
+        latestHigh := pivotHigh
+
+    if not na(pivotLow)
+        previousLow := latestLow
+        latestLow := pivotLow
+
+    bool hasStructure = (
+        not na(latestHigh) and
+        not na(previousHigh) and
+        not na(latestLow) and
+        not na(previousLow)
+    )
+    bool bullishStructure = (
+        hasStructure and
+        latestHigh > previousHigh and
+        latestLow > previousLow
+    )
+    bool bearishStructure = (
+        hasStructure and
+        latestHigh < previousHigh and
+        latestLow < previousLow
+    )
+
+    bullishStructure ? 1 : bearishStructure ? -1 : 0
+
+f_state_text(int state) =>
+    state == 1 ? "BULLISH" : state == -1 ? "BEARISH" : "NEUTRAL"
+
+f_state_color(int state) =>
+    state == 1 ? bullishColor : state == -1 ? bearishColor : neutralColor
+
+f_timeframe_label(string value) =>
+    value == "240" ? "4H" :
+     value == "60" ? "1H" :
+     value == "15" ? "15M" :
+     value == "5" ? "5M" :
+     value
+
+// A one-bar offset with lookahead_on returns the last completed HTF state.
+// This avoids using a still-forming higher-timeframe bar.
+int primaryState = request.security(
+    syminfo.tickerid,
+    primaryTimeframe,
+    f_structure_state(swingLength)[1],
+    gaps = barmerge.gaps_off,
+    lookahead = barmerge.lookahead_on
+)
+int secondaryState = request.security(
+    syminfo.tickerid,
+    secondaryTimeframe,
+    f_structure_state(swingLength)[1],
+    gaps = barmerge.gaps_off,
+    lookahead = barmerge.lookahead_on
+)
+
+int primarySeconds = timeframe.in_seconds(primaryTimeframe)
+int secondarySeconds = timeframe.in_seconds(secondaryTimeframe)
+bool timeframeOrderValid = primarySeconds > secondarySeconds
+bool conflict = (
+    timeframeOrderValid and
+    primaryState != 0 and
+    secondaryState != 0 and
+    primaryState != secondaryState
+)
+bool aligned = (
+    timeframeOrderValid and
+    primaryState != 0 and
+    primaryState == secondaryState
+)
+bool primaryOnly = (
+    timeframeOrderValid and
+    primaryState != 0 and
+    secondaryState == 0
+)
+
+int combinedState = aligned ? primaryState : primaryOnly ? primaryState : 0
+string confidence = aligned ? "HIGH" : primaryOnly ? "MEDIUM" : "LOW"
+string alignmentState = (
+    not timeframeOrderValid ? "INVALID TF ORDER" :
+    conflict ? "CONFLICT" :
+    aligned ? "ALIGNED" :
+    primaryOnly ? "PRIMARY ONLY" :
+    "WAIT"
+)
+color alignmentColor = (
+    not timeframeOrderValid or conflict ? warningColor :
+    aligned ? bullishColor :
+    primaryOnly ? warningColor :
+    neutralColor
+)
+
+color backgroundColor = (
+    showBiasBackground and timeframeOrderValid and combinedState != 0 ?
+    color.new(f_state_color(combinedState), 92) :
+    na
+)
+bgcolor(backgroundColor, title = "Confirmed HTF bias")
+
+plot(
+    primaryState,
+    title = "Primary HTF structure state",
+    display = display.data_window
+)
+plot(
+    secondaryState,
+    title = "Secondary HTF structure state",
+    display = display.data_window
+)
+plot(
+    combinedState,
+    title = "Combined HTF bias state",
+    display = display.data_window
+)
+plot(
+    conflict ? 1 : 0,
+    title = "HTF conflict",
+    display = display.data_window
+)
+
+var table biasPanel = table.new(
+    position.top_right,
+    2,
+    7,
+    frame_color = panelBorderColor,
+    frame_width = 1,
+    border_color = panelBorderColor,
+    border_width = 1
+)
+
+if barstate.isfirst
+    table.merge_cells(biasPanel, 0, 0, 1, 0)
+
+if barstate.islast
+    table.cell(
+        biasPanel,
+        0,
+        0,
+        "TRADING OS · HTF BIAS",
+        bgcolor = panelColor,
+        text_color = textColor,
+        text_halign = text.align_left
+    )
+    table.cell(
+        biasPanel,
+        0,
+        1,
+        "Primary " + f_timeframe_label(primaryTimeframe),
+        bgcolor = panelColor,
+        text_color = mutedTextColor,
+        text_halign = text.align_left
+    )
+    table.cell(
+        biasPanel,
+        1,
+        1,
+        f_state_text(primaryState),
+        bgcolor = color.new(f_state_color(primaryState), 84),
+        text_color = f_state_color(primaryState)
+    )
+    table.cell(
+        biasPanel,
+        0,
+        2,
+        "Secondary " + f_timeframe_label(secondaryTimeframe),
+        bgcolor = panelColor,
+        text_color = mutedTextColor,
+        text_halign = text.align_left
+    )
+    table.cell(
+        biasPanel,
+        1,
+        2,
+        f_state_text(secondaryState),
+        bgcolor = color.new(f_state_color(secondaryState), 84),
+        text_color = f_state_color(secondaryState)
+    )
+    table.cell(
+        biasPanel,
+        0,
+        3,
+        "Combined bias",
+        bgcolor = panelColor,
+        text_color = mutedTextColor,
+        text_halign = text.align_left
+    )
+    table.cell(
+        biasPanel,
+        1,
+        3,
+        f_state_text(combinedState),
+        bgcolor = color.new(f_state_color(combinedState), 84),
+        text_color = f_state_color(combinedState)
+    )
+    table.cell(
+        biasPanel,
+        0,
+        4,
+        "Confidence",
+        bgcolor = panelColor,
+        text_color = mutedTextColor,
+        text_halign = text.align_left
+    )
+    table.cell(
+        biasPanel,
+        1,
+        4,
+        confidence,
+        bgcolor = panelColor,
+        text_color = confidence == "HIGH" ? bullishColor : warningColor
+    )
+    table.cell(
+        biasPanel,
+        0,
+        5,
+        "Alignment",
+        bgcolor = panelColor,
+        text_color = mutedTextColor,
+        text_halign = text.align_left
+    )
+    table.cell(
+        biasPanel,
+        1,
+        5,
+        alignmentState,
+        bgcolor = color.new(alignmentColor, 86),
+        text_color = alignmentColor
+    )
+    table.cell(
+        biasPanel,
+        0,
+        6,
+        "Model",
+        bgcolor = panelColor,
+        text_color = mutedTextColor,
+        text_halign = text.align_left
+    )
+    table.cell(
+        biasPanel,
+        1,
+        6,
+        "SWING v0.1",
+        bgcolor = panelColor,
+        text_color = mutedTextColor
+    )

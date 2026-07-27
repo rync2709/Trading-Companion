@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1
+Version: v0.11.1 / Pine v0.1.0-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -619,17 +619,31 @@ This structure is a future target. It should not be forced into the current repo
 
 The Pine Script indicator is still important, but it should support the web app instead of replacing it.
 
+Status: In progress.
+
+First milestone:
+
+- [x] Create the Pine project structure.
+- [x] Add a Pine Script v6 indicator baseline.
+- [x] Add confirmed Primary 4H and Secondary 1H swing-structure states.
+- [x] Add conservative alignment, conflict, combined Bias, and confidence logic.
+- [x] Add a fixed HTF Bias table and optional background.
+- [x] Request the previous completed HTF state.
+- [ ] Compile the first file in TradingView Pine Editor.
+- [ ] Compare the output against manually marked 4H/1H structure.
+- [ ] Record disagreement examples before calibrating the heuristic.
+
 Planned modules:
 
-- HTF Bias
-- HTF POI
-- Liquidity
-- Structure: MSS, CHOCH, BOS
-- CISD
-- Displacement
-- FVG / Entry Zone
-- Score Engine
-- Alert System
+- [x] HTF Bias baseline
+- [ ] HTF POI
+- [ ] Liquidity
+- [ ] Structure: MSS, CHOCH, BOS
+- [ ] CISD
+- [ ] Displacement
+- [ ] FVG / Entry Zone
+- [ ] Score Engine
+- [ ] Alert System
 
 Expected outputs:
 
@@ -663,4 +677,5 @@ Expected outputs:
 | v0.10.0 | TradingView evidence workflow and Journal export |
 | v0.11.0 | Personal Playbook Library |
 | v0.11.1 | Real-use Validation Center and v1.0 readiness |
+| Pine v0.1.0-alpha | Confirmed 4H/1H HTF Bias baseline |
 | v1.0.0 | Trading OS MVP |

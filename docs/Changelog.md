@@ -2,6 +2,23 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.1.0-alpha - 2026-07-27
+
+### Added
+
+- Added the Pine Script v6 project baseline under `pine/`.
+- Added the first HTF Bias module using confirmed swing structure.
+- Added separate Primary 4H and Secondary 1H states.
+- Added conservative alignment, conflict, combined Bias, and confidence logic.
+- Added a fixed HTF Bias table and optional chart background.
+- Added Data Window outputs for Primary, Secondary, Combined, and Conflict states.
+- Added Pine setup, test, non-repainting, and limitation notes.
+
+### Important
+
+- The indicator does not generate Buy/Sell signals.
+- The first Pine file still requires compilation and chart validation in TradingView Pine Editor.
+
 ## v0.11.1 - 2026-07-27
 
 ### Added

@@ -1,7 +1,7 @@
 # Trading OS Indicator Specification
 
-Version: v0.1.2
-Phase: 1 - Core Trading App
+Version: v0.1.3
+Phase: Pine Track - Module 1 implementation
 
 ## Purpose
 
@@ -33,6 +33,8 @@ This document converts the Trading OS rulebook into module-level requirements fo
 
 ## Module 1 - HTF Bias
 
+Implementation status: `Pine v0.1.0-alpha`
+
 Input:
 
 - 4H structure
@@ -52,6 +54,32 @@ Output:
 - bias: BULLISH, BEARISH, or NEUTRAL
 - confidence: low, medium, or high
 - conflict: true or false
+
+Initial structure heuristic:
+
+- Confirm swing highs and lows with a configurable symmetric pivot length.
+- Higher High and Higher Low produce BULLISH structure.
+- Lower High and Lower Low produce BEARISH structure.
+- Mixed or incomplete structure produces NEUTRAL.
+- Matching directional 4H and 1H states produce high confidence.
+- Directional 4H with neutral 1H produces medium confidence.
+- Opposite directional states produce conflict and a neutral combined bias.
+- Neutral 4H cannot be overridden by directional 1H.
+
+Confirmation rule:
+
+- Use the previous completed HTF state for chart output.
+- Do not use a still-forming HTF bar as confirmed structure.
+- Accept intentional lag from pivot confirmation and the completed-bar offset.
+
+Not included in the first heuristic:
+
+- Premium/discount context
+- Recent displacement direction
+- HTF POI quality
+- Manual narrative override
+
+These inputs remain required for later confidence calibration and should not be implied by the first Pine output.
 
 ## Module 2 - HTF POI
 

@@ -12,6 +12,7 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Phase: Validation Sprint after Phase 11
 - Validation target: 20 real-use outcomes with at least 80% R and review coverage
 - Version: v0.11.1
+- Pine indicator: v0.1.0-alpha - HTF Bias
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -176,6 +177,21 @@ The v0.11.1 validation milestone includes:
 - Review Queue for Open Trades, pending SKIP reviews, missing Actual Exit, and incomplete Journal reviews
 - Read-only analysis of local records with no cloud upload
 
+## Pine Indicator Track
+
+The first Pine milestone includes:
+
+- Pine Script v6 indicator baseline
+- Confirmed 4H and 1H swing-structure states
+- Bullish, Bearish, and Neutral HTF Bias
+- Conservative timeframe conflict handling
+- High, Medium, and Low structural confidence
+- Fixed chart table and optional Bias background
+- Previous completed HTF state requests to avoid using a still-forming HTF bar
+- No Buy/Sell signal, Entry grade, or alert
+
+The Pine source and TradingView test notes are stored under `pine/`.
+
 ## Repository Structure
 
 ```text
@@ -195,6 +211,9 @@ The v0.11.1 validation milestone includes:
 |-- playbooks.html
 |-- validation.html
 |-- checklist.html
+|-- pine/
+|   |-- TradingOS.pine
+|   `-- README.md
 |-- manifest.json
 |-- sw.js
 |-- README.md
