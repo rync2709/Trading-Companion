@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.5.1-alpha
+Version: v0.11.1 / Pine v0.5.2-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -655,6 +655,9 @@ First milestone:
 - [x] Add a selectable CISD timeframe with 5M as default.
 - [x] Draw armed and confirmed CISD levels only on the selected timeframe.
 - [x] Confirm CISD levels display on 5M and remain hidden on 4H.
+- [x] Remove the separate CISD timeframe setting.
+- [x] Make CISD automatically follow and recalculate on the current chart timeframe.
+- [x] Confirm 5M and 4H each use their own CISD state without cross-timeframe projection.
 - [ ] Compare the output against manually marked 4H/1H structure.
 - [ ] Compare FVG candidates and status transitions against manual markup.
 - [ ] Compare execution BOS/CHOCH/MSS events against manual markup.
@@ -719,4 +722,5 @@ Expected outputs:
 | Pine v0.4.0-alpha | Confirmed execution-chart BOS/CHOCH/MSS baseline |
 | Pine v0.5.0-alpha | Strict execution-chart CISD and context-quality baseline |
 | Pine v0.5.1-alpha | Timeframe-scoped armed and confirmed CISD levels |
+| Pine v0.5.2-alpha | Automatic current-chart CISD timeframe behavior |
 | v1.0.0 | Trading OS MVP |

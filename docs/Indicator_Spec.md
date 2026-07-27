@@ -1,6 +1,6 @@
 # Trading OS Indicator Specification
 
-Version: v0.2.5
+Version: v0.2.6
 Phase: Pine Track - Modules 1, 2, 4, Structure, and CISD baselines
 
 ## Purpose
@@ -240,7 +240,7 @@ Current limitation:
 
 ## Module 6 - CISD
 
-Implementation status: `Pine v0.5.1-alpha - strict execution-chart CISD with timeframe-scoped levels`
+Implementation status: `Pine v0.5.2-alpha - strict current-chart CISD with automatic timeframe behavior`
 
 Input:
 
@@ -249,7 +249,6 @@ Input:
 - Delivery-leg high-to-low range
 - ATR length and minimum ATR multiple
 - Maximum confirmation bars
-- Selected CISD timeframe
 - Show CISD levels setting
 - HTF Bias, POI interaction, Liquidity, and Structure context
 
@@ -263,10 +262,11 @@ Process:
 - Require a confirmed bullish body close above the Bullish level or bearish body close below the Bearish level.
 - Expire an unconfirmed level after the configured confirmation window.
 - Keep the latest confirmed event active for the configured CISD context window.
-- Show CISD state and levels only when the chart timeframe matches the selected CISD timeframe.
+- Calculate CISD from the current chart timeframe automatically.
+- Recalculate candidates, confirmed events, and levels when the chart timeframe changes.
 - Draw dashed candidate levels for armed Bullish and Bearish CISD.
 - Draw one solid confirmed level for the latest active CISD.
-- Remove CISD lines immediately on non-matching chart timeframes.
+- Do not retain or project CISD levels from the previous chart timeframe.
 - Assign Weak when only the mechanical event exists.
 - Assign Medium when direction matches HTF Bias and at least one matching POI, Sweep, or Structure context exists.
 - Assign Strong when direction matches HTF Bias and matching Structure is supported by a matching POI interaction or Sweep.
@@ -285,12 +285,12 @@ Output:
 - bullish_cisd_candidate_line
 - bearish_cisd_candidate_line
 - confirmed_cisd_line
-- cisd_timeframe_active: true or false
 
 Current limitation:
 
 - The baseline runs on the current chart timeframe.
-- CISD is not projected from the selected timeframe onto other chart timeframes.
+- CISD has no independent timeframe setting.
+- CISD is never projected from one chart timeframe onto another.
 - It uses a conservative delivery-series and body-close heuristic; manual comparison remains required.
 - Context may strengthen while the event remains active because Sweep, Structure, and CISD can occur in different orders inside one setup window.
 - Displacement and follow-through are not yet part of CISD quality.

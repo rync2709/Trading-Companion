@@ -2,6 +2,23 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.5.2-alpha - 2026-07-27
+
+### Changed
+
+- Removed the separate `CISD timeframe` setting.
+- CISD now calculates automatically from the current chart timeframe.
+- Changing chart timeframe recalculates delivery legs, candidates, confirmed events, Dashboard state, Data Window values, and CISD lines.
+- CISD levels from one chart timeframe are never projected onto another timeframe.
+
+### Validated
+
+- Compiled Pine v0.5.2-alpha successfully in TradingView Pine Editor.
+- Confirmed XAUUSD 5M renders the current 5M CISD state and level.
+- Confirmed XAUUSD 4H recalculates its own CISD state without retaining the 5M level.
+- Returned the chart to the original 15M timeframe.
+- Saved the private TradingView script as `Trading OS HTF Context v0.5.2` without publishing.
+
 ## Pine v0.5.1-alpha - 2026-07-27
 
 ### Added

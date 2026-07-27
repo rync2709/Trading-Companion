@@ -6,7 +6,7 @@ indicator(
     max_lines_count = 10
 )
 
-// Trading OS Pine Track v0.5.1-alpha
+// Trading OS Pine Track v0.5.2-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG candidates, daily liquidity,
 // confirmed execution-chart BOS/CHOCH/MSS, and strict CISD context.
 // This indicator is decision support. It does not generate Buy/Sell signals.
@@ -43,12 +43,6 @@ int cisdMinimumDeliveryCandles = input.int(
     minval = 1,
     maxval = 20,
     tooltip = "Minimum consecutive directional candles required to arm a CISD level.",
-    group = "CISD"
-)
-string cisdTimeframe = input.timeframe(
-    "5",
-    "CISD timeframe",
-    tooltip = "CISD levels and state are shown only when the chart uses this timeframe.",
     group = "CISD"
 )
 int cisdMaximumDeliveryCandles = input.int(
@@ -94,7 +88,7 @@ int cisdContextBars = input.int(
 bool showCisdLevels = input.bool(
     true,
     "Show CISD levels",
-    tooltip = "Draws armed candidate levels and the latest confirmed CISD level only on the selected CISD timeframe.",
+    tooltip = "Draws armed candidate levels and the latest confirmed CISD level for the current chart timeframe.",
     group = "CISD"
 )
 bool showBiasBackground = input.bool(
@@ -665,12 +659,7 @@ color structureStateColor = (
     cisdConfirmationBars
 )
 
-bool cisdTimeframeActive = (
-    timeframe.in_seconds() ==
-    timeframe.in_seconds(cisdTimeframe)
-)
 bool cisdEventActive = (
-    cisdTimeframeActive and
     latestCisdDirection != 0 and
     not na(latestCisdEventBar) and
     bar_index - latestCisdEventBar <= cisdContextBars
@@ -710,15 +699,13 @@ int cisdQuality = (
 )
 bool cisdValid = cisdQuality >= 2
 string cisdState = (
-    not cisdTimeframeActive ?
-    f_timeframe_label(cisdTimeframe) + " ONLY" :
     cisdEventActive ?
     f_state_short(latestCisdDirection) + " · " +
     f_quality_text(cisdQuality) :
     "WAIT"
 )
 color cisdStateColor = (
-    not cisdTimeframeActive or not cisdEventActive ? neutralColor :
+    not cisdEventActive ? neutralColor :
     cisdValid ? f_state_color(latestCisdDirection) :
     warningColor
 )
@@ -748,7 +735,6 @@ var line bearishCisdCandidateLine = na
 var line confirmedCisdLine = na
 
 if (
-    cisdTimeframeActive and
     showCisdLevels and
     not na(bullishCisdCandidateLevel) and
     not na(bullishCisdCandidateBar)
@@ -781,7 +767,6 @@ else if not na(bullishCisdCandidateLine)
     bullishCisdCandidateLine := na
 
 if (
-    cisdTimeframeActive and
     showCisdLevels and
     not na(bearishCisdCandidateLevel) and
     not na(bearishCisdCandidateBar)
@@ -813,7 +798,7 @@ else if not na(bearishCisdCandidateLine)
     line.delete(bearishCisdCandidateLine)
     bearishCisdCandidateLine := na
 
-if cisdTimeframeActive and showCisdLevels and cisdEventPulse != 0
+if showCisdLevels and cisdEventPulse != 0
     if not na(confirmedCisdLine)
         line.delete(confirmedCisdLine)
     confirmedCisdLine := line.new(
@@ -829,7 +814,7 @@ if cisdTimeframeActive and showCisdLevels and cisdEventPulse != 0
     )
 
 if (
-    (not cisdTimeframeActive or not showCisdLevels or not cisdEventActive) and
+    (not showCisdLevels or not cisdEventActive) and
     not na(confirmedCisdLine)
 )
     line.delete(confirmedCisdLine)
@@ -931,7 +916,7 @@ plot(
     display = display.data_window
 )
 plot(
-    cisdTimeframeActive ? cisdEventPulse : 0,
+    cisdEventPulse,
     title = "CISD event pulse",
     display = display.data_window
 )
@@ -966,12 +951,12 @@ plot(
     display = display.data_window
 )
 plot(
-    cisdTimeframeActive ? bullishCisdCandidateLevel : na,
+    bullishCisdCandidateLevel,
     title = "Armed bullish CISD level",
     display = display.data_window
 )
 plot(
-    cisdTimeframeActive ? bearishCisdCandidateLevel : na,
+    bearishCisdCandidateLevel,
     title = "Armed bearish CISD level",
     display = display.data_window
 )
@@ -994,7 +979,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.5.1",
+        "TRADING OS · HTF v0.5.2",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,
