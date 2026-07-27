@@ -2,6 +2,14 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.2.3-alpha - 2026-07-27
+
+### Changed
+
+- Increased the compact dashboard default text size from Tiny to Small.
+- Added a Display setting for Tiny, Small, or Normal dashboard text.
+- Kept the seven-row compact grouping and all existing Bias/FVG logic unchanged.
+
 ## Pine v0.2.2-alpha - 2026-07-27
 
 ### Changed

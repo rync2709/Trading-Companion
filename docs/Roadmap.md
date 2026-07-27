@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.2.2-alpha
+Version: v0.11.1 / Pine v0.2.3-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -636,6 +636,7 @@ First milestone:
 - [x] Compile the first file in TradingView Pine Editor.
 - [x] Smoke-test indicator rendering on XAUUSD at 5M, 15M, 1H, and 4H.
 - [x] Reduce the HTF Context dashboard to a compact seven-row layout.
+- [x] Add Tiny, Small, and Normal dashboard text-size settings with Small as default.
 - [ ] Compare the output against manually marked 4H/1H structure.
 - [ ] Compare FVG candidates and status transitions against manual markup.
 - [ ] Record disagreement examples before calibrating the heuristic.
@@ -689,4 +690,5 @@ Expected outputs:
 | Pine v0.2.0-alpha | Bias-aligned 4H/1H FVG candidate baseline |
 | Pine v0.2.1-alpha | TradingView compile compatibility and multi-timeframe render smoke test |
 | Pine v0.2.2-alpha | Compact HTF Context dashboard |
+| Pine v0.2.3-alpha | Adjustable compact dashboard text size |
 | v1.0.0 | Trading OS MVP |

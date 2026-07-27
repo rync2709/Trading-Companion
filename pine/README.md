@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.2.2-alpha
+Version: v0.2.3-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -52,7 +52,7 @@ This is a POI candidate, not a valid Entry FVG. Displacement, Structure, CISD, a
 
 ## Compact Dashboard
 
-The dashboard uses seven rows and `tiny` text to reduce chart obstruction:
+The dashboard uses seven rows to reduce chart obstruction. Its text size defaults to `Small` and can be changed under Display to `Tiny`, `Small`, or `Normal`.
 
 - HTF: grouped Primary and Secondary states
 - Bias: Combined Bias and Confidence

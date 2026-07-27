@@ -1,6 +1,6 @@
 # Trading OS Indicator Specification
 
-Version: v0.1.6
+Version: v0.1.7
 Phase: Pine Track - Modules 1 and 2 baseline
 
 ## Purpose
@@ -83,7 +83,7 @@ These inputs remain required for later confidence calibration and should not be 
 
 ## Module 2 - HTF POI
 
-Implementation status: `Pine v0.2.2-alpha - compiled FVG candidate with compact dashboard`
+Implementation status: `Pine v0.2.3-alpha - compiled FVG candidate with adjustable compact dashboard`
 
 Input:
 
