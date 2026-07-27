@@ -2,6 +2,24 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## v0.11.0 - 2026-07-27
+
+### Added
+
+- Added five starter Playbooks for Reversal, Continuation, and Session setups.
+- Added Setup sequences, rules, invalidations, and execution checklists.
+- Added automatic Playbook matching against local Journal trades.
+- Added Matching Trades, Closed Trades, Win Rate, and Average R summaries.
+- Added Personal Trade examples with local Screenshot previews and Journal links.
+- Added local Personal Rules, What Worked, and Avoid Next Time notes.
+- Added Playbooks to desktop and mobile navigation.
+
+### Changed
+
+- Promoted the planned Playbook Library to Phase 11.
+- Updated the visible Trading OS phase to Phase 11.
+- Updated the PWA cache for the Playbook Library release.
+
 ## v0.10.0 - 2026-07-27
 
 ### Added

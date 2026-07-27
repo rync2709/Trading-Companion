@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0e1112">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Trading Companion">
+  <title>Playbook Library | Trading Companion</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css?v=0.8.0">
+  <link rel="stylesheet" href="css/playbooks.css?v=0.11.0">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html" aria-label="Trading Companion Dashboard">
+        <img src="assets/app-icon.svg" alt="">
+        <span class="brand-copy">
+          <span class="brand-name">Trading Companion</span>
+          <span class="brand-phase">Trading OS · Phase 11</span>
+        </span>
+      </a>
+
+      <nav class="topnav" aria-label="เมนูหลัก">
+        <a class="nav-link" href="index.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-home"></use></svg>
+          Dashboard
+        </a>
+        <a class="nav-link" href="trade.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-plus"></use></svg>
+          New Trade
+        </a>
+        <a class="nav-link" href="journal.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+          Journal
+        </a>
+        <a class="nav-link" href="stats.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-chart"></use></svg>
+          Statistics
+        </a>
+        <a class="nav-link" href="database.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-database"></use></svg>
+          Database
+        </a>
+        <a class="nav-link" href="weekly.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calendar-check"></use></svg>
+          Weekly Review
+        </a>
+        <a class="nav-link" href="planner.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-clock"></use></svg>
+          Session Planner
+        </a>
+        <details class="topnav-more">
+          <summary class="nav-link" aria-current="page" title="More tools">
+            <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-more"></use></svg>
+            <span class="sr-only">More tools</span>
+          </summary>
+          <div class="topnav-more-menu">
+            <a class="nav-link" href="watchlist.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-eye"></use></svg>
+              Watchlist
+            </a>
+            <a class="nav-link" href="assistant.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-sparkles"></use></svg>
+              Decision Assistant
+            </a>
+            <a class="nav-link" href="tools.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calculator"></use></svg>
+              Advanced Tools
+            </a>
+            <a class="nav-link" href="integration.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-external-link"></use></svg>
+              TradingView Hub
+            </a>
+            <a class="nav-link" href="playbooks.html" aria-current="page">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+              Playbooks
+            </a>
+            <a class="nav-link" href="checklist.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-list-checks"></use></svg>
+              Classic Checklist
+            </a>
+          </div>
+        </details>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-shell" id="playbookLibrary">
+    <header class="page-heading">
+      <p class="eyebrow">Phase 11 · Personal knowledge base</p>
+      <h1>Playbook Library</h1>
+      <p class="lede">เปลี่ยน Setup ที่ใช้ซ้ำให้เป็นกฎ ตัวอย่าง และบทเรียนจาก Trade จริงของคุณ</p>
+    </header>
+
+    <section class="playbook-layout" aria-label="Playbook workspace">
+      <aside class="panel playbook-sidebar">
+        <header class="playbook-sidebar-header">
+          <h2>Playbooks</h2>
+          <p>ตัวเลขด้านขวาคือจำนวน Trade ใน Journal ที่ตรงกับ Setup</p>
+        </header>
+        <div class="playbook-list" id="playbookList"></div>
+      </aside>
+
+      <article class="playbook-detail">
+        <header class="playbook-detail-header">
+          <div>
+            <p class="eyebrow">Selected playbook</p>
+            <h2 id="playbookName">A+ Reversal</h2>
+            <p id="playbookDescription"></p>
+          </div>
+          <span class="playbook-tier" id="playbookTier">A+</span>
+        </header>
+
+        <div class="playbook-metrics" aria-label="Playbook evidence summary">
+          <div class="playbook-metric">
+            <span>Matching Trades</span>
+            <strong id="playbookTotal">0</strong>
+          </div>
+          <div class="playbook-metric">
+            <span>Closed</span>
+            <strong id="playbookClosed">0</strong>
+          </div>
+          <div class="playbook-metric">
+            <span>Win Rate</span>
+            <strong id="playbookWinRate">--</strong>
+          </div>
+          <div class="playbook-metric">
+            <span>Average R</span>
+            <strong id="playbookAverageR">--</strong>
+          </div>
+        </div>
+
+        <section class="playbook-section" aria-labelledby="sequenceHeading">
+          <header class="playbook-section-heading">
+            <div>
+              <h3 id="sequenceHeading">Setup Sequence</h3>
+              <p>ลำดับเหตุการณ์ขั้นต่ำก่อนพิจารณา Entry</p>
+            </div>
+          </header>
+          <div class="playbook-sequence" id="playbookSequence"></div>
+        </section>
+
+        <section class="playbook-section playbook-rules-grid" aria-label="Rules and invalidations">
+          <section class="playbook-rule-section">
+            <h3>Rules</h3>
+            <ul id="playbookRules"></ul>
+          </section>
+          <section class="playbook-rule-section" data-kind="invalid">
+            <h3>Invalidation / No Trade</h3>
+            <ul id="playbookInvalidations"></ul>
+          </section>
+        </section>
+
+        <section class="playbook-section playbook-workspace" aria-label="Playbook tools">
+          <article class="panel playbook-tool">
+            <header class="playbook-tool-header">
+              <div>
+                <h3>Execution Checklist</h3>
+                <p>ใช้สำหรับทบทวน Setup ปัจจุบัน</p>
+              </div>
+              <strong class="playbook-check-progress" id="playbookChecklistProgress">0 / 0</strong>
+            </header>
+            <div class="playbook-checklist" id="playbookChecklist"></div>
+            <footer class="playbook-tool-footer">
+              <button class="button button-quiet" id="playbookChecklistReset" type="button">
+                <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-rotate"></use></svg>
+                ล้าง Checklist
+              </button>
+            </footer>
+          </article>
+
+          <article class="panel playbook-tool">
+            <header class="playbook-tool-header">
+              <div>
+                <h3>Personal Notes</h3>
+                <p>บันทึกเฉพาะอุปกรณ์นี้</p>
+              </div>
+              <span class="playbook-note-state" id="playbookNoteState">ยังไม่มี Personal Notes</span>
+            </header>
+            <form class="playbook-notes" id="playbookNotesForm">
+              <div class="playbook-note-grid">
+                <label class="playbook-note-field">
+                  <span>กฎส่วนตัวเพิ่มเติม</span>
+                  <textarea id="playbookPersonalRules" maxlength="4000" placeholder="เช่น เทรดเฉพาะเมื่อ 4H และ 1H ไปทางเดียวกัน"></textarea>
+                </label>
+                <label class="playbook-note-field">
+                  <span>สิ่งที่ทำงานได้ดี</span>
+                  <textarea id="playbookWhatWorked" maxlength="4000" placeholder="รูปแบบ Confirmation หรือ Context ที่ให้ผลดีที่สุด"></textarea>
+                </label>
+                <label class="playbook-note-field">
+                  <span>สิ่งที่ต้องหลีกเลี่ยง</span>
+                  <textarea id="playbookAvoidNextTime" maxlength="4000" placeholder="ข้อผิดพลาดหรือสถานการณ์ที่ไม่ควรเทรดซ้ำ"></textarea>
+                </label>
+              </div>
+              <div class="playbook-note-actions">
+                <span class="playbook-note-state" aria-hidden="true">ข้อมูลไม่ถูกส่งขึ้น Cloud</span>
+                <button class="button button-primary" type="submit">
+                  <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-save"></use></svg>
+                  บันทึก Notes
+                </button>
+              </div>
+            </form>
+          </article>
+        </section>
+
+        <section class="playbook-section" aria-labelledby="examplesHeading">
+          <header class="playbook-section-heading">
+            <div>
+              <h3 id="examplesHeading">Personal Trade Examples</h3>
+              <p>ตัวอย่าง Win/Loss และ Screenshot ดึงจาก Journal ในเครื่อง</p>
+            </div>
+            <span id="playbookExampleSummary">0 matching trades · 0 shown</span>
+          </header>
+          <div class="playbook-examples" id="playbookExamples"></div>
+          <p class="playbook-example-empty" id="playbookExampleEmpty">ยังไม่มี Trade ใน Journal ที่ตรงกับ Playbook นี้</p>
+        </section>
+      </article>
+    </section>
+  </main>
+
+  <nav class="mobile-nav" aria-label="เมนูมือถือ">
+    <a class="nav-link" href="index.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-home"></use></svg>
+      Dashboard
+    </a>
+    <a class="nav-link" href="trade.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-plus"></use></svg>
+      New Trade
+    </a>
+    <a class="nav-link" href="journal.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+      Journal
+    </a>
+    <a class="nav-link" href="stats.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-chart"></use></svg>
+      Statistics
+    </a>
+    <details class="mobile-more">
+      <summary class="nav-link" aria-current="page">
+        <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-more"></use></svg>
+        More
+      </summary>
+      <div class="mobile-more-menu">
+        <a class="nav-link" href="database.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-database"></use></svg>
+          Database
+        </a>
+        <a class="nav-link" href="weekly.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calendar-check"></use></svg>
+          Weekly Review
+        </a>
+        <a class="nav-link" href="planner.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-clock"></use></svg>
+          Session Planner
+        </a>
+        <a class="nav-link" href="watchlist.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-eye"></use></svg>
+          Watchlist
+        </a>
+        <a class="nav-link" href="assistant.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-sparkles"></use></svg>
+          Decision Assistant
+        </a>
+        <a class="nav-link" href="tools.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calculator"></use></svg>
+          Advanced Tools
+        </a>
+        <a class="nav-link" href="integration.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-external-link"></use></svg>
+          TradingView Hub
+        </a>
+        <a class="nav-link" href="playbooks.html" aria-current="page">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+          Playbooks
+        </a>
+        <a class="nav-link" href="checklist.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-list-checks"></use></svg>
+          Classic Checklist
+        </a>
+      </div>
+    </details>
+  </nav>
+
+  <script src="js/storage.js?v=0.11.0"></script>
+  <script src="js/media.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/playbooks.js?v=0.11.0"></script>
+</body>
+</html>

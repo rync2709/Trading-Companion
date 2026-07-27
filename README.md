@@ -2,16 +2,16 @@
 
 Trading Companion is the web application for the Trading OS decision framework. It is built from the original ICT/SMC Trade Entry Checklist.
 
-Trading Companion now combines the guided decision workflow, Trade Journal, performance statistics, searchable Trade Database, Weekly Review, daily Session Planner, manual context Watchlist, practical risk tools, a Rulebook-based Decision Assistant, and a supported TradingView evidence workflow. Real-use validation continues across the earlier phases while Phase 10 is developed.
+Trading Companion now combines the guided decision workflow, Trade Journal, performance statistics, searchable Trade Database, Weekly Review, daily Session Planner, manual context Watchlist, practical risk tools, a Rulebook-based Decision Assistant, a supported TradingView evidence workflow, and a personal Playbook Library. Real-use validation continues across the earlier phases while Phase 11 is developed.
 
 ## Current Status
 
 - Product name: Trading Companion
 - Decision framework: Trading OS
 - Repository name: Trading-Companion
-- Phase: 10 - TradingView Integration (in progress)
+- Phase: 11 - Playbook Library (in progress)
 - Phase 1 validation: collecting 20 real-use outcomes
-- Version: v0.10.0
+- Version: v0.11.0
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -151,6 +151,19 @@ The first Phase 10 milestone includes:
 - 30-day, 90-day, and all-time export ranges
 - Clear boundary: no live prices, indicators, or order placement
 
+## Phase 11 Milestone
+
+The first Phase 11 milestone includes:
+
+- Five starter Playbooks: A+ Reversal, A Continuation, NY Open Sweep, London Reversal, and Asian Liquidity Raid
+- Setup sequence, rules, invalidations, and execution checklist for every Playbook
+- Automatic matching against local Journal trades
+- Matching Trade count, Closed count, Win Rate, and Average R
+- Personal Win/Loss examples with Journal links
+- Local Screenshot previews when a matching Trade has an attachment
+- Personal Rules, What Worked, and Avoid Next Time notes
+- Local-only Playbook data with no cloud upload
+
 ## Repository Structure
 
 ```text
@@ -167,6 +180,7 @@ The first Phase 10 milestone includes:
 |-- tools.html
 |-- integration.html
 |-- report.html
+|-- playbooks.html
 |-- checklist.html
 |-- manifest.json
 |-- sw.js
@@ -190,4 +204,4 @@ The first Phase 10 milestone includes:
 
 ## Data Note
 
-Drafts, Decision Assistant sessions, assessment history, Weekly Reviews, Daily Session Plans, Watchlist Context, and Screenshots are stored only in the browser on the current device. Screenshots use IndexedDB so image files do not consume the smaller checklist storage area. Watchlist status is entered manually and is not live market data. Advanced Tool inputs are calculated locally and are not saved. The Currency Converter requests only the selected fiat currency pair from Frankfurter; it does not send the entered amount. The Decision Assistant uses the local Rulebook engine without an external AI API. CSV and PDF-ready reports are generated locally from Journal data. Trading Companion does not directly access TradingView market data, place orders, or send trade data to a server.
+Drafts, Decision Assistant sessions, Playbook Notes, assessment history, Weekly Reviews, Daily Session Plans, Watchlist Context, and Screenshots are stored only in the browser on the current device. Screenshots use IndexedDB so image files do not consume the smaller checklist storage area. Watchlist status is entered manually and is not live market data. Advanced Tool inputs are calculated locally and are not saved. The Currency Converter requests only the selected fiat currency pair from Frankfurter; it does not send the entered amount. The Decision Assistant uses the local Rulebook engine without an external AI API. CSV and PDF-ready reports are generated locally from Journal data. Trading Companion does not directly access TradingView market data, place orders, or send trade data to a server.

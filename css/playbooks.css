@@ -1,0 +1,588 @@
+.playbook-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.playbook-sidebar {
+  position: sticky;
+  top: calc(var(--header-height) + 14px);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.playbook-sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.playbook-sidebar-header h2 {
+  margin: 0 0 5px;
+  font-size: 16px;
+}
+
+.playbook-sidebar-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.playbook-list {
+  display: grid;
+}
+
+.playbook-list-item {
+  width: 100%;
+  min-height: 76px;
+  padding: 12px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.playbook-list-item:last-child {
+  border-bottom: 0;
+}
+
+.playbook-list-item:hover {
+  background: var(--surface-soft);
+}
+
+.playbook-list-item[data-active="true"] {
+  background: var(--green-soft);
+  box-shadow: inset 3px 0 0 var(--green);
+}
+
+.playbook-list-item strong,
+.playbook-list-item small {
+  display: block;
+}
+
+.playbook-list-item strong {
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.playbook-list-item small {
+  max-height: 30px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.playbook-list-count {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--cyan);
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.playbook-detail {
+  min-width: 0;
+}
+
+.playbook-detail-header {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.playbook-detail-header h2 {
+  margin: 6px 0 8px;
+  font-size: 28px;
+}
+
+.playbook-detail-header p {
+  max-width: 720px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.playbook-tier {
+  min-width: 48px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(82, 212, 147, 0.38);
+  border-radius: 6px;
+  background: var(--green-soft);
+  color: var(--green);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.playbook-metrics {
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.playbook-metric {
+  min-width: 0;
+  min-height: 78px;
+  padding: 14px 16px;
+  border-right: 1px solid var(--line);
+}
+
+.playbook-metric:last-child {
+  border-right: 0;
+}
+
+.playbook-metric span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.playbook-metric strong {
+  font-size: 19px;
+}
+
+.playbook-section {
+  margin-top: 28px;
+}
+
+.playbook-section-heading {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.playbook-section-heading h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+
+.playbook-section-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.playbook-sequence {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.playbook-sequence-step {
+  position: relative;
+  min-width: 0;
+  min-height: 80px;
+  padding: 14px 12px;
+  border-right: 1px solid var(--line);
+}
+
+.playbook-sequence-step:last-child {
+  border-right: 0;
+}
+
+.playbook-sequence-step span {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 9px;
+  border: 1px solid var(--cyan);
+  border-radius: 50%;
+  color: var(--cyan);
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.playbook-sequence-step strong {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.playbook-rules-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.playbook-rule-section {
+  padding-top: 14px;
+  border-top: 2px solid var(--green);
+}
+
+.playbook-rule-section[data-kind="invalid"] {
+  border-top-color: var(--red);
+}
+
+.playbook-rule-section h3 {
+  margin: 0 0 11px;
+  font-size: 15px;
+}
+
+.playbook-rule-section ul {
+  margin: 0;
+  padding-left: 19px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.playbook-rule-section li + li {
+  margin-top: 7px;
+}
+
+.playbook-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  align-items: start;
+  gap: 14px;
+}
+
+.playbook-tool {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.playbook-tool-header {
+  min-height: 64px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.playbook-tool-header h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+
+.playbook-tool-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.playbook-check-progress {
+  color: var(--amber);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.playbook-check-progress[data-complete="true"] {
+  color: var(--green);
+}
+
+.playbook-checklist {
+  display: grid;
+}
+
+.playbook-check {
+  min-height: 43px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.playbook-check input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--green);
+}
+
+.playbook-check:has(input:checked) {
+  background: var(--green-soft);
+  color: var(--text);
+}
+
+.playbook-tool-footer {
+  padding: 11px 14px;
+}
+
+.playbook-notes {
+  padding: 14px 16px 16px;
+}
+
+.playbook-note-grid {
+  display: grid;
+  gap: 11px;
+}
+
+.playbook-note-field span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.playbook-note-field textarea {
+  width: 100%;
+  min-height: 74px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  resize: vertical;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.playbook-note-field textarea:focus {
+  border-color: var(--cyan);
+}
+
+.playbook-note-actions {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.playbook-note-state {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.playbook-note-state[data-state="saved"] {
+  color: var(--green);
+}
+
+.playbook-note-state[data-state="error"] {
+  color: var(--red);
+}
+
+.playbook-examples {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.playbook-example {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+}
+
+.playbook-example[data-outcome="win"] {
+  border-top-color: var(--green);
+}
+
+.playbook-example[data-outcome="loss"] {
+  border-top-color: var(--red);
+}
+
+.playbook-example-visual {
+  height: 126px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  background:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px),
+    var(--bg);
+  background-size: 22px 22px;
+  color: var(--cyan);
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+}
+
+.playbook-example-visual > span {
+  width: 78%;
+  padding: 8px;
+  border-left: 2px solid var(--green);
+  border-right: 2px solid var(--red);
+  background: var(--surface-raised);
+  font-size: 9px;
+  font-weight: 750;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.playbook-example-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.playbook-example-body {
+  padding: 12px;
+}
+
+.playbook-example-body > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.playbook-example-body > div strong {
+  font-size: 12px;
+}
+
+.playbook-example-body > div span {
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.playbook-example-body p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.playbook-example-body .playbook-example-result {
+  color: var(--text);
+}
+
+.playbook-example-body > a {
+  display: inline-block;
+  margin-top: 9px;
+  color: var(--cyan);
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.playbook-example-empty {
+  padding: 28px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+@media (max-width: 1020px) {
+  .playbook-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .playbook-sidebar {
+    position: static;
+  }
+
+  .playbook-list {
+    grid-template-columns: repeat(5, minmax(180px, 1fr));
+    overflow-x: auto;
+  }
+
+  .playbook-list-item {
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .playbook-sequence {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .playbook-sequence-step:nth-child(3) {
+    border-right: 0;
+  }
+
+  .playbook-sequence-step:nth-child(-n + 3) {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .playbook-rules-grid,
+  .playbook-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .playbook-examples {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .playbook-detail-header {
+    flex-direction: column-reverse;
+  }
+
+  .playbook-detail-header h2 {
+    font-size: 24px;
+  }
+
+  .playbook-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .playbook-metric:nth-child(2) {
+    border-right: 0;
+  }
+
+  .playbook-metric:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .playbook-sequence {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .playbook-sequence-step,
+  .playbook-sequence-step:nth-child(3) {
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .playbook-sequence-step:nth-child(even) {
+    border-right: 0;
+  }
+
+  .playbook-sequence-step:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+
+  .playbook-note-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .playbook-note-actions .button {
+    width: 100%;
+  }
+
+  .playbook-examples {
+    grid-template-columns: 1fr;
+  }
+}

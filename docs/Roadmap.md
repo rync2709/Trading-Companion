@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.10.0
+Version: v0.11.0
 Status: Master product roadmap
 
 ## Product Direction
@@ -514,9 +514,23 @@ Example:
 Next Step: WAIT FOR DISPLACEMENT
 ```
 
-## Playbook Library
+## Phase 11 - Playbook Library
 
 Goal: turn repeated trading experience into a personal knowledge base.
+
+Status: In progress.
+
+First milestone:
+
+- [x] Add A+ Reversal, A Continuation, NY Open Sweep, London Reversal, and Asian Liquidity Raid.
+- [x] Add a Setup sequence, rules, invalidations, and execution checklist to every Playbook.
+- [x] Match each Playbook against local Journal trades.
+- [x] Show Matching Trades, Closed Trades, Win Rate, and Average R.
+- [x] Add Personal Win/Loss examples with direct Journal links.
+- [x] Load local Screenshot previews when available.
+- [x] Save Personal Rules, What Worked, and Avoid Next Time notes locally.
+- [ ] Validate Playbook matching rules against a larger real-trade sample.
+- [ ] Refine rules and invalidations from repeated weekly reviews.
 
 Planned playbooks:
 
@@ -621,4 +635,5 @@ Expected outputs:
 | v0.8.3 | NO TRADE and SKIP assessment deletion |
 | v0.9.0 | Local Decision Assistant prototype |
 | v0.10.0 | TradingView evidence workflow and Journal export |
+| v0.11.0 | Personal Playbook Library |
 | v1.0.0 | Trading OS MVP |

@@ -4,6 +4,7 @@
   const KEYS = {
     draft: "tradingCompanionDraftV1",
     assistant: "tradingCompanionAssistantV1",
+    playbookNotes: "tradingCompanionPlaybookNotesV1",
     history: "tradingCompanionHistoryV1",
     weeklyReviews: "tradingCompanionWeeklyReviewsV1",
     sessionPlans: "tradingCompanionSessionPlansV1",
@@ -135,6 +136,51 @@
 
   function clearAssistantSession() {
     localStorage.removeItem(KEYS.assistant);
+  }
+
+  function normalizePlaybookNote(note) {
+    const source = note && typeof note === "object" ? note : {};
+    return {
+      personalRules: typeof source.personalRules === "string" ?
+        source.personalRules.trim().slice(0, 4000) : "",
+      whatWorked: typeof source.whatWorked === "string" ?
+        source.whatWorked.trim().slice(0, 4000) : "",
+      avoidNextTime: typeof source.avoidNextTime === "string" ?
+        source.avoidNextTime.trim().slice(0, 4000) : "",
+      updatedAt: typeof source.updatedAt === "string" ? source.updatedAt : null
+    };
+  }
+
+  function loadPlaybookNotes() {
+    const saved = parse(localStorage.getItem(KEYS.playbookNotes), {});
+    if (!saved || typeof saved !== "object" || Array.isArray(saved)) return {};
+    return Object.fromEntries(
+      Object.entries(saved)
+        .filter(function (entry) {
+          return /^[a-z0-9-]{1,60}$/.test(entry[0]);
+        })
+        .slice(0, 30)
+        .map(function (entry) {
+          return [entry[0], normalizePlaybookNote(entry[1])];
+        })
+    );
+  }
+
+  function loadPlaybookNote(id) {
+    return loadPlaybookNotes()[String(id || "")] || normalizePlaybookNote();
+  }
+
+  function savePlaybookNote(id, note) {
+    const playbookId = String(id || "");
+    if (!/^[a-z0-9-]{1,60}$/.test(playbookId)) return null;
+    const notes = loadPlaybookNotes();
+    const next = normalizePlaybookNote({
+      ...note,
+      updatedAt: new Date().toISOString()
+    });
+    notes[playbookId] = next;
+    localStorage.setItem(KEYS.playbookNotes, JSON.stringify(notes));
+    return next;
   }
 
   function hasMeaningfulDraft(draft) {
@@ -766,6 +812,10 @@
     loadAssistantSession,
     saveAssistantSession,
     clearAssistantSession,
+    normalizePlaybookNote,
+    loadPlaybookNotes,
+    loadPlaybookNote,
+    savePlaybookNote,
     hasMeaningfulDraft,
     loadHistory,
     isValidationEligible,
