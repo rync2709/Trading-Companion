@@ -2,6 +2,25 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.3.1-alpha - 2026-07-27
+
+### Changed
+
+- Added a default-on option to stretch the selected current FVG and current PDH/PDL across the visible chart.
+- Added a historical display mode that restores the FVG origin and daily PDH/PDL step plots.
+- Kept confirmed FVG selection, daily levels, and sweep detection unchanged.
+- Added current PDH and PDL values to the Data Window.
+
+### Important
+
+- Viewport-pinned drawings show current context over the visible chart and are not historical evidence.
+- Price-level drawings remain attached to their actual prices and still move vertically when the price scale changes.
+
+### Validated
+
+- Compiled Pine v0.3.1-alpha successfully in TradingView Pine Editor.
+- Confirmed the current FVG and PDH/PDL remain stretched across the visible XAUUSD 15M chart after horizontal scrolling and zooming.
+
 ## Pine v0.3.0-alpha - 2026-07-27
 
 ### Added
