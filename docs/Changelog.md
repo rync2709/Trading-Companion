@@ -2,6 +2,21 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.2.2-alpha - 2026-07-27
+
+### Changed
+
+- Reduced the HTF Context dashboard from 11 rows to 7 rows.
+- Grouped Primary and Secondary HTF states into one compact row.
+- Grouped Combined Bias with Confidence.
+- Grouped POI timeframe, direction, and type.
+- Grouped FVG status with current price location.
+- Reduced all dashboard text to Pine `tiny` size.
+
+### Important
+
+- The compact layout changes presentation only and does not change Bias or FVG logic.
+
 ## Pine v0.2.1-alpha - 2026-07-27
 
 ### Fixed

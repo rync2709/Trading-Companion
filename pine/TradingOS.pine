@@ -6,7 +6,7 @@ indicator(
     max_boxes_count = 10
 )
 
-// Trading OS Pine Track v0.2.1-alpha
+// Trading OS Pine Track v0.2.2-alpha
 // Modules: confirmed 4H/1H Bias and aligned HTF FVG candidates.
 // This indicator is decision support. It does not generate Buy/Sell signals.
 
@@ -77,6 +77,9 @@ f_structure_state(int length) =>
 
 f_state_text(int state) =>
     state == 1 ? "BULLISH" : state == -1 ? "BEARISH" : "NEUTRAL"
+
+f_state_short(int state) =>
+    state == 1 ? "BULL" : state == -1 ? "BEAR" : "NEUTRAL"
 
 f_state_color(int state) =>
     state == 1 ? bullishColor : state == -1 ? bearishColor : neutralColor
@@ -363,7 +366,7 @@ plot(
 var table biasPanel = table.new(
     position.top_right,
     2,
-    11,
+    7,
     frame_color = panelBorderColor,
     frame_width = 1,
     border_color = panelBorderColor,
@@ -378,188 +381,142 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF CONTEXT",
+        "TRADING OS · HTF",
         bgcolor = panelColor,
         text_color = textColor,
-        text_halign = text.align_left
+        text_halign = text.align_left,
+        text_size = size.tiny
     )
     table.cell(
         biasPanel,
         0,
         1,
-        "Primary " + f_timeframe_label(primaryTimeframe),
+        "HTF",
         bgcolor = panelColor,
         text_color = mutedTextColor,
-        text_halign = text.align_left
+        text_halign = text.align_left,
+        text_size = size.tiny
     )
     table.cell(
         biasPanel,
         1,
         1,
-        f_state_text(primaryState),
-        bgcolor = color.new(f_state_color(primaryState), 84),
-        text_color = f_state_color(primaryState)
+        (
+            f_timeframe_label(primaryTimeframe) + " " +
+            f_state_short(primaryState) + " · " +
+            f_timeframe_label(secondaryTimeframe) + " " +
+            f_state_short(secondaryState)
+        ),
+        bgcolor = panelColor,
+        text_color = textColor,
+        text_size = size.tiny
     )
     table.cell(
         biasPanel,
         0,
         2,
-        "Secondary " + f_timeframe_label(secondaryTimeframe),
+        "Bias",
         bgcolor = panelColor,
         text_color = mutedTextColor,
-        text_halign = text.align_left
+        text_halign = text.align_left,
+        text_size = size.tiny
     )
     table.cell(
         biasPanel,
         1,
         2,
-        f_state_text(secondaryState),
-        bgcolor = color.new(f_state_color(secondaryState), 84),
-        text_color = f_state_color(secondaryState)
-    )
-    table.cell(
-        biasPanel,
-        0,
-        3,
-        "Combined bias",
-        bgcolor = panelColor,
-        text_color = mutedTextColor,
-        text_halign = text.align_left
-    )
-    table.cell(
-        biasPanel,
-        1,
-        3,
-        f_state_text(combinedState),
+        f_state_text(combinedState) + " · " + confidence,
         bgcolor = color.new(f_state_color(combinedState), 84),
-        text_color = f_state_color(combinedState)
+        text_color = f_state_color(combinedState),
+        text_size = size.tiny
     )
     table.cell(
         biasPanel,
         0,
-        4,
-        "Confidence",
+        3,
+        "Context",
         bgcolor = panelColor,
         text_color = mutedTextColor,
-        text_halign = text.align_left
+        text_halign = text.align_left,
+        text_size = size.tiny
     )
     table.cell(
         biasPanel,
         1,
-        4,
-        confidence,
-        bgcolor = panelColor,
-        text_color = confidence == "HIGH" ? bullishColor : warningColor
-    )
-    table.cell(
-        biasPanel,
-        0,
-        5,
-        "Alignment",
-        bgcolor = panelColor,
-        text_color = mutedTextColor,
-        text_halign = text.align_left
-    )
-    table.cell(
-        biasPanel,
-        1,
-        5,
+        3,
         alignmentState,
         bgcolor = color.new(alignmentColor, 86),
-        text_color = alignmentColor
+        text_color = alignmentColor,
+        text_size = size.tiny
     )
     table.cell(
         biasPanel,
         0,
-        6,
-        "POI candidate",
+        4,
+        "POI",
         bgcolor = panelColor,
         text_color = mutedTextColor,
-        text_halign = text.align_left
+        text_halign = text.align_left,
+        text_size = size.tiny
     )
     table.cell(
         biasPanel,
         1,
-        6,
-        poiActive ? f_state_text(poiDirection) + " FVG" : "NONE",
+        4,
+        (
+            poiActive ?
+            poiTimeframe + " " + f_state_short(poiDirection) + " FVG" :
+            "NONE"
+        ),
         bgcolor = poiActive ?
             color.new(f_state_color(poiDirection), 84) :
             panelColor,
         text_color = poiActive ?
             f_state_color(poiDirection) :
-            neutralColor
+            neutralColor,
+        text_size = size.tiny
     )
     table.cell(
         biasPanel,
         0,
-        7,
-        "POI timeframe",
+        5,
+        "Status",
         bgcolor = panelColor,
         text_color = mutedTextColor,
-        text_halign = text.align_left
+        text_halign = text.align_left,
+        text_size = size.tiny
     )
     table.cell(
         biasPanel,
         1,
-        7,
-        poiTimeframe,
-        bgcolor = panelColor,
-        text_color = textColor
-    )
-    table.cell(
-        biasPanel,
-        0,
-        8,
-        "POI status",
-        bgcolor = panelColor,
-        text_color = mutedTextColor,
-        text_halign = text.align_left
-    )
-    table.cell(
-        biasPanel,
-        1,
-        8,
-        f_fvg_status_text(poiStatus),
-        bgcolor = panelColor,
-        text_color = poiStatus == 1 ? bullishColor :
-            poiStatus == 2 ? warningColor :
-            neutralColor
-    )
-    table.cell(
-        biasPanel,
-        0,
-        9,
-        "Price location",
-        bgcolor = panelColor,
-        text_color = mutedTextColor,
-        text_halign = text.align_left
-    )
-    table.cell(
-        biasPanel,
-        1,
-        9,
-        poiLocation,
+        5,
+        f_fvg_status_text(poiStatus) + " · " + poiLocation,
         bgcolor = priceInsidePoi or priceTouchesPoi ?
             color.new(warningColor, 86) :
             panelColor,
         text_color = priceInsidePoi or priceTouchesPoi ?
             warningColor :
-            neutralColor
+            poiStatus == 1 ? bullishColor :
+            poiStatus == 2 ? warningColor :
+            neutralColor,
+        text_size = size.tiny
     )
     table.cell(
         biasPanel,
         0,
-        10,
+        6,
         "Model",
         bgcolor = panelColor,
         text_color = mutedTextColor,
-        text_halign = text.align_left
+        text_halign = text.align_left,
+        text_size = size.tiny
     )
     table.cell(
         biasPanel,
         1,
-        10,
-        "SWING + FVG v0.2.1",
+        6,
+        "v0.2.2",
         bgcolor = panelColor,
-        text_color = mutedTextColor
+        text_color = mutedTextColor,
+        text_size = size.tiny
     )

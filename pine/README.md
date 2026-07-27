@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.2.1-alpha
+Version: v0.2.2-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -49,6 +49,17 @@ Selection rules:
 - Only the latest Bullish and Bearish candidate on each HTF is tracked.
 
 This is a POI candidate, not a valid Entry FVG. Displacement, Structure, CISD, and setup-window confirmation are not implemented yet.
+
+## Compact Dashboard
+
+The dashboard uses seven rows and `tiny` text to reduce chart obstruction:
+
+- HTF: grouped Primary and Secondary states
+- Bias: Combined Bias and Confidence
+- Context: HTF alignment
+- POI: selected timeframe, direction, and FVG type
+- Status: FVG status and current price location
+- Model: Pine version
 
 ## Non-Repainting Baseline
 
