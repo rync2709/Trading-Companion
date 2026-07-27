@@ -2,16 +2,16 @@
 
 Trading Companion is the web application for the Trading OS decision framework. It is built from the original ICT/SMC Trade Entry Checklist.
 
-Trading Companion now combines the guided decision workflow, Trade Journal, performance statistics, searchable Trade Database, Weekly Review, daily Session Planner, manual context Watchlist, practical risk tools, a Rulebook-based Decision Assistant, a supported TradingView evidence workflow, and a personal Playbook Library. Real-use validation continues across the earlier phases while Phase 11 is developed.
+Trading Companion now combines the guided decision workflow, Trade Journal, performance statistics, searchable Trade Database, Weekly Review, daily Session Planner, manual context Watchlist, practical risk tools, a Rulebook-based Decision Assistant, a supported TradingView evidence workflow, a personal Playbook Library, and a dedicated Validation Center. The current sprint focuses on turning real-use records into reliable calibration evidence.
 
 ## Current Status
 
 - Product name: Trading Companion
 - Decision framework: Trading OS
 - Repository name: Trading-Companion
-- Phase: 11 - Playbook Library (in progress)
-- Phase 1 validation: collecting 20 real-use outcomes
-- Version: v0.11.0
+- Phase: Validation Sprint after Phase 11
+- Validation target: 20 real-use outcomes with at least 80% R and review coverage
+- Version: v0.11.1
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -164,6 +164,18 @@ The first Phase 11 milestone includes:
 - Personal Rules, What Worked, and Avoid Next Time notes
 - Local-only Playbook data with no cloud upload
 
+## Validation Sprint
+
+The v0.11.1 validation milestone includes:
+
+- Dedicated Validation Center linked from the Dashboard and app navigation
+- Four explicit v1.0 readiness checks
+- Evidence target, Realized R coverage, post-trade review coverage, and pending-action tracking
+- Grade calibration across A+, A, B, and NO TRADE
+- Win/Loss comparison for every versioned score category
+- Review Queue for Open Trades, pending SKIP reviews, missing Actual Exit, and incomplete Journal reviews
+- Read-only analysis of local records with no cloud upload
+
 ## Repository Structure
 
 ```text
@@ -181,6 +193,7 @@ The first Phase 11 milestone includes:
 |-- integration.html
 |-- report.html
 |-- playbooks.html
+|-- validation.html
 |-- checklist.html
 |-- manifest.json
 |-- sw.js

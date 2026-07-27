@@ -2,6 +2,23 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## v0.11.1 - 2026-07-27
+
+### Added
+
+- Added a dedicated Validation Center for the real-use calibration sprint.
+- Added four explicit v1.0 readiness checks.
+- Added Realized R, post-trade review, and Screenshot evidence coverage.
+- Added Grade Calibration for A+, A, B, and NO TRADE.
+- Added Win/Loss score-category comparison using the versioned score breakdown.
+- Added a Review Queue for Open Trades, pending SKIP reviews, missing Actual Exit, and incomplete Journal reviews.
+- Added Validation Center links to the Dashboard and app navigation.
+
+### Changed
+
+- Defined an 80% minimum target for Realized R and post-trade review coverage.
+- Updated the PWA cache for the Validation Sprint release.
+
 ## v0.11.0 - 2026-07-27
 
 ### Added

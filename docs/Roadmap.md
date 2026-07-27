@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.0
+Version: v0.11.1
 Status: Master product roadmap
 
 ## Product Direction
@@ -554,6 +554,32 @@ Expected long-term value:
 
 - Trading OS becomes a knowledge base built from the trader's own experience, not just a checklist.
 
+## Validation Sprint - v1.0 Readiness
+
+Goal: make the remaining real-use validation work measurable before calibrating the Score and Rulebook.
+
+Status: In progress.
+
+First milestone:
+
+- [x] Add a dedicated Validation Center.
+- [x] Keep the existing target of 20 validated outcomes.
+- [x] Track Realized R and post-trade review coverage.
+- [x] Define 80% minimum coverage targets for Calibration readiness.
+- [x] Add Grade Calibration for A+, A, B, and NO TRADE.
+- [x] Compare every versioned score category across Win and Loss records.
+- [x] Add a Review Queue for incomplete evidence.
+- [ ] Collect at least 20 real-use outcomes.
+- [ ] Reach at least 80% Realized R coverage.
+- [ ] Reach at least 80% post-trade review coverage.
+- [ ] Resolve all pending SKIP reviews.
+- [ ] Review score-category differences before changing any weight.
+
+Important rule:
+
+- Validation Center reports evidence quality but does not automatically change scoring weights.
+- Score changes require a documented review after the minimum sample and coverage targets are met.
+
 ## Future Project Structure
 
 Target structure for the larger app:
@@ -636,4 +662,5 @@ Expected outputs:
 | v0.9.0 | Local Decision Assistant prototype |
 | v0.10.0 | TradingView evidence workflow and Journal export |
 | v0.11.0 | Personal Playbook Library |
+| v0.11.1 | Real-use Validation Center and v1.0 readiness |
 | v1.0.0 | Trading OS MVP |

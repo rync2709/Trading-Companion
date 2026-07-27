@@ -1,4 +1,4 @@
-const CACHE = 'trading-companion-v0.11.0';
+const CACHE = 'trading-companion-v0.11.1';
 const ASSETS = [
   './',
   './index.html',
@@ -14,6 +14,7 @@ const ASSETS = [
   './integration.html',
   './report.html',
   './playbooks.html',
+  './validation.html',
   './checklist.html',
   './manifest.json',
   './assets/app-icon.svg',
@@ -22,6 +23,7 @@ const ASSETS = [
   './icons/icon-512.png',
   './css/style.css',
   './css/style.css?v=0.8.0',
+  './css/style.css?v=0.11.1',
   './css/dashboard.css?v=0.8.3',
   './css/wizard.css',
   './css/journal.css?v=0.8.2',
@@ -35,6 +37,7 @@ const ASSETS = [
   './css/integration.css?v=0.10.0',
   './css/report.css?v=0.10.0',
   './css/playbooks.css?v=0.11.0',
+  './css/validation.css?v=0.11.1',
   './js/app.js',
   './js/storage.js',
   './js/storage.js?v=0.8.0',
@@ -43,6 +46,7 @@ const ASSETS = [
   './js/storage.js?v=0.9.0',
   './js/storage.js?v=0.10.0',
   './js/storage.js?v=0.11.0',
+  './js/storage.js?v=0.11.1',
   './js/media.js',
   './js/logic.js',
   './js/logic.js?v=0.9.0',
@@ -58,7 +62,8 @@ const ASSETS = [
   './js/tools.js?v=0.8.1',
   './js/integration.js?v=0.10.0',
   './js/report.js?v=0.10.0',
-  './js/playbooks.js?v=0.11.0'
+  './js/playbooks.js?v=0.11.0',
+  './js/validation.js?v=0.11.1'
 ];
 
 self.addEventListener('install', event => {

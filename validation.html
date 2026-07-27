@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0e1112">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Trading Companion">
+  <title>Validation Center | Trading Companion</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css?v=0.11.1">
+  <link rel="stylesheet" href="css/validation.css?v=0.11.1">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html" aria-label="Trading Companion Dashboard">
+        <img src="assets/app-icon.svg" alt="">
+        <span class="brand-copy">
+          <span class="brand-name">Trading Companion</span>
+          <span class="brand-phase">Trading OS · Validation Sprint</span>
+        </span>
+      </a>
+
+      <nav class="topnav" aria-label="เมนูหลัก">
+        <a class="nav-link" href="index.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-home"></use></svg>
+          Dashboard
+        </a>
+        <a class="nav-link" href="trade.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-plus"></use></svg>
+          New Trade
+        </a>
+        <a class="nav-link" href="journal.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+          Journal
+        </a>
+        <a class="nav-link" href="stats.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-chart"></use></svg>
+          Statistics
+        </a>
+        <a class="nav-link" href="database.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-database"></use></svg>
+          Database
+        </a>
+        <a class="nav-link" href="weekly.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calendar-check"></use></svg>
+          Weekly Review
+        </a>
+        <a class="nav-link" href="planner.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-clock"></use></svg>
+          Session Planner
+        </a>
+        <details class="topnav-more">
+          <summary class="nav-link" aria-current="page" title="More tools">
+            <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-more"></use></svg>
+            <span class="sr-only">More tools</span>
+          </summary>
+          <div class="topnav-more-menu">
+            <a class="nav-link" href="watchlist.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-eye"></use></svg>
+              Watchlist
+            </a>
+            <a class="nav-link" href="assistant.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-sparkles"></use></svg>
+              Decision Assistant
+            </a>
+            <a class="nav-link" href="tools.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calculator"></use></svg>
+              Advanced Tools
+            </a>
+            <a class="nav-link" href="integration.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-external-link"></use></svg>
+              TradingView Hub
+            </a>
+            <a class="nav-link" href="playbooks.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+              Playbooks
+            </a>
+            <a class="nav-link" href="validation.html" aria-current="page">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-shield"></use></svg>
+              Validation Center
+            </a>
+            <a class="nav-link" href="checklist.html">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-list-checks"></use></svg>
+              Classic Checklist
+            </a>
+          </div>
+        </details>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-shell" id="validationCenter">
+    <header class="validation-heading">
+      <div class="page-heading">
+        <p class="eyebrow">v0.11.1 · Real-use calibration</p>
+        <h1>Validation Center</h1>
+        <p class="lede">ตรวจว่าข้อมูลจริงครบพอสำหรับปรับ Score, Rulebook และพา Trading OS ไปสู่ v1.0 หรือยัง</p>
+      </div>
+      <a class="button button-secondary" href="journal.html">
+        <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+        เปิด Journal
+      </a>
+    </header>
+
+    <section class="validation-status" id="validationCenterStatus" data-state="waiting" aria-live="polite">
+      <span class="status-pill" data-state="waiting">
+        <span class="status-dot"></span>
+        <span class="pill-copy">COLLECTING EVIDENCE</span>
+      </span>
+      <p id="validationCenterMessage">กำลังอ่านข้อมูลจากอุปกรณ์นี้</p>
+    </section>
+
+    <section class="validation-metric-grid" aria-label="Validation summary">
+      <article class="validation-metric">
+        <span>Validated evidence</span>
+        <strong id="validationEvidence">0 / 20</strong>
+        <small>Closed outcomes + Reviewed skips</small>
+        <div class="progress-track validation-evidence-progress" role="progressbar" aria-label="Validated evidence progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="progress-value" id="validationEvidenceProgress"></div>
+        </div>
+      </article>
+      <article class="validation-metric">
+        <span>Closed outcomes</span>
+        <strong id="validationClosed">0</strong>
+        <small>Trade ที่ปิด Win, Loss หรือ BE</small>
+      </article>
+      <article class="validation-metric">
+        <span>Reviewed skips</span>
+        <strong id="validationSkips">0</strong>
+        <small>GOOD SKIP หรือ MISSED MOVE</small>
+      </article>
+      <article class="validation-metric">
+        <span>R coverage</span>
+        <strong id="validationRCoverage">0%</strong>
+        <small>Closed Trade ที่มี Realized R</small>
+      </article>
+      <article class="validation-metric">
+        <span>Review coverage</span>
+        <strong id="validationReviewCoverage">0%</strong>
+        <small>Closed Trade ที่มี Emotion + Lesson</small>
+      </article>
+      <article class="validation-metric">
+        <span>Pending actions</span>
+        <strong id="validationPending">0</strong>
+        <small>ข้อมูลที่ควรเติมก่อน Calibration</small>
+      </article>
+    </section>
+
+    <section class="validation-grid" aria-label="v1.0 readiness and evidence quality">
+      <article class="panel validation-panel">
+        <header class="validation-panel-heading">
+          <div>
+            <h2>v1.0 Readiness</h2>
+            <p>เกณฑ์ขั้นต่ำก่อนทบทวนน้ำหนักคะแนนรอบหลัก</p>
+          </div>
+          <span id="validationReadinessCount">0 / 4</span>
+        </header>
+        <ul class="validation-readiness" id="validationReadiness"></ul>
+      </article>
+
+      <article class="panel validation-panel">
+        <header class="validation-panel-heading">
+          <div>
+            <h2>Evidence Quality</h2>
+            <p>ความครบถ้วนของ Closed Trade ใน Journal</p>
+          </div>
+        </header>
+        <div class="validation-coverage-list">
+          <div class="validation-coverage-row">
+            <span>Realized R</span>
+            <strong id="validationRValue">0 / 0</strong>
+            <div class="progress-track" aria-hidden="true">
+              <div class="progress-value" id="validationRBar"></div>
+            </div>
+          </div>
+          <div class="validation-coverage-row">
+            <span>Emotion + Lesson</span>
+            <strong id="validationReviewValue">0 / 0</strong>
+            <div class="progress-track" aria-hidden="true">
+              <div class="progress-value" id="validationReviewBar"></div>
+            </div>
+          </div>
+          <div class="validation-coverage-row">
+            <span>Screenshot evidence</span>
+            <strong id="validationScreenshotValue">0 / 0</strong>
+            <div class="progress-track" aria-hidden="true">
+              <div class="progress-value" id="validationScreenshotBar"></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="validation-section panel validation-panel" aria-labelledby="gradeCalibrationHeading">
+      <header class="validation-panel-heading">
+        <div>
+          <h2 id="gradeCalibrationHeading">Grade Calibration</h2>
+          <p>เปรียบเทียบผลลัพธ์จริงของ A+, A, B และ NO TRADE โดยไม่ตีความข้อมูลที่ยังไม่ครบเป็นศูนย์</p>
+        </div>
+      </header>
+      <div class="validation-table-wrap">
+        <table class="validation-table">
+          <thead>
+            <tr>
+              <th scope="col">Grade</th>
+              <th scope="col">Evidence</th>
+              <th scope="col">Closed</th>
+              <th scope="col">Win Rate</th>
+              <th scope="col">Average R</th>
+              <th scope="col">Good Skip</th>
+            </tr>
+          </thead>
+          <tbody id="validationGradeRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="validation-section panel validation-panel" aria-labelledby="scoreSignalHeading">
+      <header class="validation-panel-heading">
+        <div>
+          <h2 id="scoreSignalHeading">Score Category Signal</h2>
+          <p>ค่าเฉลี่ยของแต่ละหมวดใน Win เทียบกับ Loss ใช้เป็นหลักฐานประกอบการปรับน้ำหนัก ไม่ใช่คำแนะนำให้เข้าเทรด</p>
+        </div>
+      </header>
+      <div class="validation-table-wrap">
+        <table class="validation-table">
+          <thead>
+            <tr>
+              <th scope="col">Score category</th>
+              <th scope="col">Wins</th>
+              <th scope="col">Win avg.</th>
+              <th scope="col">Losses</th>
+              <th scope="col">Loss avg.</th>
+              <th scope="col">Difference</th>
+            </tr>
+          </thead>
+          <tbody id="validationSignalRows"></tbody>
+        </table>
+      </div>
+      <p class="validation-table-empty" id="validationSignalEmpty">ต้องมีทั้ง Win และ Loss จาก Score Profile ปัจจุบันก่อนจึงจะแสดง Signal</p>
+    </section>
+
+    <section class="validation-section panel validation-panel" aria-labelledby="validationQueueHeading">
+      <header class="validation-panel-heading">
+        <div>
+          <h2 id="validationQueueHeading">Review Queue</h2>
+          <p>เรียงสิ่งที่ควรทำต่อเพื่อให้ข้อมูลพร้อมสำหรับ Calibration</p>
+        </div>
+        <span id="validationQueueCount">0 รายการ</span>
+      </header>
+      <div class="validation-queue" id="validationQueue"></div>
+      <p class="validation-queue-empty" id="validationQueueEmpty">ไม่มีข้อมูลค้าง ระบบพร้อมใช้หลักฐานที่มีในการทบทวนรอบถัดไป</p>
+    </section>
+  </main>
+
+  <nav class="mobile-nav" aria-label="เมนูมือถือ">
+    <a class="nav-link" href="index.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-home"></use></svg>
+      Dashboard
+    </a>
+    <a class="nav-link" href="trade.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-plus"></use></svg>
+      New Trade
+    </a>
+    <a class="nav-link" href="journal.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+      Journal
+    </a>
+    <a class="nav-link" href="stats.html">
+      <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-chart"></use></svg>
+      Statistics
+    </a>
+    <details class="mobile-more">
+      <summary class="nav-link" aria-current="page">
+        <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-more"></use></svg>
+        More
+      </summary>
+      <div class="mobile-more-menu">
+        <a class="nav-link" href="database.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-database"></use></svg>
+          Database
+        </a>
+        <a class="nav-link" href="weekly.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calendar-check"></use></svg>
+          Weekly Review
+        </a>
+        <a class="nav-link" href="planner.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-clock"></use></svg>
+          Session Planner
+        </a>
+        <a class="nav-link" href="watchlist.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-eye"></use></svg>
+          Watchlist
+        </a>
+        <a class="nav-link" href="assistant.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-sparkles"></use></svg>
+          Decision Assistant
+        </a>
+        <a class="nav-link" href="tools.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-calculator"></use></svg>
+          Advanced Tools
+        </a>
+        <a class="nav-link" href="integration.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-external-link"></use></svg>
+          TradingView Hub
+        </a>
+        <a class="nav-link" href="playbooks.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-book-open"></use></svg>
+          Playbooks
+        </a>
+        <a class="nav-link" href="validation.html" aria-current="page">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-shield"></use></svg>
+          Validation Center
+        </a>
+        <a class="nav-link" href="checklist.html">
+          <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-list-checks"></use></svg>
+          Classic Checklist
+        </a>
+      </div>
+    </details>
+  </nav>
+
+  <script src="js/storage.js?v=0.11.1"></script>
+  <script src="js/app.js"></script>
+  <script src="js/validation.js?v=0.11.1"></script>
+</body>
+</html>
