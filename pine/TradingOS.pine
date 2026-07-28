@@ -8,8 +8,8 @@ indicator(
     max_labels_count = 300
 )
 
-// Trading OS Pine Track v0.11.1-alpha
-// Modules: confirmed 4H/1H Bias, aligned HTF FVG and Order Block context,
+// Trading OS Pine Track v0.11.2-alpha
+// Modules: confirmed 4H/1H Bias, aligned HTF FVG and latest Order Block context,
 // daily liquidity, confirmed execution-chart BOS/CHOCH/MSS, strict CISD
 // context, execution-chart displacement with follow-through, Entry FVG
 // confirmation, an automated setup score, a locked Entry/Risk planning
@@ -45,8 +45,8 @@ int obSourceSearchCandles = input.int(
 )
 bool showHtfOrderBlocks = input.bool(
     true,
-    "Show aligned HTF Order Blocks",
-    tooltip = "Draws the latest active 4H and 1H Order Blocks aligned with HTF Bias. Departure strength uses the Displacement thresholds.",
+    "Show latest HTF Order Blocks",
+    tooltip = "Draws the latest active 4H and 1H Order Blocks. Zones aligned with HTF Bias use directional color; unaligned zones remain visible in gray.",
     group = "HTF Order Block"
 )
 int structureSwingLength = input.int(
@@ -1050,9 +1050,17 @@ color alignmentColor = (
     neutralColor
 )
 
+bool primaryBullObAvailable = f_ob_active(primaryBullObStatus)
+bool primaryBearObAvailable = f_ob_active(primaryBearObStatus)
 int primaryObDirection = (
-    combinedState == 1 and f_ob_active(primaryBullObStatus) ? 1 :
-    combinedState == -1 and f_ob_active(primaryBearObStatus) ? -1 :
+    primaryBullObAvailable and primaryBearObAvailable ?
+    (
+        nz(primaryBullObStart, 0) >= nz(primaryBearObStart, 0) ?
+        1 :
+        -1
+    ) :
+    primaryBullObAvailable ? 1 :
+    primaryBearObAvailable ? -1 :
     0
 )
 float primaryObTop = (
@@ -1079,10 +1087,22 @@ bool primaryObActive = (
     primaryObDirection != 0 and
     f_ob_active(primaryObStatus)
 )
+bool primaryObAligned = (
+    combinedState != 0 and
+    primaryObDirection == combinedState
+)
 
+bool secondaryBullObAvailable = f_ob_active(secondaryBullObStatus)
+bool secondaryBearObAvailable = f_ob_active(secondaryBearObStatus)
 int secondaryObDirection = (
-    combinedState == 1 and f_ob_active(secondaryBullObStatus) ? 1 :
-    combinedState == -1 and f_ob_active(secondaryBearObStatus) ? -1 :
+    secondaryBullObAvailable and secondaryBearObAvailable ?
+    (
+        nz(secondaryBullObStart, 0) >= nz(secondaryBearObStart, 0) ?
+        1 :
+        -1
+    ) :
+    secondaryBullObAvailable ? 1 :
+    secondaryBearObAvailable ? -1 :
     0
 )
 float secondaryObTop = (
@@ -1108,6 +1128,10 @@ int secondaryObStatus = (
 bool secondaryObActive = (
     secondaryObDirection != 0 and
     f_ob_active(secondaryObStatus)
+)
+bool secondaryObAligned = (
+    combinedState != 0 and
+    secondaryObDirection == combinedState
 )
 
 bool primaryBullAvailable = f_fvg_active(primaryBullStatus)
@@ -1929,11 +1953,16 @@ if barstate.islast
         primaryObActive and
         not na(primaryObStart)
     )
-        color primaryObColor = f_state_color(primaryObDirection)
+        color primaryObColor = (
+            primaryObAligned ?
+            f_state_color(primaryObDirection) :
+            neutralColor
+        )
         string primaryObText = (
             f_timeframe_label(primaryTimeframe) + " " +
             f_state_short(primaryObDirection) + " OB · " +
-            f_ob_status_text(primaryObStatus)
+            f_ob_status_text(primaryObStatus) +
+            (primaryObAligned ? "" : " · UNALIGNED")
         )
         if na(primaryObBox)
             primaryObBox := box.new(
@@ -1981,11 +2010,16 @@ if barstate.islast
         secondaryObActive and
         not na(secondaryObStart)
     )
-        color secondaryObColor = f_state_color(secondaryObDirection)
+        color secondaryObColor = (
+            secondaryObAligned ?
+            f_state_color(secondaryObDirection) :
+            neutralColor
+        )
         string secondaryObText = (
             f_timeframe_label(secondaryTimeframe) + " " +
             f_state_short(secondaryObDirection) + " OB · " +
-            f_ob_status_text(secondaryObStatus)
+            f_ob_status_text(secondaryObStatus) +
+            (secondaryObAligned ? "" : " · UNALIGNED")
         )
         if na(secondaryObBox)
             secondaryObBox := box.new(
@@ -3025,7 +3059,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.11.1",
+        "TRADING OS · HTF v0.11.2",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,

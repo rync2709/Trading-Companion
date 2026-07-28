@@ -12,7 +12,7 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Phase: Validation Sprint after Phase 11
 - Validation target: 20 real-use outcomes with at least 80% R and review coverage
 - Version: v0.11.1
-- Pine indicator: v0.11.1-alpha - centered Structure event labels
+- Pine indicator: v0.11.2-alpha - latest HTF Order Blocks with gray unaligned context
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -330,6 +330,12 @@ The eleventh Pine milestone adds:
 The v0.11.1 presentation update moves BOS, CHOCH, and MSS labels from the break
 candle to the midpoint of each historical Structure line. Detection, line
 coordinates, Dashboard size, scoring, and Alerts remain unchanged.
+
+The v0.11.2 OB visibility update keeps the latest active 4H and 1H Order Block
+visible even when it does not align with the combined HTF Bias. Aligned zones
+keep their directional color; unaligned zones are gray and labeled
+`UNALIGNED`. This display change does not affect POI selection, scoring, Grade,
+or Alerts.
 
 The Pine source and TradingView test notes are stored under `pine/`.
 

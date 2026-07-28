@@ -2,6 +2,33 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.11.2-alpha - 2026-07-28
+
+### Changed
+
+- Removed the combined HTF Bias gate from Order Block chart visibility.
+- When both Bullish and Bearish OBs remain active on one HTF, the zone with the
+  newest source candle is shown.
+- Kept Bias-aligned OBs in their directional color and changed unaligned OBs
+  to neutral gray with an `UNALIGNED` label.
+
+### Kept
+
+- Kept selected FVG POI, score, Grade, Alerts, and automatic execution behavior
+  unchanged.
+
+### Validated
+
+- Compiled Pine v0.11.2-alpha successfully in TradingView Pine Editor.
+- Confirmed a gray `1H BEAR OB · FRESH · UNALIGNED` zone remains visible while
+  the Dashboard reports `4H NEUTRAL · 1H BEAR`.
+- Confirmed one valid indicator instance and no compile or runtime errors on
+  XAUUSD at 5M, 15M, and 1H.
+- Returned the chart to 15M and saved the private script as
+  `Trading OS HTF Context v0.11.2` without publishing.
+- Confirmed the local Pine source exactly matches the compiled and saved
+  TradingView payload.
+
 ## Pine v0.11.1-alpha - 2026-07-28
 
 ### Changed

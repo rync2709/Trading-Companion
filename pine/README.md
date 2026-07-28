@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.11.1-alpha
+Version: v0.11.2-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -9,7 +9,7 @@ The Pine track automates selected Trading OS context checks without replacing tr
 `TradingOS.pine` currently implements:
 
 - Module 1: HTF Bias baseline
-- Module 2 baseline: aligned HTF FVG candidate and HTF Order Block chart context
+- Module 2 baseline: aligned HTF FVG candidate and latest HTF Order Block chart context
 - Module 4 baseline: Previous Day High/Low liquidity
 - Module 5 baseline: execution-chart BOS/CHOCH/MSS
 - Module 6 baseline: strict execution-chart CISD
@@ -86,7 +86,11 @@ The v0.11.0 Order Block baseline scans completed 4H and 1H candles:
 - Bullish invalidation requires a completed HTF close below the OB low.
 - Bearish invalidation requires a completed HTF close above the OB high.
 - First price overlap changes the state from `FRESH` to `MITIGATED`.
-- Only OBs aligned with the combined HTF Bias are drawn.
+- The latest active OB on each HTF is drawn regardless of combined HTF Bias.
+- When Bullish and Bearish OBs are both active on one HTF, the newest source
+  candle determines which zone is shown.
+- Bias-aligned OBs use their directional color.
+- Unaligned OBs use neutral gray and include `UNALIGNED` in the box label.
 - The latest active 4H and 1H zones can appear together.
 - The 4H box uses a stronger dashed border; the 1H box is lighter.
 
@@ -403,6 +407,15 @@ Compile status:
   source swing and confirmed break bar.
 - Saved the private TradingView script as
   `Trading OS HTF Context v0.11.1` without publishing.
+- The v0.11.2 OB visibility update compiled successfully in TradingView.
+- Confirmed a gray `1H BEAR OB · FRESH · UNALIGNED` zone remains visible while
+  the Dashboard reports `4H NEUTRAL · 1H BEAR`.
+- Confirmed one valid indicator instance and no compile or runtime errors on
+  XAUUSD at 5M, 15M, and 1H.
+- Returned the chart to 15M and saved the private script as
+  `Trading OS HTF Context v0.11.2` without publishing.
+- Confirmed the local Pine source exactly matches the compiled and saved
+  TradingView payload.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.

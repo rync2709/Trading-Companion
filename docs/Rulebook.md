@@ -1,6 +1,6 @@
 # Trading OS Rulebook
 
-Version: v0.1.4
+Version: v0.1.5
 Phase: 1 - Core Trading App
 
 ## Purpose
@@ -96,7 +96,10 @@ Initial automated Order Block baseline:
 - A first overlap changes the zone from Fresh to Mitigated.
 - Invalidate a Bullish OB after a completed HTF close below its low.
 - Invalidate a Bearish OB after a completed HTF close above its high.
-- Show only 4H and 1H zones aligned with the active HTF Bias.
+- Keep the latest active 4H and 1H zones visible as chart context.
+- Use the directional color for zones aligned with the active HTF Bias.
+- Show unaligned zones in gray with an `UNALIGNED` label and do not count them
+  toward POI scoring or Alerts.
 - Treat the current implementation as chart context until manual calibration
   supports using it in POI scoring.
 

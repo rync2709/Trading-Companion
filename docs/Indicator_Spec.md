@@ -1,6 +1,6 @@
 # Trading OS Indicator Specification
 
-Version: v0.3.3
+Version: v0.3.4
 Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, Risk / Entry, Score, Alert, and HTF Order Block baselines
 
 ## Purpose
@@ -83,7 +83,7 @@ These inputs remain required for later confidence calibration and should not be 
 
 ## Module 2 - HTF POI
 
-Implementation status: `Pine v0.11.0-alpha - FVG candidate plus aligned 4H/1H Order Block chart context`
+Implementation status: `Pine v0.11.2-alpha - FVG candidate plus latest 4H/1H Order Block chart context`
 
 Input:
 
@@ -130,7 +130,10 @@ Initial Order Block heuristic:
 - Mark the zone `MITIGATED` after price first overlaps it.
 - Invalidate Bullish OB after a completed HTF close below its low.
 - Invalidate Bearish OB after a completed HTF close above its high.
-- Draw only active zones aligned with the combined HTF Bias.
+- Select the newest active Bullish or Bearish OB on each HTF by source time.
+- Draw the latest active zone regardless of the combined HTF Bias.
+- Use the directional color when the OB aligns with the combined HTF Bias.
+- Use neutral gray and the `UNALIGNED` flag when it does not align.
 - Allow the latest active Primary 4H and Secondary 1H zones to appear together.
 
 Current limitation:

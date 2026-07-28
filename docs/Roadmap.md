@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.11.1-alpha
+Version: v0.11.1 / Pine v0.11.2-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -700,6 +700,9 @@ First milestone:
 - [x] Compile, load, smoke-test, and save Pine v0.11.0 privately in TradingView.
 - [x] Move BOS/CHOCH/MSS labels to the midpoint of each Structure line.
 - [x] Compile and save Pine v0.11.1 privately in TradingView.
+- [x] Keep the latest active 4H and 1H Order Block visible regardless of Bias.
+- [x] Show unaligned Order Blocks in gray with an `UNALIGNED` label.
+- [x] Compile, smoke-test, and save Pine v0.11.2 privately in TradingView.
 - [ ] Compare Order Block source, mitigation, and invalidation against manual
   4H/1H markup.
 - [ ] Compare the output against manually marked 4H/1H structure.
@@ -781,4 +784,5 @@ Expected outputs:
 | Pine v0.10.0-alpha | Configurable confirmed-bar Alert System |
 | Pine v0.11.0-alpha | Aligned 4H/1H Order Block chart context |
 | Pine v0.11.1-alpha | Centered BOS/CHOCH/MSS Structure labels |
+| Pine v0.11.2-alpha | Latest active HTF Order Block visibility with gray unaligned context |
 | v1.0.0 | Trading OS MVP |
