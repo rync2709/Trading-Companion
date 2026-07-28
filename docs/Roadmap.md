@@ -730,7 +730,7 @@ First milestone:
   `trading-companion.alert.v1` JSON.
 - [x] Include Manual or Automatic Narrative, State, Score, Grade, Checklist,
   Risk Plan, Symbol, Timeframe, and event time.
-- [ ] Compile, smoke-test, and save Pine v0.14.0 privately in TradingView.
+- [x] Compile, smoke-test, and save Pine v0.14.0 privately in TradingView.
 - [ ] Compare Order Block source, mitigation, and invalidation against manual
   4H/1H markup.
 - [ ] Compare Breaker activation, mitigation, and invalidation against manual

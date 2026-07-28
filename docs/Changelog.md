@@ -55,11 +55,17 @@ All notable changes to Trading OS will be documented in this file.
 - Kept chart drawings and automatic calculations unchanged.
 - Kept the payload as decision support only; it does not place an order.
 
-### Pending Validation
+### Validated
 
-- Compile Pine v0.14.0-alpha in TradingView Pine Editor.
-- Smoke-test one valid indicator instance at 5M, 15M, 1H, and 4H.
-- Save the private script without publishing.
+- Compiled Pine v0.14.0-alpha successfully in TradingView Pine Editor.
+- Confirmed one valid indicator instance and no compile or runtime errors on
+  XAUUSD at 5M, 15M, 1H, and 4H.
+- Confirmed the compact Dashboard remains unchanged and starts in
+  `Manual · Neutral · 0/100`.
+- Removed the previous v0.13.0 chart instance, returned the chart to 15M, and
+  saved the layout.
+- Saved the private script as `Trading OS HTF Context v0.14.0` without
+  publishing.
 
 ## Pine v0.13.0-alpha - 2026-07-28
 

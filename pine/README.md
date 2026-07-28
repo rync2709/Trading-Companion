@@ -462,8 +462,13 @@ Compile status:
   `Trading OS HTF Context v0.13.0` without publishing.
 - Pine v0.14.0 now emits the versioned
   `trading-companion.alert.v1` JSON payload from confirmed-bar Alert events.
-- TradingView compile, multi-timeframe smoke testing, and private save remain
-  pending for Pine v0.14.0.
+- Pine v0.14.0 compiled successfully in TradingView Pine Editor.
+- Confirmed one valid v0.14.0 indicator instance and no compile or runtime
+  errors on XAUUSD at 5M, 15M, 1H, and 4H.
+- Removed the previous v0.13.0 chart instance, returned the chart to 15M, and
+  saved the layout.
+- Saved the private TradingView script as
+  `Trading OS HTF Context v0.14.0` without publishing.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.
