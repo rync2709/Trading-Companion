@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.10.0-alpha
+Version: v0.11.1 / Pine v0.11.0-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -693,6 +693,13 @@ First milestone:
 - [x] Compile, load, smoke-test, and save Pine v0.10.0 privately in TradingView.
 - [ ] Create a temporary running TradingView alert and validate realtime
   notification delivery.
+- [x] Detect the latest 4H and 1H Order Block from a qualified HTF departure.
+- [x] Track Fresh, Mitigated, and Invalid Order Block states.
+- [x] Draw aligned 4H and 1H Order Blocks at actual source time and price.
+- [x] Keep Order Block context separate from scoring and Alerts.
+- [x] Compile, load, smoke-test, and save Pine v0.11.0 privately in TradingView.
+- [ ] Compare Order Block source, mitigation, and invalidation against manual
+  4H/1H markup.
 - [ ] Compare the output against manually marked 4H/1H structure.
 - [ ] Compare FVG candidates and status transitions against manual markup.
 - [ ] Compare execution BOS/CHOCH/MSS events against manual markup.
@@ -706,7 +713,8 @@ Planned modules:
 
 - [x] HTF Bias baseline
 - [x] HTF POI - FVG candidate baseline
-- [ ] HTF POI - OB, Breaker, Liquidity, and Premium/Discount
+- [x] HTF POI - Order Block chart-context baseline
+- [ ] HTF POI - Breaker, Liquidity, and Premium/Discount
 - [x] Liquidity - Previous Day High/Low baseline
 - [ ] Liquidity - Asia, Equal High/Low, and Internal/External expansion
 - [x] Structure: MSS, CHOCH, BOS baseline
@@ -769,4 +777,5 @@ Expected outputs:
 | Pine v0.8.0-alpha | Provisional automated Setup State and Score Engine |
 | Pine v0.9.0-alpha | Locked Entry/Risk plan, planned RR, READY state, and final Grade |
 | Pine v0.10.0-alpha | Configurable confirmed-bar Alert System |
+| Pine v0.11.0-alpha | Aligned 4H/1H Order Block chart context |
 | v1.0.0 | Trading OS MVP |

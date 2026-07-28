@@ -1,6 +1,6 @@
 # Trading OS Rulebook
 
-Version: v0.1.3
+Version: v0.1.4
 Phase: 1 - Core Trading App
 
 ## Purpose
@@ -86,6 +86,19 @@ Invalid POI conditions:
 - Price has moved too far away from the POI.
 - POI has been fully invalidated.
 - Trade idea is being forced after the move already happened.
+
+Initial automated Order Block baseline:
+
+- Use the latest opposing HTF candle before a qualified directional departure.
+- Require the departure to show body/range expansion and close beyond prior
+  HTF range.
+- Use the source candle's full high-to-low range.
+- A first overlap changes the zone from Fresh to Mitigated.
+- Invalidate a Bullish OB after a completed HTF close below its low.
+- Invalidate a Bearish OB after a completed HTF close above its high.
+- Show only 4H and 1H zones aligned with the active HTF Bias.
+- Treat the current implementation as chart context until manual calibration
+  supports using it in POI scoring.
 
 ## Rule 3 - LTF Context
 

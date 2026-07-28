@@ -8,13 +8,14 @@ indicator(
     max_labels_count = 300
 )
 
-// Trading OS Pine Track v0.10.0-alpha
-// Modules: confirmed 4H/1H Bias, aligned HTF FVG candidates, daily liquidity,
-// confirmed execution-chart BOS/CHOCH/MSS, strict CISD context, and
-// execution-chart displacement with follow-through, Entry FVG confirmation,
-// an automated setup score, a locked Entry/Risk planning baseline, and
-// confirmed-bar event alerts. Full chart context is enabled by default. This
-// indicator remains decision support and does not generate Buy/Sell signals.
+// Trading OS Pine Track v0.11.0-alpha
+// Modules: confirmed 4H/1H Bias, aligned HTF FVG and Order Block context,
+// daily liquidity, confirmed execution-chart BOS/CHOCH/MSS, strict CISD
+// context, execution-chart displacement with follow-through, Entry FVG
+// confirmation, an automated setup score, a locked Entry/Risk planning
+// baseline, and confirmed-bar event alerts. Full chart context is enabled by
+// default. This indicator remains decision support and does not generate
+// Buy/Sell signals.
 
 string primaryTimeframe = input.timeframe("240", "Primary HTF", group = "HTF Bias")
 string secondaryTimeframe = input.timeframe("60", "Secondary HTF", group = "HTF Bias")
@@ -25,6 +26,28 @@ int swingLength = input.int(
     maxval = 20,
     tooltip = "A pivot is confirmed after this many bars on both sides.",
     group = "HTF Bias"
+)
+int obBreakLookback = input.int(
+    5,
+    "HTF break lookback",
+    minval = 2,
+    maxval = 50,
+    tooltip = "The completed HTF departure candle must close beyond this many earlier HTF candles.",
+    group = "HTF Order Block"
+)
+int obSourceSearchCandles = input.int(
+    6,
+    "Opposing candle search",
+    minval = 1,
+    maxval = 20,
+    tooltip = "Maximum HTF candles searched for the latest opposing candle before the qualified departure.",
+    group = "HTF Order Block"
+)
+bool showHtfOrderBlocks = input.bool(
+    true,
+    "Show aligned HTF Order Blocks",
+    tooltip = "Draws the latest active 4H and 1H Order Blocks aligned with HTF Bias. Departure strength uses the Displacement thresholds.",
+    group = "HTF Order Block"
 )
 int structureSwingLength = input.int(
     3,
@@ -392,6 +415,120 @@ f_fvg_state() =>
 
 f_fvg_active(int status) =>
     status == 1 or status == 2
+
+f_ob_status_text(int status) =>
+    status == 1 ? "FRESH" :
+     status == 2 ? "MITIGATED" :
+     status == 3 ? "INVALID" :
+     "NONE"
+
+f_ob_active(int status) =>
+    status == 1 or status == 2
+
+f_ob_state(
+    int breakLookback,
+    int searchCandles,
+    int bodyLength,
+    int atrLength,
+    float minimumBodyMultiple,
+    float minimumRangeAtr,
+    float minimumBodyShare
+) =>
+    var float bullishTop = na
+    var float bullishBottom = na
+    var int bullishStart = na
+    var int bullishStatus = 0
+    var float bearishTop = na
+    var float bearishBottom = na
+    var int bearishStart = na
+    var int bearishStatus = 0
+
+    float completedBody = math.abs(close[1] - open[1])
+    float completedRange = high[1] - low[1]
+    float completedBodyShare = (
+        completedRange > 0.0 ?
+        completedBody / completedRange :
+        0.0
+    )
+    float averageBodyBaseline = ta.sma(
+        math.abs(close - open),
+        bodyLength
+    )[2]
+    float atrBaseline = ta.atr(atrLength)[2]
+    float priorHigh = ta.highest(high[2], breakLookback)
+    float priorLow = ta.lowest(low[2], breakLookback)
+    bool baselineReady = (
+        not na(averageBodyBaseline) and
+        averageBodyBaseline > 0.0 and
+        not na(atrBaseline) and
+        atrBaseline > 0.0 and
+        not na(priorHigh) and
+        not na(priorLow)
+    )
+    bool bullishDeparture = (
+        baselineReady and
+        close[1] > open[1] and
+        close[1] > priorHigh and
+        completedBody >= averageBodyBaseline * minimumBodyMultiple and
+        completedRange >= atrBaseline * minimumRangeAtr and
+        completedBodyShare >= minimumBodyShare
+    )
+    bool bearishDeparture = (
+        baselineReady and
+        close[1] < open[1] and
+        close[1] < priorLow and
+        completedBody >= averageBodyBaseline * minimumBodyMultiple and
+        completedRange >= atrBaseline * minimumRangeAtr and
+        completedBodyShare >= minimumBodyShare
+    )
+
+    float bullishCandidateTop = na
+    float bullishCandidateBottom = na
+    int bullishCandidateStart = na
+    float bearishCandidateTop = na
+    float bearishCandidateBottom = na
+    int bearishCandidateStart = na
+
+    if bullishDeparture
+        for offset = 2 to searchCandles + 1
+            if na(bullishCandidateStart) and close[offset] < open[offset]
+                bullishCandidateTop := high[offset]
+                bullishCandidateBottom := low[offset]
+                bullishCandidateStart := time[offset]
+
+    if bearishDeparture
+        for offset = 2 to searchCandles + 1
+            if na(bearishCandidateStart) and close[offset] > open[offset]
+                bearishCandidateTop := high[offset]
+                bearishCandidateBottom := low[offset]
+                bearishCandidateStart := time[offset]
+
+    bool bullishCreated = not na(bullishCandidateStart)
+    bool bearishCreated = not na(bearishCandidateStart)
+
+    if bullishCreated
+        bullishTop := bullishCandidateTop
+        bullishBottom := bullishCandidateBottom
+        bullishStart := bullishCandidateStart
+        bullishStatus := 1
+    else if f_ob_active(bullishStatus)
+        if close[1] < bullishBottom
+            bullishStatus := 3
+        else if low[1] <= bullishTop
+            bullishStatus := 2
+
+    if bearishCreated
+        bearishTop := bearishCandidateTop
+        bearishBottom := bearishCandidateBottom
+        bearishStart := bearishCandidateStart
+        bearishStatus := 1
+    else if f_ob_active(bearishStatus)
+        if close[1] > bearishTop
+            bearishStatus := 3
+        else if high[1] >= bearishBottom
+            bearishStatus := 2
+
+    [bullishTop, bullishBottom, bullishStart, bullishStatus, bearishTop, bearishBottom, bearishStart, bearishStatus]
 
 f_structure_event_text(int eventCode) =>
     eventCode == 1 ? "BOS" :
@@ -839,6 +976,36 @@ int secondaryState = request.security(
     gaps = barmerge.gaps_off,
     lookahead = barmerge.lookahead_on
 )
+[primaryBullObTop, primaryBullObBottom, primaryBullObStart, primaryBullObStatus, primaryBearObTop, primaryBearObBottom, primaryBearObStart, primaryBearObStatus] = request.security(
+    syminfo.tickerid,
+    primaryTimeframe,
+    f_ob_state(
+        obBreakLookback,
+        obSourceSearchCandles,
+        displacementBodyLength,
+        displacementAtrLength,
+        displacementMinimumBodyMultiple,
+        displacementMinimumRangeAtr,
+        displacementMinimumBodyShare
+    ),
+    gaps = barmerge.gaps_off,
+    lookahead = barmerge.lookahead_on
+)
+[secondaryBullObTop, secondaryBullObBottom, secondaryBullObStart, secondaryBullObStatus, secondaryBearObTop, secondaryBearObBottom, secondaryBearObStart, secondaryBearObStatus] = request.security(
+    syminfo.tickerid,
+    secondaryTimeframe,
+    f_ob_state(
+        obBreakLookback,
+        obSourceSearchCandles,
+        displacementBodyLength,
+        displacementAtrLength,
+        displacementMinimumBodyMultiple,
+        displacementMinimumRangeAtr,
+        displacementMinimumBodyShare
+    ),
+    gaps = barmerge.gaps_off,
+    lookahead = barmerge.lookahead_on
+)
 [previousDayHigh, previousDayLow] = request.security(
     syminfo.tickerid,
     "1D",
@@ -881,6 +1048,66 @@ color alignmentColor = (
     aligned ? bullishColor :
     primaryOnly ? warningColor :
     neutralColor
+)
+
+int primaryObDirection = (
+    combinedState == 1 and f_ob_active(primaryBullObStatus) ? 1 :
+    combinedState == -1 and f_ob_active(primaryBearObStatus) ? -1 :
+    0
+)
+float primaryObTop = (
+    primaryObDirection == 1 ? primaryBullObTop :
+    primaryObDirection == -1 ? primaryBearObTop :
+    na
+)
+float primaryObBottom = (
+    primaryObDirection == 1 ? primaryBullObBottom :
+    primaryObDirection == -1 ? primaryBearObBottom :
+    na
+)
+int primaryObStart = (
+    primaryObDirection == 1 ? primaryBullObStart :
+    primaryObDirection == -1 ? primaryBearObStart :
+    na
+)
+int primaryObStatus = (
+    primaryObDirection == 1 ? primaryBullObStatus :
+    primaryObDirection == -1 ? primaryBearObStatus :
+    0
+)
+bool primaryObActive = (
+    primaryObDirection != 0 and
+    f_ob_active(primaryObStatus)
+)
+
+int secondaryObDirection = (
+    combinedState == 1 and f_ob_active(secondaryBullObStatus) ? 1 :
+    combinedState == -1 and f_ob_active(secondaryBearObStatus) ? -1 :
+    0
+)
+float secondaryObTop = (
+    secondaryObDirection == 1 ? secondaryBullObTop :
+    secondaryObDirection == -1 ? secondaryBearObTop :
+    na
+)
+float secondaryObBottom = (
+    secondaryObDirection == 1 ? secondaryBullObBottom :
+    secondaryObDirection == -1 ? secondaryBearObBottom :
+    na
+)
+int secondaryObStart = (
+    secondaryObDirection == 1 ? secondaryBullObStart :
+    secondaryObDirection == -1 ? secondaryBearObStart :
+    na
+)
+int secondaryObStatus = (
+    secondaryObDirection == 1 ? secondaryBullObStatus :
+    secondaryObDirection == -1 ? secondaryBearObStatus :
+    0
+)
+bool secondaryObActive = (
+    secondaryObDirection != 0 and
+    f_ob_active(secondaryObStatus)
 )
 
 bool primaryBullAvailable = f_fvg_active(primaryBullStatus)
@@ -1693,6 +1920,113 @@ if barstate.islast
     else if not na(poiBox)
         box.delete(poiBox)
         poiBox := na
+
+var box primaryObBox = na
+var box secondaryObBox = na
+if barstate.islast
+    if (
+        showHtfOrderBlocks and
+        primaryObActive and
+        not na(primaryObStart)
+    )
+        color primaryObColor = f_state_color(primaryObDirection)
+        string primaryObText = (
+            f_timeframe_label(primaryTimeframe) + " " +
+            f_state_short(primaryObDirection) + " OB · " +
+            f_ob_status_text(primaryObStatus)
+        )
+        if na(primaryObBox)
+            primaryObBox := box.new(
+                left = primaryObStart,
+                top = primaryObTop,
+                right = time,
+                bottom = primaryObBottom,
+                xloc = xloc.bar_time,
+                extend = extend.right,
+                border_color = color.new(primaryObColor, 8),
+                border_width = 2,
+                border_style = line.style_dashed,
+                bgcolor = color.new(primaryObColor, 91),
+                text = primaryObText,
+                text_color = color.new(primaryObColor, 2),
+                text_size = size.tiny,
+                text_halign = text.align_left,
+                text_valign = text.align_bottom
+            )
+        else
+            box.set_left(primaryObBox, primaryObStart)
+            box.set_top(primaryObBox, primaryObTop)
+            box.set_right(primaryObBox, time)
+            box.set_bottom(primaryObBox, primaryObBottom)
+            box.set_extend(primaryObBox, extend.right)
+            box.set_border_color(
+                primaryObBox,
+                color.new(primaryObColor, 8)
+            )
+            box.set_bgcolor(
+                primaryObBox,
+                color.new(primaryObColor, 91)
+            )
+            box.set_text(primaryObBox, primaryObText)
+            box.set_text_color(
+                primaryObBox,
+                color.new(primaryObColor, 2)
+            )
+    else if not na(primaryObBox)
+        box.delete(primaryObBox)
+        primaryObBox := na
+
+    if (
+        showHtfOrderBlocks and
+        secondaryObActive and
+        not na(secondaryObStart)
+    )
+        color secondaryObColor = f_state_color(secondaryObDirection)
+        string secondaryObText = (
+            f_timeframe_label(secondaryTimeframe) + " " +
+            f_state_short(secondaryObDirection) + " OB · " +
+            f_ob_status_text(secondaryObStatus)
+        )
+        if na(secondaryObBox)
+            secondaryObBox := box.new(
+                left = secondaryObStart,
+                top = secondaryObTop,
+                right = time,
+                bottom = secondaryObBottom,
+                xloc = xloc.bar_time,
+                extend = extend.right,
+                border_color = color.new(secondaryObColor, 32),
+                border_width = 1,
+                border_style = line.style_dashed,
+                bgcolor = color.new(secondaryObColor, 94),
+                text = secondaryObText,
+                text_color = color.new(secondaryObColor, 18),
+                text_size = size.tiny,
+                text_halign = text.align_left,
+                text_valign = text.align_bottom
+            )
+        else
+            box.set_left(secondaryObBox, secondaryObStart)
+            box.set_top(secondaryObBox, secondaryObTop)
+            box.set_right(secondaryObBox, time)
+            box.set_bottom(secondaryObBox, secondaryObBottom)
+            box.set_extend(secondaryObBox, extend.right)
+            box.set_border_color(
+                secondaryObBox,
+                color.new(secondaryObColor, 32)
+            )
+            box.set_bgcolor(
+                secondaryObBox,
+                color.new(secondaryObColor, 94)
+            )
+            box.set_text(secondaryObBox, secondaryObText)
+            box.set_text_color(
+                secondaryObBox,
+                color.new(secondaryObColor, 18)
+            )
+    else if not na(secondaryObBox)
+        box.delete(secondaryObBox)
+        secondaryObBox := na
 
 var label pdhLabel = na
 var label pdlLabel = na
@@ -2683,7 +3017,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.10.0",
+        "TRADING OS · HTF v0.11.0",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,

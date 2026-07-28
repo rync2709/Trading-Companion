@@ -1,7 +1,7 @@
 # Trading OS Indicator Specification
 
-Version: v0.3.1
-Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, Risk / Entry, Score, and Alert baselines
+Version: v0.3.2
+Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, Risk / Entry, Score, Alert, and HTF Order Block baselines
 
 ## Purpose
 
@@ -83,7 +83,7 @@ These inputs remain required for later confidence calibration and should not be 
 
 ## Module 2 - HTF POI
 
-Implementation status: `Pine v0.6.1-alpha - FVG candidate with optional price/time-anchored chart box`
+Implementation status: `Pine v0.11.0-alpha - FVG candidate plus aligned 4H/1H Order Block chart context`
 
 Input:
 
@@ -118,18 +118,37 @@ Initial FVG candidate heuristic:
 - Prefer the Primary 4H candidate before the Secondary 1H candidate.
 - Return no selected candidate during neutral or conflicting Bias.
 
+Initial Order Block heuristic:
+
+- Evaluate completed 4H and 1H candles only.
+- Require a directional departure candle to pass the existing Displacement
+  body, range/ATR, and body-share thresholds.
+- Require the departure close to break the configured prior HTF range.
+- Select the nearest opposing candle within the configured search window.
+- Use the opposing candle's full high-to-low range as the OB zone.
+- Track the latest Bullish and Bearish OB independently on each HTF.
+- Mark the zone `MITIGATED` after price first overlaps it.
+- Invalidate Bullish OB after a completed HTF close below its low.
+- Invalidate Bearish OB after a completed HTF close above its high.
+- Draw only active zones aligned with the combined HTF Bias.
+- Allow the latest active Primary 4H and Secondary 1H zones to appear together.
+
 Current limitation:
 
 - The candidate is not confirmed by displacement.
 - Filled status is based on completed HTF candles and intentionally updates with HTF confirmation lag.
 - INVALID status is not automated because structure invalidation rules are not yet explicit.
-- Order Block, Breaker, Liquidity, and Premium/Discount POIs are not implemented.
+- Order Block is chart context only and does not yet participate in selected
+  POI logic, scoring, or Alerts.
+- Breaker, Liquidity, and Premium/Discount POIs are not implemented.
 - The output must be described as an HTF FVG candidate, not a ready Entry zone.
 
 Current display:
 
 - The selected FVG is reported in the fixed Dashboard and Data Window.
 - An optional box starts at the actual HTF origin time and uses the candidate's exact top and bottom prices.
+- Optional dashed 4H and 1H OB boxes start at the source candle's actual HTF
+  time and use its exact full-candle range.
 - Disabling the chart box must not change candidate selection, zone prices, status, or Entry logic.
 
 ## Module 3 - LTF Context

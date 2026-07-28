@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.10.0-alpha
+Version: v0.11.0-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -9,7 +9,7 @@ The Pine track automates selected Trading OS context checks without replacing tr
 `TradingOS.pine` currently implements:
 
 - Module 1: HTF Bias baseline
-- Module 2 baseline: aligned HTF FVG candidate
+- Module 2 baseline: aligned HTF FVG candidate and HTF Order Block chart context
 - Module 4 baseline: Previous Day High/Low liquidity
 - Module 5 baseline: execution-chart BOS/CHOCH/MSS
 - Module 6 baseline: strict execution-chart CISD
@@ -37,6 +37,8 @@ Defaults:
 - Displacement follow-through window: 2 chart bars
 - Displacement active context window: 20 chart bars
 - Minimum planned RR: 2.0R
+- HTF OB break lookback: 5 completed HTF candles
+- HTF OB opposing-candle search: 6 HTF candles
 
 Structure heuristic:
 
@@ -70,6 +72,28 @@ Selection rules:
 - Only the latest Bullish and Bearish candidate on each HTF is tracked.
 
 This is a POI candidate, not a valid Entry FVG. The separate Displacement baseline does not yet validate this HTF candidate, and complete setup-window confirmation is not implemented.
+
+## HTF Order Block Baseline
+
+The v0.11.0 Order Block baseline scans completed 4H and 1H candles:
+
+- A Bullish departure candle must close above the previous HTF range.
+- A Bearish departure candle must close below the previous HTF range.
+- The departure must pass the existing Displacement body, range/ATR, and body
+  share thresholds.
+- The latest opposing candle before the departure becomes the OB source.
+- The OB uses the source candle's full high-to-low range.
+- Bullish invalidation requires a completed HTF close below the OB low.
+- Bearish invalidation requires a completed HTF close above the OB high.
+- First price overlap changes the state from `FRESH` to `MITIGATED`.
+- Only OBs aligned with the combined HTF Bias are drawn.
+- The latest active 4H and 1H zones can appear together.
+- The 4H box uses a stronger dashed border; the 1H box is lighter.
+
+OB boxes use actual source time and price and extend right until invalidated or
+replaced. The Display switch is enabled by default. This baseline is chart
+context only and does not yet replace the selected FVG POI, alter the setup
+score, or create a separate Alert event.
 
 ## Compact Dashboard
 
@@ -363,6 +387,15 @@ Compile status:
 - Saved the private TradingView script as
   `Trading OS HTF Context v0.10.0` without publishing.
 - No running TradingView alert was created during implementation.
+- The v0.11.0 HTF Order Block baseline compiled successfully in TradingView.
+- Confirmed the OB break-lookback, opposing-candle search, and chart-display
+  settings load correctly.
+- Confirmed one v0.11.0 indicator instance and no compile or runtime errors on
+  XAUUSD at 5M, 15M, 1H, and 4H.
+- Removed the previous v0.10.0 chart instance, returned the chart to 15M, and
+  confirmed the layout was saved.
+- Saved the private TradingView script as
+  `Trading OS HTF Context v0.11.0` without publishing.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.
@@ -389,12 +422,16 @@ Compile status:
     planned RR against manual plans.
 19. Create a temporary `Any alert() function call` alert and confirm each
     enabled event group on realtime candles before relying on notifications.
-20. Record disagreements before changing the Structure, CISD, Displacement, FVG, Liquidity, Risk, or Alert rules.
+20. Compare 4H and 1H OB source candles, mitigation, and invalidation against
+    manual markup.
+21. Record disagreements before changing the Structure, CISD, Displacement, FVG, OB, Liquidity, Risk, or Alert rules.
 
 ## Current Limits
 
 - HTF POI currently supports FVG candidates only.
-- No Order Block, Breaker, mitigation block, or liquidity POI.
+- Order Block is chart context only and is not yet part of POI selection,
+  scoring, or Alerts.
+- No Breaker, mitigation block, or liquidity POI.
 - Liquidity currently supports PDH and PDL only.
 - No Asia High/Low, Equal High/Low, or Internal/External Liquidity.
 - Structure is a baseline without automated setup type, POI proximity, or a complete setup window.

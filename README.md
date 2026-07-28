@@ -12,7 +12,7 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Phase: Validation Sprint after Phase 11
 - Validation target: 20 real-use outcomes with at least 80% R and review coverage
 - Version: v0.11.1
-- Pine indicator: v0.10.0-alpha - configurable confirmed-bar Alert System
+- Pine indicator: v0.11.0-alpha - aligned 4H/1H Order Block chart context
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -313,6 +313,19 @@ The tenth Pine milestone adds:
 - One `alert()` call so the script remains within TradingView's plot limit
 - No Buy/Sell order, automatic execution, or automatically created running
   alert
+
+The eleventh Pine milestone adds:
+
+- Latest Bullish and Bearish HTF Order Block detection on completed 4H and 1H
+  candles
+- A qualified departure candle that must show Displacement and close beyond
+  prior HTF range
+- The nearest opposing candle before departure as the full-candle OB zone
+- `FRESH`, `MITIGATED`, and `INVALID` lifecycle states
+- Bias-aligned 4H and 1H boxes anchored to actual source time and price
+- A stronger dashed border for 4H and a lighter dashed border for 1H
+- No change to the compact Dashboard, setup score, Grade, alerts, or automatic
+  execution
 
 The Pine source and TradingView test notes are stored under `pine/`.
 

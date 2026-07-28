@@ -2,6 +2,43 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.11.0-alpha - 2026-07-28
+
+### Added
+
+- Added completed-candle 4H and 1H Order Block detection.
+- Required the departure candle to pass the existing Displacement thresholds
+  and close beyond the configured prior HTF range.
+- Selected the nearest opposing candle as the full-candle OB zone.
+- Added Fresh, Mitigated, and Invalid lifecycle states.
+- Added Bias-aligned 4H and 1H dashed boxes anchored to actual source time and
+  price.
+- Added settings for HTF break lookback, opposing-candle search, and OB display.
+
+### Kept
+
+- Kept the compact ten-row Dashboard and `Small` default size unchanged.
+- Kept the existing selected FVG POI, score, Grade, and Alert rules unchanged.
+- Kept OB as chart context without Buy/Sell orders or automatic execution.
+
+### Validated
+
+- Compiled Pine v0.11.0-alpha successfully in TradingView Pine Editor.
+- Confirmed the new OB settings load correctly.
+- Confirmed one valid v0.11.0 indicator instance and no compile or runtime
+  errors on XAUUSD at 5M, 15M, 1H, and 4H.
+- Removed the previous v0.10.0 chart instance.
+- Returned the chart to 15M and confirmed the layout was saved.
+- Saved the private script as `Trading OS HTF Context v0.11.0` without
+  publishing.
+- Confirmed the local Pine source exactly matches the compiled and saved
+  TradingView payload.
+
+### Pending Manual Review
+
+- Compare 4H and 1H Order Block source candles, mitigation, and invalidation
+  against manual markup before adding OB to POI selection or scoring.
+
 ## Pine v0.10.0-alpha - 2026-07-28
 
 ### Added
