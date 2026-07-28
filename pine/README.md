@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.11.0-alpha
+Version: v0.11.1-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -131,7 +131,8 @@ The first Liquidity module uses the confirmed Previous Day High (`PDH`) and Prev
 - PDH and PDL are drawn as historical steplines with right-edge labels.
 - Confirmed PDH and PDL sweeps can display event markers.
 - Current confirmed swing high and low levels can display with labels.
-- Confirmed BOS, CHOCH, and MSS events can display as historical break segments and labels.
+- Confirmed BOS, CHOCH, and MSS events can display as historical break segments
+  with their labels centered between the source swing and confirmed break bar.
 - Armed CISD candidates use dashed levels; confirmed CISD events use solid historical levels and labels.
 - A Displacement Watch candidate can display its expansion range; confirmed events keep historical range boxes and labels.
 - The latest Entry FVG can display as a price/time-anchored box with creation, retracement, and fill labels.
@@ -396,6 +397,12 @@ Compile status:
   confirmed the layout was saved.
 - Saved the private TradingView script as
   `Trading OS HTF Context v0.11.0` without publishing.
+- The v0.11.1 Structure-label presentation compiled successfully in
+  TradingView.
+- Confirmed BOS, CHOCH, and MSS label anchors use the midpoint between the
+  source swing and confirmed break bar.
+- Saved the private TradingView script as
+  `Trading OS HTF Context v0.11.1` without publishing.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.

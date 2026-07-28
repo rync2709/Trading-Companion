@@ -2,6 +2,21 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.11.1-alpha - 2026-07-28
+
+### Changed
+
+- Moved BOS, CHOCH, and MSS labels from the confirmed break bar to the midpoint
+  of each historical Structure line.
+- Kept the original source swing, confirmed break endpoint, line price, event
+  classification, Dashboard, Score, and Alert logic unchanged.
+
+### Validated
+
+- Compiled Pine v0.11.1-alpha successfully in TradingView Pine Editor.
+- Saved the private script as `Trading OS HTF Context v0.11.1` without
+  publishing.
+
 ## Pine v0.11.0-alpha - 2026-07-28
 
 ### Added

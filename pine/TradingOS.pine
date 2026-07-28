@@ -8,7 +8,7 @@ indicator(
     max_labels_count = 300
 )
 
-// Trading OS Pine Track v0.11.0-alpha
+// Trading OS Pine Track v0.11.1-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG and Order Block context,
 // daily liquidity, confirmed execution-chart BOS/CHOCH/MSS, strict CISD
 // context, execution-chart displacement with follow-through, Entry FVG
@@ -2221,6 +2221,14 @@ if (
         f_structure_event_text(structureEventPulse) + " " +
         f_state_short(latestStructureDirection)
     )
+    int structureEventMidpointBar = int(
+        math.round(
+            (
+                latestStructureOriginBar +
+                latestStructureEventBar
+            ) / 2.0
+        )
+    )
     line.new(
         x1 = latestStructureOriginBar,
         y1 = latestStructureLevel,
@@ -2233,7 +2241,7 @@ if (
         width = structureEventPulse == 3 ? 2 : 1
     )
     label.new(
-        x = latestStructureEventBar,
+        x = structureEventMidpointBar,
         y = latestStructureLevel,
         text = structureEventLabel,
         xloc = xloc.bar_index,
@@ -3017,7 +3025,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.11.0",
+        "TRADING OS · HTF v0.11.1",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,

@@ -1,6 +1,6 @@
 # Trading OS Indicator Specification
 
-Version: v0.3.2
+Version: v0.3.3
 Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, Risk / Entry, Score, Alert, and HTF Order Block baselines
 
 ## Purpose
@@ -256,7 +256,10 @@ Current limitation:
 - Setup type, POI proximity, and a complete setup-window state machine are not automated.
 - A Structure event is decision-support context, not an Entry Signal.
 - Manual comparison against marked BOS/CHOCH/MSS examples remains required.
-- Current swing levels and confirmed BOS/CHOCH/MSS events can be drawn from their source bars.
+- Current swing levels and confirmed BOS/CHOCH/MSS events can be drawn from
+  their source bars.
+- Each Structure event label is centered between its source swing and
+  confirmed break bar to reduce endpoint congestion.
 
 ## Module 6 - CISD
 
