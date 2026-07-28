@@ -12,7 +12,7 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Phase: Validation Sprint after Phase 11
 - Validation target: 20 real-use outcomes with at least 80% R and review coverage
 - Version: v0.11.1
-- Pine indicator: v0.7.0-alpha - Displacement-linked Entry FVG and retracement tracking
+- Pine indicator: v0.8.0-alpha - provisional automated Setup State and Score Engine
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -280,6 +280,14 @@ The seventh Pine milestone adds:
 - A latest Entry FVG box anchored to its actual formation time and price
 - Exact Entry FVG direction, status, boundaries, events, and interaction state in the Data Window
 - Entry FVG status in the existing Status row without increasing the ten-row Dashboard
+
+The eighth Pine milestone adds:
+
+- Provisional score-v1 mapping across HTF, POI, Liquidity, Structure, CISD,
+  Displacement, and Entry FVG evidence
+- Automated NO TRADE, WAITING, DEVELOPING, and RISK REVIEW states
+- Entry/Risk held at 0 of 5 and final Grade held pending until risk rules are implemented
+- Compact ten-row Dashboard retained by reusing the existing Status row as Setup
 
 The Pine source and TradingView test notes are stored under `pine/`.
 

@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.7.0-alpha
+Version: v0.8.0-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -15,6 +15,7 @@ The Pine track automates selected Trading OS context checks without replacing tr
 - Module 6 baseline: strict execution-chart CISD
 - Module 7 baseline: execution-chart Displacement and follow-through
 - Module 8 baseline: Displacement-linked Entry FVG and retracement
+- Module 10 baseline: provisional automated Setup State and Score Engine
 
 Defaults:
 
@@ -75,13 +76,16 @@ The dashboard uses ten rows to reduce chart obstruction. Its text size defaults 
 - Bias: Combined Bias and Confidence
 - Context: HTF alignment
 - POI: selected timeframe, direction, and FVG type
-- Status: Entry FVG status and price location when active, otherwise HTF FVG status
+- Setup: automated setup state, provisional score, and pending Grade
 - Liquidity: confirmed PDH/PDL sweep state
 - Structure: active BOS, CHOCH, MSS, or WAIT
 - CISD: active direction with Weak, Medium, Strong, or WAIT quality
 - Displacement: Watch candidate, confirmed Medium/Strong direction, conflict, or WAIT
 
-POI and Status rows remain neutral gray while price is `AWAY`. They receive active colors only when price is `TOUCH` or `IN ZONE`. Bias and Context colors remain directional because they describe market context rather than POI interaction.
+The POI row remains neutral gray until price touches or enters the zone. The
+Setup row is neutral while waiting, directional while developing, yellow during
+Risk Review, and red when blocked. Bias and Context colors remain directional
+because they describe market context rather than POI interaction.
 
 ## Daily Liquidity Baseline
 
@@ -195,6 +199,38 @@ The first Entry FVG module runs on the current chart timeframe:
 
 This baseline tracks the latest Entry FVG only. It does not yet automate invalidation beyond a full fill, Entry trigger, Stop Loss, target, RR, grade, or alert.
 
+## Provisional Setup State / Score Engine
+
+The first automated score baseline maps confirmed Pine outputs to the
+versioned `score-v1` weights:
+
+- HTF Context: up to 20
+- POI: up to 15
+- Liquidity: up to 15
+- Structure: up to 15
+- CISD: up to 15
+- Displacement: up to 10
+- FVG / Entry Zone: up to 5
+- Entry / Risk: 0 of 5 until Entry, Stop Loss, target, and RR rules are implemented
+
+The automated Pine score therefore tops out at 95. The final Grade remains
+pending and is shown as `--`; the script does not infer the missing Risk
+decision.
+
+Setup states:
+
+- `NO TRADE`: an active timeframe or direction conflict blocks the setup.
+- `WAITING`: the automated score is below 25 and no blocker is active.
+- `DEVELOPING`: the automated score is at least 25 but the confirmation chain
+  is incomplete.
+- `RISK REVIEW`: HTF alignment, recent POI interaction, direction-aligned
+  liquidity, Structure, CISD, Displacement, active Entry FVG, and retracement
+  are all present. Entry/Risk is still manual.
+
+The existing Dashboard remains ten rows. Its Status row becomes `Setup` and
+shows the short state, automated score, and pending Grade. Exact category
+scores and the next-step code remain available in the Data Window.
+
 ## Non-Repainting Baseline
 
 The script requests the previous completed HTF state. Confirmed pivots also require bars on both sides, so the output intentionally lags live price. This tradeoff avoids treating a still-forming HTF structure as confirmed.
@@ -235,6 +271,13 @@ Compile status:
 - Confirmed a Displacement-linked Entry FVG and its exact boundaries appear in the XAUUSD 15M Data Window.
 - Removed the previous v0.6.1 chart instance, returned the chart to 15M, and saved the layout.
 - Saved the private TradingView script as `Trading OS HTF Context v0.7.0` without publishing.
+- The v0.8.0 provisional Setup State and Score Engine compiled successfully in
+  TradingView.
+- Confirmed setup-state, total-score, category-score, next-step, manual Risk,
+  and pending-Grade outputs in the XAUUSD Data Window.
+- Confirmed no runtime errors on XAUUSD at 5M, 15M, 1H, and 4H.
+- Returned the chart to 15M and saved the private TradingView script as
+  `Trading OS HTF Context v0.8.0` without publishing.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.
@@ -269,6 +312,8 @@ Compile status:
 - Displacement has not been calibrated against a manual sample.
 - Entry FVG tracks the latest confirmed zone only and has not been calibrated against a manual sample.
 - No Entry FVG invalidation beyond Filled status or complete setup-window validation.
+- The automated Pine score cannot exceed 95 until Entry/Risk rules are
+  implemented, and its final Grade intentionally remains pending.
 - No Entry grade or alert.
 - Premium/discount and displacement are not yet included in HTF confidence.
 - Compilation and rendering are confirmed, but manual comparison and heuristic calibration are still required before release readiness.

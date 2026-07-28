@@ -8,12 +8,13 @@ indicator(
     max_labels_count = 300
 )
 
-// Trading OS Pine Track v0.7.0-alpha
+// Trading OS Pine Track v0.8.0-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG candidates, daily liquidity,
 // confirmed execution-chart BOS/CHOCH/MSS, strict CISD context, and
-// execution-chart displacement with follow-through and Entry FVG confirmation.
-// Full chart context is enabled by default. This indicator remains decision
-// support and does not generate Buy/Sell signals.
+// execution-chart displacement with follow-through, Entry FVG confirmation,
+// and a provisional automated setup score. Full chart context is enabled by
+// default. This indicator remains decision support and does not generate
+// Buy/Sell signals.
 
 string primaryTimeframe = input.timeframe("240", "Primary HTF", group = "HTF Bias")
 string secondaryTimeframe = input.timeframe("60", "Secondary HTF", group = "HTF Bias")
@@ -1141,39 +1142,139 @@ bool entryFvgInteractionActive = (
     priceInsideEntryFvg or
     priceTouchesEntryFvg
 )
-string entryFvgLocation = (
-    entryFvgStatus == 3 ? "FILLED" :
-    priceInsideEntryFvg ? "IN ZONE" :
-    priceTouchesEntryFvg ? "TOUCH" :
-    entryFvgActive ? "AWAY" :
-    "--"
+// Preserve a POI touch for the current selected zone so later confirmation
+// events can remain part of the same developing setup after price leaves it.
+int setupContextBars = math.max(
+    structureContextBars,
+    math.max(cisdContextBars, displacementContextBars)
 )
-bool entryFvgDashboardVisible = (
-    entryFvgActive or
+var int latestPoiInteractionBar = na
+var int latestPoiInteractionStart = na
+var int latestPoiInteractionDirection = 0
+
+if barstate.isconfirmed and poiInteractionActive
+    latestPoiInteractionBar := bar_index
+    latestPoiInteractionStart := poiStart
+    latestPoiInteractionDirection := poiDirection
+
+bool poiRecentlyInteracted = (
+    poiActive and
+    not na(latestPoiInteractionBar) and
+    not na(latestPoiInteractionStart) and
+    latestPoiInteractionStart == poiStart and
+    latestPoiInteractionDirection == poiDirection and
+    bar_index - latestPoiInteractionBar <= setupContextBars
+)
+bool liquidityAligned = (
+    combinedState == 1 ? recentPdlSweep :
+    combinedState == -1 ? recentPdhSweep :
+    false
+)
+bool entryFvgAligned = (
+    entryFvgActive and
+    combinedState != 0 and
+    entryFvgDirection == combinedState
+)
+bool structureConflict = (
+    structureEventActive and
+    combinedState != 0 and
+    latestStructureDirection != combinedState
+)
+bool cisdConflict = (
+    cisdEventActive and
+    combinedState != 0 and
+    latestCisdDirection != combinedState
+)
+bool displacementConflict = (
+    displacementEventActive and
+    combinedState != 0 and
+    latestDisplacementDirection != combinedState
+)
+bool entryFvgConflict = (
+    entryFvgActive and
+    combinedState != 0 and
+    entryFvgDirection != combinedState
+)
+bool setupBlocked = (
+    not timeframeOrderValid or
+    conflict or
+    structureConflict or
+    cisdConflict or
+    displacementConflict or
+    entryFvgConflict or
     entryFvgFilledPulse != 0
 )
-string dashboardStatusLabel = (
-    entryFvgDashboardVisible ?
-    "Entry FVG" :
-    "Status"
+
+// score-v1 automation mapping. Entry/Risk remains manual, so the Pine score
+// deliberately tops out at 95 and the final grade remains pending.
+int htfScore = aligned ? 20 : primaryOnly ? 10 : 0
+int poiScore = poiRecentlyInteracted ? 15 : poiActive ? 5 : 0
+int liquidityScore = liquidityAligned ? 15 : 0
+int structureScore = structureAligned ? 15 : 0
+int cisdScore = cisdValid and cisdAligned ? 15 : 0
+int displacementScore = displacementValid ? 10 : 0
+int entryFvgScore = (
+    entryFvgAligned ?
+    3 + (entryFvgStatus == 2 or entryFvgInteractionActive ? 2 : 0) :
+    0
 )
+int automatedScoreRaw = (
+    htfScore +
+    poiScore +
+    liquidityScore +
+    structureScore +
+    cisdScore +
+    displacementScore +
+    entryFvgScore
+)
+int automatedScore = setupBlocked ? 0 : automatedScoreRaw
+bool automatedSetupComplete = (
+    aligned and
+    poiRecentlyInteracted and
+    liquidityAligned and
+    structureAligned and
+    cisdValid and
+    cisdAligned and
+    displacementValid and
+    entryFvgAligned and
+    entryFvgInteractionActive
+)
+int setupStateCode = (
+    setupBlocked ? -1 :
+    automatedSetupComplete ? 2 :
+    automatedScore >= 25 ? 1 :
+    0
+)
+string setupState = (
+    setupStateCode == -1 ? "NO TRADE" :
+    setupStateCode == 2 ? "RISK REVIEW" :
+    setupStateCode == 1 ? "DEVELOPING" :
+    "WAITING"
+)
+int setupNextStepCode = (
+    setupBlocked ? -1 :
+    combinedState == 0 ? 1 :
+    not poiActive ? 2 :
+    not poiRecentlyInteracted ? 3 :
+    not liquidityAligned ? 4 :
+    not structureAligned ? 5 :
+    not (cisdValid and cisdAligned) ? 6 :
+    not displacementValid ? 7 :
+    not entryFvgAligned ? 8 :
+    not entryFvgInteractionActive ? 9 :
+    10
+)
+string dashboardStatusLabel = "Setup"
 string dashboardStatusValue = (
-    entryFvgDashboardVisible ?
-    (
-        f_state_short(entryFvgDirection) + " · " +
-        f_fvg_status_text(entryFvgStatus) + " · " +
-        entryFvgLocation
-    ) :
-    f_fvg_status_text(poiStatus) + " · " + poiLocation
+    setupState + " · " +
+    str.tostring(automatedScore) + "/100 · --"
 )
-bool dashboardStatusActive = (
-    entryFvgDashboardVisible ?
-    entryFvgInteractionActive :
-    poiInteractionActive
-)
+bool dashboardStatusActive = setupStateCode != 0
 color dashboardStatusColor = (
-    entryFvgDashboardVisible and entryFvgStatus == 3 ? neutralColor :
-    dashboardStatusActive ? warningColor :
+    setupStateCode == -1 ? bearishColor :
+    setupStateCode == 2 ? warningColor :
+    setupStateCode == 1 and combinedState != 0 ?
+    f_state_color(combinedState) :
     neutralColor
 )
 
@@ -2011,6 +2112,66 @@ plot(
     title = "Latest Entry FVG creation bar",
     display = display.data_window
 )
+plot(
+    setupStateCode,
+    title = "Automated setup state (-1 No Trade, 0 Waiting, 1 Developing, 2 Risk Review)",
+    display = display.data_window
+)
+plot(
+    automatedScore,
+    title = "Automated setup score (Risk pending, max 95)",
+    display = display.data_window
+)
+plot(
+    htfScore,
+    title = "Score - HTF Context (max 20)",
+    display = display.data_window
+)
+plot(
+    poiScore,
+    title = "Score - POI (max 15)",
+    display = display.data_window
+)
+plot(
+    liquidityScore,
+    title = "Score - Liquidity (max 15)",
+    display = display.data_window
+)
+plot(
+    structureScore,
+    title = "Score - Structure (max 15)",
+    display = display.data_window
+)
+plot(
+    cisdScore,
+    title = "Score - CISD (max 15)",
+    display = display.data_window
+)
+plot(
+    displacementScore,
+    title = "Score - Displacement (max 10)",
+    display = display.data_window
+)
+plot(
+    entryFvgScore,
+    title = "Score - FVG / Entry Zone (max 5)",
+    display = display.data_window
+)
+plot(
+    setupNextStepCode,
+    title = "Next step (-1 Blocked, 1 HTF, 2 POI, 3 POI Touch, 4 Liquidity, 5 Structure, 6 CISD, 7 Displacement, 8 Entry FVG, 9 Retrace, 10 Risk)",
+    display = display.data_window
+)
+plot(
+    0,
+    title = "Score - Entry / Risk (manual, max 5)",
+    display = display.data_window
+)
+plot(
+    0,
+    title = "Final grade (pending Risk review)",
+    display = display.data_window
+)
 
 var table biasPanel = table.new(
     position.top_right,
@@ -2030,7 +2191,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.7.0",
+        "TRADING OS · HTF v0.8.0",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,

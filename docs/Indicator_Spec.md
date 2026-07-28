@@ -1,7 +1,7 @@
 # Trading OS Indicator Specification
 
 Version: v0.2.9
-Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, and Entry FVG baselines
+Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, and provisional Score baselines
 
 ## Purpose
 
@@ -411,6 +411,8 @@ Output:
 
 ## Module 10 - Score Engine
 
+Implementation status: `Pine v0.8.0-alpha - provisional automated score baseline`
+
 Input:
 
 - Outputs from all prior modules
@@ -443,6 +445,28 @@ The score is calculated continuously, but the grade remains pending until the
 setup reaches READY. Every saved assessment includes the profile name and
 category breakdown so future calibration does not mix records produced by
 different formulas.
+
+Pine v0.8.0 maps the currently automated evidence to these weights. HTF
+alignment earns 20, while Primary-only context earns 10. A selected HTF FVG
+earns 5 and a recent interaction with that same zone earns 15. Direction-aligned
+recent PDH/PDL liquidity, Structure, valid CISD, Displacement, and Entry FVG
+then earn their category weights.
+
+The Pine score is provisional and has a maximum of 95 because Entry / Risk
+remains manual. Pine must not display a final Grade until Entry, Stop Loss,
+target, RR, and trader risk confirmation are implemented.
+
+Current Pine setup states:
+
+- NO_TRADE: timeframe or active direction conflict.
+- WAITING: score below 25 with no active blocker.
+- DEVELOPING: score at least 25 with an incomplete automated chain.
+- RISK_REVIEW: the automated chain and Entry FVG retracement are complete, but
+  Entry / Risk is still pending.
+
+The Dashboard remains ten rows. The existing Status row becomes Setup and shows
+the short state, score, and pending Grade. Category scores and a numeric
+next-step code are exposed in the Data Window.
 
 Output:
 

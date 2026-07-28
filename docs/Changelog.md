@@ -2,6 +2,40 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.8.0-alpha - 2026-07-28
+
+### Added
+
+- Added a provisional automated Setup State and Score Engine using the
+  versioned `score-v1` category weights.
+- Added NO TRADE, WAITING, DEVELOPING, and RISK REVIEW states.
+- Preserved a confirmed interaction with the currently selected HTF FVG for
+  the active setup context window.
+- Added direction-aware Liquidity, Structure, CISD, Displacement, and Entry FVG
+  scoring.
+- Added exact category scores, setup-state code, and next-step code to the Data
+  Window.
+
+### Kept
+
+- Kept Entry / Risk at 0 of 5 and the automated Pine score capped at 95.
+- Kept the final Grade pending instead of inferring unimplemented risk checks.
+- Kept the compact ten-row Dashboard and `Small` default size unchanged.
+- Kept the indicator as decision support without Buy/Sell orders or alerts.
+
+### Validated
+
+- Compiled Pine v0.8.0-alpha successfully in TradingView Pine Editor.
+- Confirmed the setup-state, total-score, category-score, next-step, manual
+  Risk, and pending-Grade outputs in the XAUUSD Data Window.
+- Confirmed no runtime errors on XAUUSD at 5M, 15M, 1H, and 4H.
+- Returned the chart to 15M and saved the private TradingView script as
+  `Trading OS HTF Context v0.8.0` without publishing.
+
+### Pending Manual Review
+
+- Compare each score category and state transition against manual markup.
+
 ## Pine v0.7.0-alpha - 2026-07-27
 
 ### Added
