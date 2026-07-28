@@ -1,7 +1,7 @@
 # Trading OS Indicator Specification
 
-Version: v0.2.9
-Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, and provisional Score baselines
+Version: v0.3.0
+Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, Risk / Entry, and Score baselines
 
 ## Purpose
 
@@ -383,35 +383,59 @@ Current limitation:
 - INVALID is not automated because non-fill invalidation rules are not explicit.
 - A direct full fill emits Filled without requiring a prior Partial state.
 - Entry FVG is decision-support context, not an Entry Signal.
-- Stop Loss, target, RR, grade, setup-window validation, and alerts remain manual.
+- Non-fill Entry FVG invalidation, alerts, and trader execution remain manual.
 
 ## Module 9 - Risk / Entry Decision
 
+Implementation status: `Pine v0.9.0-alpha - locked Entry/Risk planning baseline`
+
 Input:
 
-- Entry trigger
-- Stop loss level
-- Invalidation level
-- Target level
-- Risk/reward ratio
-- Trader checklist confirmation
+- Latest active Entry FVG
+- Latest confirmed execution swing high and low
+- Confirmed Previous Day High and Previous Day Low
+- Minimum planned RR, configurable with `2.0R` as the default
 
 Process:
 
-- Confirm entry trigger on execution timeframe.
-- Confirm SL represents true invalidation.
-- Confirm RR passes minimum requirement.
-- Block entries marked as emotional or forced.
+- Lock the plan when a new Entry FVG is created so later swing updates do not
+  move the original Entry, Stop, or Target.
+- Set Entry to the midpoint of the Entry FVG.
+- Set Bullish Stop Loss to the latest confirmed execution swing low.
+- Set Bearish Stop Loss to the latest confirmed execution swing high.
+- Set Bullish Target to confirmed Previous Day High liquidity.
+- Set Bearish Target to confirmed Previous Day Low liquidity.
+- Reject inverted Stop or Target geometry.
+- Calculate planned reward-to-risk and require it to meet the configured
+  minimum before the setup becomes READY.
+- Keep the setup in RISK_REVIEW when the automated confirmation chain is
+  complete but a valid risk plan is unavailable.
+- Return NO_TRADE when the complete automated chain has an available plan whose
+  RR is below the configured minimum.
+- Draw optional price/time-anchored Entry, Stop, and Target levels for the
+  latest active plan.
 
 Output:
 
 - entry_ready: true or false
-- rr_valid: true or false
-- final_state: NO_TRADE, WAITING, DEVELOPING, or READY
+- planned_entry
+- planned_stop
+- planned_target
+- planned_rr
+- final_state: NO_TRADE, WAITING, DEVELOPING, RISK_REVIEW, or READY
+
+Current limitation:
+
+- Entry is a proposed FVG-midpoint plan, not a confirmed broker fill.
+- Stop and Target use one baseline each: latest confirmed execution swing and
+  PDH/PDL liquidity.
+- Trader emotion, forced-entry checks, position sizing, news risk, and order
+  execution remain outside Pine.
+- The plan tracks the latest active Entry FVG only.
 
 ## Module 10 - Score Engine
 
-Implementation status: `Pine v0.8.0-alpha - provisional automated score baseline`
+Implementation status: `Pine v0.9.0-alpha - automated score and final Grade baseline`
 
 Input:
 
@@ -446,27 +470,30 @@ setup reaches READY. Every saved assessment includes the profile name and
 category breakdown so future calibration does not mix records produced by
 different formulas.
 
-Pine v0.8.0 maps the currently automated evidence to these weights. HTF
+Pine v0.9.0 maps the currently automated evidence to these weights. HTF
 alignment earns 20, while Primary-only context earns 10. A selected HTF FVG
 earns 5 and a recent interaction with that same zone earns 15. Direction-aligned
 recent PDH/PDL liquidity, Structure, valid CISD, Displacement, and Entry FVG
-then earn their category weights.
+then earn their category weights. A valid locked risk plan earns the remaining
+5 points.
 
-The Pine score is provisional and has a maximum of 95 because Entry / Risk
-remains manual. Pine must not display a final Grade until Entry, Stop Loss,
-target, RR, and trader risk confirmation are implemented.
+Pine displays a final Grade only when the setup reaches READY. Pending states
+show `--`; NO_TRADE remains explicitly blocked.
 
 Current Pine setup states:
 
 - NO_TRADE: timeframe or active direction conflict.
 - WAITING: score below 25 with no active blocker.
 - DEVELOPING: score at least 25 with an incomplete automated chain.
-- RISK_REVIEW: the automated chain and Entry FVG retracement are complete, but
-  Entry / Risk is still pending.
+- RISK_REVIEW: the automated chain and Entry FVG interaction are complete, but
+  the locked plan is missing valid geometry or minimum RR.
+- READY: the complete automated chain and locked risk plan pass on a confirmed
+  chart candle.
 
 The Dashboard remains ten rows. The existing Status row becomes Setup and shows
-the short state, score, and pending Grade. Category scores and a numeric
-next-step code are exposed in the Data Window.
+the short state, final score, and Grade. Automated category scores, final score,
+planned RR, Entry readiness, final Grade code, and a numeric next-step code are
+exposed in the Data Window.
 
 Output:
 

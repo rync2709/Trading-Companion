@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.8.0-alpha
+Version: v0.9.0-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -15,7 +15,8 @@ The Pine track automates selected Trading OS context checks without replacing tr
 - Module 6 baseline: strict execution-chart CISD
 - Module 7 baseline: execution-chart Displacement and follow-through
 - Module 8 baseline: Displacement-linked Entry FVG and retracement
-- Module 10 baseline: provisional automated Setup State and Score Engine
+- Module 9 baseline: locked Entry, Stop, Target, and planned RR
+- Module 10 baseline: automated Setup State, Score, and final Grade
 
 Defaults:
 
@@ -34,6 +35,7 @@ Defaults:
 - Displacement minimum body share: 60%
 - Displacement follow-through window: 2 chart bars
 - Displacement active context window: 20 chart bars
+- Minimum planned RR: 2.0R
 
 Structure heuristic:
 
@@ -76,16 +78,16 @@ The dashboard uses ten rows to reduce chart obstruction. Its text size defaults 
 - Bias: Combined Bias and Confidence
 - Context: HTF alignment
 - POI: selected timeframe, direction, and FVG type
-- Setup: automated setup state, provisional score, and pending Grade
+- Setup: automated setup state, final score, and Grade when READY
 - Liquidity: confirmed PDH/PDL sweep state
 - Structure: active BOS, CHOCH, MSS, or WAIT
 - CISD: active direction with Weak, Medium, Strong, or WAIT quality
 - Displacement: Watch candidate, confirmed Medium/Strong direction, conflict, or WAIT
 
 The POI row remains neutral gray until price touches or enters the zone. The
-Setup row is neutral while waiting, directional while developing, yellow during
-Risk Review, and red when blocked. Bias and Context colors remain directional
-because they describe market context rather than POI interaction.
+Setup row is neutral while waiting, directional while developing or ready,
+yellow during Risk Review, and red when blocked. Bias and Context colors remain
+directional because they describe market context rather than POI interaction.
 
 ## Daily Liquidity Baseline
 
@@ -159,7 +161,8 @@ The first CISD module runs on the current chart timeframe:
 - Exact armed candidate and confirmed CISD values remain available in the Data Window.
 - Armed and confirmed CISD levels can be drawn on the current chart timeframe.
 
-CISD remains context only. Displacement is evaluated by a separate module; risk and Entry readiness are not automated.
+CISD remains context only. Displacement and Entry readiness are evaluated by
+separate modules.
 
 ## Displacement Baseline
 
@@ -178,7 +181,8 @@ The first Displacement module runs on the current chart timeframe:
 - Exact direction, quality, Structure level, body multiple, range/ATR multiple, body share, and candidate state remain available in the Data Window.
 - Watch and confirmed Displacement ranges can be drawn as chart boxes with confirmed-event labels.
 
-Displacement remains decision-support context. It does not generate a Buy/Sell signal, grade, alert, or automatic Entry.
+Displacement remains decision-support context. It does not generate a Buy/Sell
+signal, alert, or automatic Entry by itself.
 
 ## Entry FVG / Entry Zone Baseline
 
@@ -197,11 +201,35 @@ The first Entry FVG module runs on the current chart timeframe:
 - The existing Dashboard Status row temporarily becomes `Entry FVG` while the zone is active, so the Dashboard remains ten rows.
 - Exact direction, status, boundaries, event pulses, creation bar, and price-interaction state remain available in the Data Window.
 
-This baseline tracks the latest Entry FVG only. It does not yet automate invalidation beyond a full fill, Entry trigger, Stop Loss, target, RR, grade, or alert.
+This baseline tracks the latest Entry FVG only. It does not automate
+invalidation beyond a full fill, a broker Entry trigger, or alerts. Module 9
+uses the active zone as the source for a proposed risk plan.
 
-## Provisional Setup State / Score Engine
+## Entry / Risk Planning Baseline
 
-The first automated score baseline maps confirmed Pine outputs to the
+The first Risk / Entry baseline locks a proposed plan when a new Entry FVG is
+created:
+
+- Entry: midpoint of the latest Entry FVG
+- Bullish Stop Loss: latest confirmed execution swing low
+- Bearish Stop Loss: latest confirmed execution swing high
+- Bullish Target: confirmed Previous Day High
+- Bearish Target: confirmed Previous Day Low
+- Planned RR: absolute reward distance divided by risk distance
+- Minimum RR: configurable, with `2.0R` as the default
+
+Entry, Stop, and Target geometry must agree with the setup direction. The plan
+is locked to its Entry FVG creation event, so later swing updates do not move
+the original levels. Optional Entry, SL, and Target drawings use actual time and
+price coordinates.
+
+This is a planning baseline. It does not confirm a broker fill, calculate
+position size, check news or emotion, place an order, or replace trader
+approval.
+
+## Setup State / Score Engine
+
+The automated score baseline maps confirmed Pine outputs to the
 versioned `score-v1` weights:
 
 - HTF Context: up to 20
@@ -211,11 +239,10 @@ versioned `score-v1` weights:
 - CISD: up to 15
 - Displacement: up to 10
 - FVG / Entry Zone: up to 5
-- Entry / Risk: 0 of 5 until Entry, Stop Loss, target, and RR rules are implemented
+- Entry / Risk: 5 when the locked plan has valid geometry and meets minimum RR
 
-The automated Pine score therefore tops out at 95. The final Grade remains
-pending and is shown as `--`; the script does not infer the missing Risk
-decision.
+The final score can reach 100. A final A+ to D Grade appears only after the
+setup reaches READY; pending states continue to show `--`.
 
 Setup states:
 
@@ -225,11 +252,15 @@ Setup states:
   is incomplete.
 - `RISK REVIEW`: HTF alignment, recent POI interaction, direction-aligned
   liquidity, Structure, CISD, Displacement, active Entry FVG, and retracement
-  are all present. Entry/Risk is still manual.
+  are all present, but valid Entry/Stop/Target geometry or minimum RR is
+  missing.
+- `READY`: the complete confirmation chain and locked risk plan pass on a
+  confirmed chart candle.
 
 The existing Dashboard remains ten rows. Its Status row becomes `Setup` and
-shows the short state, automated score, and pending Grade. Exact category
-scores and the next-step code remain available in the Data Window.
+shows the short state, final score, and Grade. Automated category scores, final
+score, planned RR, Entry readiness, Grade code, and the next-step code remain
+available in the Data Window.
 
 ## Non-Repainting Baseline
 
@@ -278,9 +309,20 @@ Compile status:
 - Confirmed no runtime errors on XAUUSD at 5M, 15M, 1H, and 4H.
 - Returned the chart to 15M and saved the private TradingView script as
   `Trading OS HTF Context v0.8.0` without publishing.
+- The v0.9.0 Entry/Risk planning baseline compiled successfully after keeping
+  total Pine plot outputs within TradingView's 64-plot limit.
+- Confirmed one v0.9.0 indicator instance and no runtime errors on XAUUSD at
+  5M, 15M, 1H, and 4H.
+- Confirmed final score, planned RR, Entry readiness, and Grade outputs in the
+  XAUUSD Data Window.
+- Removed the previous v0.8.0 and the discarded runtime-error chart instances,
+  returned the chart to 15M, and saved the layout.
+- Saved the private TradingView script as
+  `Trading OS HTF Context v0.9.0` without publishing.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.
+- Manual Entry, Stop, Target, and RR comparison remains pending.
 
 1. Open Pine Editor in TradingView.
 2. Paste the contents of `TradingOS.pine`.
@@ -299,7 +341,9 @@ Compile status:
 15. Confirm each Entry FVG uses a confirmed Displacement candle as the middle candle of its three-candle pattern.
 16. Confirm Fresh, Partial, and Filled Entry FVG transitions against manual markup.
 17. Confirm all drawings remain anchored to their source bar time and price while scrolling or zooming.
-18. Record disagreements before changing the Structure, CISD, Displacement, FVG, or Liquidity rules.
+18. Compare the locked Entry midpoint, swing invalidation, PDH/PDL Target, and
+    planned RR against manual plans.
+19. Record disagreements before changing the Structure, CISD, Displacement, FVG, Liquidity, or Risk rules.
 
 ## Current Limits
 
@@ -312,8 +356,10 @@ Compile status:
 - Displacement has not been calibrated against a manual sample.
 - Entry FVG tracks the latest confirmed zone only and has not been calibrated against a manual sample.
 - No Entry FVG invalidation beyond Filled status or complete setup-window validation.
-- The automated Pine score cannot exceed 95 until Entry/Risk rules are
-  implemented, and its final Grade intentionally remains pending.
-- No Entry grade or alert.
+- Entry, Stop, and Target use one mechanical baseline each and have not been
+  calibrated against manual plans.
+- The final Grade covers automated evidence and planned RR only; it does not
+  include emotion, news, spread, slippage, or position-size checks.
+- No order execution or alert.
 - Premium/discount and displacement are not yet included in HTF confidence.
 - Compilation and rendering are confirmed, but manual comparison and heuristic calibration are still required before release readiness.

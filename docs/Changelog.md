@@ -2,6 +2,46 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.9.0-alpha - 2026-07-28
+
+### Added
+
+- Added a locked Entry/Risk plan for each newly created Entry FVG.
+- Set proposed Entry at the Entry FVG midpoint.
+- Set Bullish/Bearish Stop Loss at the latest confirmed execution swing
+  invalidation.
+- Set Bullish/Bearish Target at confirmed PDH/PDL liquidity.
+- Added configurable minimum planned RR with `2.0R` as the default.
+- Added optional price/time-anchored Entry, Stop, and Target lines and labels.
+- Added READY state, final 0-100 score, and A+ to D Grade after the complete
+  automated chain and planned RR pass.
+- Added final score, planned RR, Entry readiness, and Grade code to the Data
+  Window.
+
+### Kept
+
+- Kept the compact ten-row Dashboard and `Small` default size unchanged.
+- Kept pending states without a Grade and kept NO TRADE explicit.
+- Kept the indicator as decision support without Buy/Sell orders, alerts, or
+  automatic execution.
+
+### Validated
+
+- Compiled Pine v0.9.0-alpha successfully in TradingView Pine Editor.
+- Reduced duplicate Data Window outputs to stay within TradingView's 64-plot
+  limit.
+- Confirmed no compile or runtime errors on XAUUSD at 5M, 15M, 1H, and 4H.
+- Confirmed final score, planned RR, Entry readiness, and Grade outputs in the
+  XAUUSD Data Window.
+- Removed the previous v0.8.0 and discarded runtime-error chart instances.
+- Returned the chart to 15M, saved the layout, and saved the private script as
+  `Trading OS HTF Context v0.9.0` without publishing.
+
+### Pending Manual Review
+
+- Compare Entry midpoint, swing invalidation, PDH/PDL Target, planned RR, READY,
+  and Grade against manually reviewed setups before calibration.
+
 ## Pine v0.8.0-alpha - 2026-07-28
 
 ### Added

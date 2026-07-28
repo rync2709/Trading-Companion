@@ -8,13 +8,13 @@ indicator(
     max_labels_count = 300
 )
 
-// Trading OS Pine Track v0.8.0-alpha
+// Trading OS Pine Track v0.9.0-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG candidates, daily liquidity,
 // confirmed execution-chart BOS/CHOCH/MSS, strict CISD context, and
 // execution-chart displacement with follow-through, Entry FVG confirmation,
-// and a provisional automated setup score. Full chart context is enabled by
-// default. This indicator remains decision support and does not generate
-// Buy/Sell signals.
+// an automated setup score, and a locked Entry/Risk planning baseline. Full
+// chart context is enabled by default. This indicator remains decision support
+// and does not generate Buy/Sell signals.
 
 string primaryTimeframe = input.timeframe("240", "Primary HTF", group = "HTF Bias")
 string secondaryTimeframe = input.timeframe("60", "Secondary HTF", group = "HTF Bias")
@@ -191,6 +191,21 @@ bool showEntryFvgEvents = input.bool(
     "Show Entry FVG event labels",
     tooltip = "Marks Entry FVG creation, retracement, and fill events.",
     group = "Entry FVG"
+)
+float minimumPlannedRr = input.float(
+    2.0,
+    "Minimum planned RR",
+    minval = 0.1,
+    maxval = 20.0,
+    step = 0.1,
+    tooltip = "Minimum reward-to-risk ratio required before the setup can become READY TO ENTER.",
+    group = "Risk / Entry"
+)
+bool showRiskPlan = input.bool(
+    true,
+    "Show Entry / SL / Target",
+    tooltip = "Draws the latest locked FVG-midpoint Entry, swing-invalidation Stop Loss, and PDH/PDL liquidity Target.",
+    group = "Risk / Entry"
 )
 bool showBiasBackground = input.bool(
     true,
@@ -1142,6 +1157,87 @@ bool entryFvgInteractionActive = (
     priceInsideEntryFvg or
     priceTouchesEntryFvg
 )
+
+// Lock the first risk plan for each new Entry FVG. Later swing updates do not
+// move the plan, so Entry, Stop, Target, and RR remain auditable.
+var int riskPlanDirection = 0
+var int riskPlanFvgCreatedBar = na
+var int riskPlanStartTime = na
+var float plannedEntry = na
+var float plannedStop = na
+var float plannedTarget = na
+
+if entryFvgCreatedPulse != 0
+    riskPlanDirection := entryFvgDirection
+    riskPlanFvgCreatedBar := entryFvgCreatedBar
+    riskPlanStartTime := time
+    plannedEntry := (entryFvgTop + entryFvgBottom) / 2.0
+    plannedStop := (
+        entryFvgDirection == 1 ?
+        latestExecutionSwingLow :
+        latestExecutionSwingHigh
+    )
+    plannedTarget := (
+        entryFvgDirection == 1 ?
+        previousDayHigh :
+        previousDayLow
+    )
+
+bool riskPlanMatchesEntryFvg = (
+    entryFvgExists and
+    not na(riskPlanFvgCreatedBar) and
+    riskPlanFvgCreatedBar == entryFvgCreatedBar and
+    riskPlanDirection == entryFvgDirection
+)
+bool plannedStopValid = (
+    riskPlanMatchesEntryFvg and
+    not na(plannedEntry) and
+    not na(plannedStop) and
+    (
+        riskPlanDirection == 1 ?
+        plannedStop < plannedEntry :
+        plannedStop > plannedEntry
+    )
+)
+bool plannedTargetValid = (
+    riskPlanMatchesEntryFvg and
+    not na(plannedEntry) and
+    not na(plannedTarget) and
+    (
+        riskPlanDirection == 1 ?
+        plannedTarget > plannedEntry :
+        plannedTarget < plannedEntry
+    )
+)
+float plannedRisk = (
+    plannedStopValid ?
+    math.abs(plannedEntry - plannedStop) :
+    na
+)
+float plannedReward = (
+    plannedTargetValid ?
+    math.abs(plannedTarget - plannedEntry) :
+    na
+)
+float plannedRr = (
+    not na(plannedRisk) and
+    plannedRisk > 0.0 and
+    not na(plannedReward) ?
+    plannedReward / plannedRisk :
+    na
+)
+bool riskPlanAvailable = (
+    entryFvgActive and
+    riskPlanMatchesEntryFvg and
+    plannedStopValid and
+    plannedTargetValid and
+    not na(plannedRr)
+)
+bool riskPlanValid = (
+    riskPlanAvailable and
+    plannedRr >= minimumPlannedRr
+)
+
 // Preserve a POI touch for the current selected zone so later confirmation
 // events can remain part of the same developing setup after price leaves it.
 int setupContextBars = math.max(
@@ -1195,7 +1291,7 @@ bool entryFvgConflict = (
     combinedState != 0 and
     entryFvgDirection != combinedState
 )
-bool setupBlocked = (
+bool contextBlocked = (
     not timeframeOrderValid or
     conflict or
     structureConflict or
@@ -1205,8 +1301,7 @@ bool setupBlocked = (
     entryFvgFilledPulse != 0
 )
 
-// score-v1 automation mapping. Entry/Risk remains manual, so the Pine score
-// deliberately tops out at 95 and the final grade remains pending.
+// score-v1 automation mapping.
 int htfScore = aligned ? 20 : primaryOnly ? 10 : 0
 int poiScore = poiRecentlyInteracted ? 15 : poiActive ? 5 : 0
 int liquidityScore = liquidityAligned ? 15 : 0
@@ -1227,8 +1322,9 @@ int automatedScoreRaw = (
     displacementScore +
     entryFvgScore
 )
-int automatedScore = setupBlocked ? 0 : automatedScoreRaw
 bool automatedSetupComplete = (
+    not contextBlocked and
+    barstate.isconfirmed and
     aligned and
     poiRecentlyInteracted and
     liquidityAligned and
@@ -1239,14 +1335,27 @@ bool automatedSetupComplete = (
     entryFvgAligned and
     entryFvgInteractionActive
 )
+bool riskBlocked = (
+    automatedSetupComplete and
+    riskPlanAvailable and
+    not riskPlanValid
+)
+bool setupBlocked = contextBlocked or riskBlocked
+int automatedScore = setupBlocked ? 0 : automatedScoreRaw
+int riskScore = riskPlanValid ? 5 : 0
+int setupScoreRaw = automatedScoreRaw + riskScore
+int setupScore = setupBlocked ? 0 : setupScoreRaw
+bool entryReady = automatedSetupComplete and riskPlanValid
 int setupStateCode = (
     setupBlocked ? -1 :
+    entryReady ? 3 :
     automatedSetupComplete ? 2 :
-    automatedScore >= 25 ? 1 :
+    setupScore >= 25 ? 1 :
     0
 )
 string setupState = (
     setupStateCode == -1 ? "NO TRADE" :
+    setupStateCode == 3 ? "READY" :
     setupStateCode == 2 ? "RISK REVIEW" :
     setupStateCode == 1 ? "DEVELOPING" :
     "WAITING"
@@ -1262,17 +1371,39 @@ int setupNextStepCode = (
     not displacementValid ? 7 :
     not entryFvgAligned ? 8 :
     not entryFvgInteractionActive ? 9 :
-    10
+    not riskPlanValid ? 10 :
+    11
+)
+int finalGradeCode = (
+    setupStateCode == -1 ? -1 :
+    setupStateCode != 3 ? 0 :
+    setupScore >= 90 ? 5 :
+    setupScore >= 80 ? 4 :
+    setupScore >= 70 ? 3 :
+    setupScore >= 60 ? 2 :
+    1
+)
+string finalGrade = (
+    finalGradeCode == -1 ? "NO TRADE" :
+    finalGradeCode == 5 ? "A+" :
+    finalGradeCode == 4 ? "A" :
+    finalGradeCode == 3 ? "B" :
+    finalGradeCode == 2 ? "C" :
+    finalGradeCode == 1 ? "D" :
+    "--"
 )
 string dashboardStatusLabel = "Setup"
 string dashboardStatusValue = (
     setupState + " · " +
-    str.tostring(automatedScore) + "/100 · --"
+    str.tostring(setupScore) + "/100 · " +
+    finalGrade
 )
 bool dashboardStatusActive = setupStateCode != 0
 color dashboardStatusColor = (
     setupStateCode == -1 ? bearishColor :
     setupStateCode == 2 ? warningColor :
+    setupStateCode == 3 and combinedState != 0 ?
+    f_state_color(combinedState) :
     setupStateCode == 1 and combinedState != 0 ?
     f_state_color(combinedState) :
     neutralColor
@@ -1848,6 +1979,139 @@ if showEntryFvgEvents and entryFvgFilledPulse != 0
         size = size.tiny
     )
 
+var line plannedEntryLine = na
+var line plannedStopLine = na
+var line plannedTargetLine = na
+var label plannedEntryLabel = na
+var label plannedStopLabel = na
+var label plannedTargetLabel = na
+
+if barstate.islast
+    if (
+        showRiskPlan and
+        riskPlanAvailable and
+        not na(riskPlanStartTime)
+    )
+        if na(plannedEntryLine)
+            plannedEntryLine := line.new(
+                x1 = riskPlanStartTime,
+                y1 = plannedEntry,
+                x2 = time,
+                y2 = plannedEntry,
+                xloc = xloc.bar_time,
+                extend = extend.right,
+                color = warningColor,
+                style = line.style_solid,
+                width = 1
+            )
+            plannedStopLine := line.new(
+                x1 = riskPlanStartTime,
+                y1 = plannedStop,
+                x2 = time,
+                y2 = plannedStop,
+                xloc = xloc.bar_time,
+                extend = extend.right,
+                color = bearishColor,
+                style = line.style_dashed,
+                width = 1
+            )
+            plannedTargetLine := line.new(
+                x1 = riskPlanStartTime,
+                y1 = plannedTarget,
+                x2 = time,
+                y2 = plannedTarget,
+                xloc = xloc.bar_time,
+                extend = extend.right,
+                color = bullishColor,
+                style = line.style_dashed,
+                width = 1
+            )
+            plannedEntryLabel := label.new(
+                x = bar_index + 1,
+                y = plannedEntry,
+                text = "ENTRY " + str.tostring(plannedEntry, format.mintick),
+                xloc = xloc.bar_index,
+                style = label.style_label_left,
+                color = color.new(warningColor, 12),
+                textcolor = panelColor,
+                size = size.tiny
+            )
+            plannedStopLabel := label.new(
+                x = bar_index + 1,
+                y = plannedStop,
+                text = "SL " + str.tostring(plannedStop, format.mintick),
+                xloc = xloc.bar_index,
+                style = label.style_label_left,
+                color = color.new(bearishColor, 12),
+                textcolor = panelColor,
+                size = size.tiny
+            )
+            plannedTargetLabel := label.new(
+                x = bar_index + 1,
+                y = plannedTarget,
+                text = (
+                    "TP " + str.tostring(plannedTarget, format.mintick) +
+                    " · " + str.tostring(plannedRr, "#.##") + "R"
+                ),
+                xloc = xloc.bar_index,
+                style = label.style_label_left,
+                color = color.new(bullishColor, 12),
+                textcolor = panelColor,
+                size = size.tiny
+            )
+        else
+            line.set_xy1(
+                plannedEntryLine,
+                riskPlanStartTime,
+                plannedEntry
+            )
+            line.set_xy2(plannedEntryLine, time, plannedEntry)
+            line.set_xy1(plannedStopLine, riskPlanStartTime, plannedStop)
+            line.set_xy2(plannedStopLine, time, plannedStop)
+            line.set_xy1(
+                plannedTargetLine,
+                riskPlanStartTime,
+                plannedTarget
+            )
+            line.set_xy2(plannedTargetLine, time, plannedTarget)
+            label.set_xy(plannedEntryLabel, bar_index + 1, plannedEntry)
+            label.set_text(
+                plannedEntryLabel,
+                "ENTRY " + str.tostring(plannedEntry, format.mintick)
+            )
+            label.set_xy(plannedStopLabel, bar_index + 1, plannedStop)
+            label.set_text(
+                plannedStopLabel,
+                "SL " + str.tostring(plannedStop, format.mintick)
+            )
+            label.set_xy(plannedTargetLabel, bar_index + 1, plannedTarget)
+            label.set_text(
+                plannedTargetLabel,
+                (
+                    "TP " + str.tostring(plannedTarget, format.mintick) +
+                    " · " + str.tostring(plannedRr, "#.##") + "R"
+                )
+            )
+    else
+        if not na(plannedEntryLine)
+            line.delete(plannedEntryLine)
+            plannedEntryLine := na
+        if not na(plannedStopLine)
+            line.delete(plannedStopLine)
+            plannedStopLine := na
+        if not na(plannedTargetLine)
+            line.delete(plannedTargetLine)
+            plannedTargetLine := na
+        if not na(plannedEntryLabel)
+            label.delete(plannedEntryLabel)
+            plannedEntryLabel := na
+        if not na(plannedStopLabel)
+            label.delete(plannedStopLabel)
+            plannedStopLabel := na
+        if not na(plannedTargetLabel)
+            label.delete(plannedTargetLabel)
+            plannedTargetLabel := na
+
 plot(
     primaryState,
     title = "Primary HTF structure state",
@@ -2114,12 +2378,12 @@ plot(
 )
 plot(
     setupStateCode,
-    title = "Automated setup state (-1 No Trade, 0 Waiting, 1 Developing, 2 Risk Review)",
+    title = "Automated setup state (-1 No Trade, 0 Waiting, 1 Developing, 2 Risk Review, 3 Ready)",
     display = display.data_window
 )
 plot(
-    automatedScore,
-    title = "Automated setup score (Risk pending, max 95)",
+    setupScore,
+    title = "Final setup score (max 100)",
     display = display.data_window
 )
 plot(
@@ -2159,17 +2423,22 @@ plot(
 )
 plot(
     setupNextStepCode,
-    title = "Next step (-1 Blocked, 1 HTF, 2 POI, 3 POI Touch, 4 Liquidity, 5 Structure, 6 CISD, 7 Displacement, 8 Entry FVG, 9 Retrace, 10 Risk)",
+    title = "Next step (-1 Blocked, 1 HTF, 2 POI, 3 POI Touch, 4 Liquidity, 5 Structure, 6 CISD, 7 Displacement, 8 Entry FVG, 9 Retrace, 10 Risk, 11 Ready)",
     display = display.data_window
 )
 plot(
-    0,
-    title = "Score - Entry / Risk (manual, max 5)",
+    riskPlanAvailable ? plannedRr : na,
+    title = "Planned RR",
     display = display.data_window
 )
 plot(
-    0,
-    title = "Final grade (pending Risk review)",
+    entryReady ? 1 : 0,
+    title = "Entry ready",
+    display = display.data_window
+)
+plot(
+    finalGradeCode,
+    title = "Final grade (-1 No Trade, 0 Pending, 1 D, 2 C, 3 B, 4 A, 5 A+)",
     display = display.data_window
 )
 
@@ -2191,7 +2460,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.8.0",
+        "TRADING OS · HTF v0.9.0",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,

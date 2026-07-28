@@ -12,7 +12,7 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Phase: Validation Sprint after Phase 11
 - Validation target: 20 real-use outcomes with at least 80% R and review coverage
 - Version: v0.11.1
-- Pine indicator: v0.8.0-alpha - provisional automated Setup State and Score Engine
+- Pine indicator: v0.9.0-alpha - locked Entry/Risk plan, planned RR, Ready state, and final Grade
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -288,6 +288,18 @@ The eighth Pine milestone adds:
 - Automated NO TRADE, WAITING, DEVELOPING, and RISK REVIEW states
 - Entry/Risk held at 0 of 5 and final Grade held pending until risk rules are implemented
 - Compact ten-row Dashboard retained by reusing the existing Status row as Setup
+
+The ninth Pine milestone adds:
+
+- A locked plan when a new Entry FVG is created
+- Entry at the Entry FVG midpoint
+- Stop Loss at the latest confirmed execution swing used as invalidation
+- Target at confirmed Previous Day High or Previous Day Low liquidity
+- Configurable minimum planned RR with `2.0R` as the default
+- Price-anchored Entry, SL, and Target lines with an RR label
+- READY state and final A+ to D Grade only after the automated chain and RR pass
+- Final Score, planned RR, Entry readiness, and Grade outputs in the Data Window
+- No Buy/Sell order, alert, or automatic trade execution
 
 The Pine source and TradingView test notes are stored under `pine/`.
 
