@@ -1,7 +1,7 @@
 # Trading OS Indicator Specification
 
-Version: v0.3.4
-Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, Risk / Entry, Score, Alert, and HTF Order Block baselines
+Version: v0.3.5
+Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, Risk / Entry, Score, Alert, HTF Order Block, and Breaker baselines
 
 ## Purpose
 
@@ -83,7 +83,7 @@ These inputs remain required for later confidence calibration and should not be 
 
 ## Module 2 - HTF POI
 
-Implementation status: `Pine v0.11.2-alpha - FVG candidate plus latest 4H/1H Order Block chart context`
+Implementation status: `Pine v0.12.0-alpha - FVG candidate plus latest 4H/1H Order Block and Breaker chart context`
 
 Input:
 
@@ -136,6 +136,25 @@ Initial Order Block heuristic:
 - Use neutral gray and the `UNALIGNED` flag when it does not align.
 - Allow the latest active Primary 4H and Secondary 1H zones to appear together.
 
+Initial Breaker heuristic:
+
+- Evaluate completed 4H and 1H Order Block invalidations only.
+- Convert an invalidated Bullish OB into a Bearish Breaker after a completed
+  HTF close below the OB low.
+- Convert an invalidated Bearish OB into a Bullish Breaker after a completed
+  HTF close above the OB high.
+- Retain the invalidated OB's full-candle range and source time.
+- Record the invalidating HTF candle time as Breaker activation time.
+- Mark the Breaker `MITIGATED` after a later completed HTF candle overlaps it.
+- Invalidate a Bullish Breaker after a completed HTF close below its low.
+- Invalidate a Bearish Breaker after a completed HTF close above its high.
+- Select the newest active Bullish or Bearish Breaker on each HTF by activation
+  time.
+- Draw aligned Breakers in their directional color.
+- Draw unaligned Breakers in neutral gray with the `UNALIGNED` flag.
+- Allow the latest active Primary 4H and Secondary 1H Breakers to appear
+  together.
+
 Current limitation:
 
 - The candidate is not confirmed by displacement.
@@ -143,7 +162,9 @@ Current limitation:
 - INVALID status is not automated because structure invalidation rules are not yet explicit.
 - Order Block is chart context only and does not yet participate in selected
   POI logic, scoring, or Alerts.
-- Breaker, Liquidity, and Premium/Discount POIs are not implemented.
+- Breaker is chart context only and does not yet participate in selected POI
+  logic, scoring, or Alerts.
+- Liquidity and Premium/Discount POIs are not implemented.
 - The output must be described as an HTF FVG candidate, not a ready Entry zone.
 
 Current display:
@@ -152,6 +173,8 @@ Current display:
 - An optional box starts at the actual HTF origin time and uses the candidate's exact top and bottom prices.
 - Optional dashed 4H and 1H OB boxes start at the source candle's actual HTF
   time and use its exact full-candle range.
+- Optional dotted 4H and 1H Breaker boxes retain the invalidated OB's actual
+  source time and full-candle range.
 - Disabling the chart box must not change candidate selection, zone prices, status, or Entry logic.
 
 ## Module 3 - LTF Context

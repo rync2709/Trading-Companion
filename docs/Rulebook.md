@@ -1,6 +1,6 @@
 # Trading OS Rulebook
 
-Version: v0.1.5
+Version: v0.1.6
 Phase: 1 - Core Trading App
 
 ## Purpose
@@ -102,6 +102,22 @@ Initial automated Order Block baseline:
   toward POI scoring or Alerts.
 - Treat the current implementation as chart context until manual calibration
   supports using it in POI scoring.
+
+Initial automated Breaker baseline:
+
+- A Bullish OB becomes a Bearish Breaker only after a completed HTF candle
+  closes below the OB low.
+- A Bearish OB becomes a Bullish Breaker only after a completed HTF candle
+  closes above the OB high.
+- Keep the original OB range and source time as the Breaker zone.
+- A later overlap changes the Breaker from Fresh to Mitigated.
+- Invalidate a Bullish Breaker after a completed HTF close below its low.
+- Invalidate a Bearish Breaker after a completed HTF close above its high.
+- Keep the latest active 4H and 1H Breakers visible as chart context.
+- Use directional color for Bias-aligned Breakers and gray with `UNALIGNED`
+  for the others.
+- Do not count Breakers toward POI scoring or Alerts until manual calibration
+  confirms the baseline.
 
 ## Rule 3 - LTF Context
 

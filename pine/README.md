@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.11.2-alpha
+Version: v0.12.0-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -9,7 +9,7 @@ The Pine track automates selected Trading OS context checks without replacing tr
 `TradingOS.pine` currently implements:
 
 - Module 1: HTF Bias baseline
-- Module 2 baseline: aligned HTF FVG candidate and latest HTF Order Block chart context
+- Module 2 baseline: aligned HTF FVG candidate plus latest HTF Order Block and Breaker chart context
 - Module 4 baseline: Previous Day High/Low liquidity
 - Module 5 baseline: execution-chart BOS/CHOCH/MSS
 - Module 6 baseline: strict execution-chart CISD
@@ -39,6 +39,7 @@ Defaults:
 - Minimum planned RR: 2.0R
 - HTF OB break lookback: 5 completed HTF candles
 - HTF OB opposing-candle search: 6 HTF candles
+- HTF Order Block and Breaker display: enabled
 
 Structure heuristic:
 
@@ -98,6 +99,31 @@ OB boxes use actual source time and price and extend right until invalidated or
 replaced. The Display switch is enabled by default. This baseline is chart
 context only and does not yet replace the selected FVG POI, alter the setup
 score, or create a separate Alert event.
+
+## HTF Breaker Baseline
+
+The v0.12.0 Breaker baseline reuses completed 4H and 1H Order Block lifecycle
+events:
+
+- A Bullish OB becomes a Bearish Breaker after a completed HTF candle closes
+  below the OB low.
+- A Bearish OB becomes a Bullish Breaker after a completed HTF candle closes
+  above the OB high.
+- The Breaker retains the invalidated OB's full-candle range and original
+  source time.
+- The invalidating close activates the Breaker as `FRESH`.
+- A later completed HTF candle overlapping the zone changes it to `MITIGATED`.
+- A Bullish Breaker is invalid after a completed HTF close below its low.
+- A Bearish Breaker is invalid after a completed HTF close above its high.
+- The newest active Bullish or Bearish Breaker by activation time is shown on
+  each HTF.
+- Bias-aligned Breakers use their directional color.
+- Unaligned Breakers use neutral gray and include `UNALIGNED` in the label.
+- Breaker boxes use a dotted border so they remain distinct from dashed OB
+  boxes.
+
+Breaker boxes are chart context only. They do not replace the selected FVG
+POI, affect the Dashboard, score, Grade, or Alerts, or create Buy/Sell orders.
 
 ## Compact Dashboard
 
@@ -416,6 +442,14 @@ Compile status:
   `Trading OS HTF Context v0.11.2` without publishing.
 - Confirmed the local Pine source exactly matches the compiled and saved
   TradingView payload.
+- The v0.12.0 HTF Breaker baseline compiled successfully in TradingView.
+- Confirmed active dotted 4H and 1H Breaker boxes remain anchored to the
+  invalidated OB source time and price.
+- Confirmed visible `BEAR BRK · MITIGATED · UNALIGNED` chart context on XAUUSD.
+- Confirmed one valid indicator instance and no compile or runtime errors on
+  XAUUSD at 5M, 15M, 1H, and 4H.
+- Returned the chart to 15M and saved the private script as
+  `Trading OS HTF Context v0.12.0` without publishing.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.
@@ -444,14 +478,18 @@ Compile status:
     enabled event group on realtime candles before relying on notifications.
 20. Compare 4H and 1H OB source candles, mitigation, and invalidation against
     manual markup.
-21. Record disagreements before changing the Structure, CISD, Displacement, FVG, OB, Liquidity, Risk, or Alert rules.
+21. Compare 4H and 1H Breaker activation, mitigation, and invalidation against
+    manual markup.
+22. Record disagreements before changing the Structure, CISD, Displacement, FVG, OB, Breaker, Liquidity, Risk, or Alert rules.
 
 ## Current Limits
 
 - HTF POI currently supports FVG candidates only.
 - Order Block is chart context only and is not yet part of POI selection,
   scoring, or Alerts.
-- No Breaker, mitigation block, or liquidity POI.
+- Breaker is chart context only and is not yet part of POI selection, scoring,
+  or Alerts.
+- No mitigation block or liquidity POI.
 - Liquidity currently supports PDH and PDL only.
 - No Asia High/Low, Equal High/Low, or Internal/External Liquidity.
 - Structure is a baseline without automated setup type, POI proximity, or a complete setup window.

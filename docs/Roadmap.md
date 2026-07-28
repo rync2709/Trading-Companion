@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.11.2-alpha
+Version: v0.11.1 / Pine v0.12.0-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -703,7 +703,15 @@ First milestone:
 - [x] Keep the latest active 4H and 1H Order Block visible regardless of Bias.
 - [x] Show unaligned Order Blocks in gray with an `UNALIGNED` label.
 - [x] Compile, smoke-test, and save Pine v0.11.2 privately in TradingView.
+- [x] Convert completed-close HTF Order Block invalidations into opposite
+  Breakers.
+- [x] Track Fresh, Mitigated, and Invalid 4H/1H Breaker states.
+- [x] Draw dotted Bias-aligned or gray `UNALIGNED` Breaker chart context.
+- [x] Keep Breaker context separate from the Dashboard, scoring, and Alerts.
+- [x] Compile, smoke-test, and save Pine v0.12.0 privately in TradingView.
 - [ ] Compare Order Block source, mitigation, and invalidation against manual
+  4H/1H markup.
+- [ ] Compare Breaker activation, mitigation, and invalidation against manual
   4H/1H markup.
 - [ ] Compare the output against manually marked 4H/1H structure.
 - [ ] Compare FVG candidates and status transitions against manual markup.
@@ -719,7 +727,8 @@ Planned modules:
 - [x] HTF Bias baseline
 - [x] HTF POI - FVG candidate baseline
 - [x] HTF POI - Order Block chart-context baseline
-- [ ] HTF POI - Breaker, Liquidity, and Premium/Discount
+- [x] HTF POI - Breaker chart-context baseline
+- [ ] HTF POI - Liquidity and Premium/Discount
 - [x] Liquidity - Previous Day High/Low baseline
 - [ ] Liquidity - Asia, Equal High/Low, and Internal/External expansion
 - [x] Structure: MSS, CHOCH, BOS baseline
@@ -785,4 +794,5 @@ Expected outputs:
 | Pine v0.11.0-alpha | Aligned 4H/1H Order Block chart context |
 | Pine v0.11.1-alpha | Centered BOS/CHOCH/MSS Structure labels |
 | Pine v0.11.2-alpha | Latest active HTF Order Block visibility with gray unaligned context |
+| Pine v0.12.0-alpha | Completed-close 4H/1H Breaker chart context |
 | v1.0.0 | Trading OS MVP |

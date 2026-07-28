@@ -12,7 +12,7 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Phase: Validation Sprint after Phase 11
 - Validation target: 20 real-use outcomes with at least 80% R and review coverage
 - Version: v0.11.1
-- Pine indicator: v0.11.2-alpha - latest HTF Order Blocks with gray unaligned context
+- Pine indicator: v0.12.0-alpha - completed-close 4H/1H Breaker chart context
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -335,6 +335,13 @@ The v0.11.2 OB visibility update keeps the latest active 4H and 1H Order Block
 visible even when it does not align with the combined HTF Bias. Aligned zones
 keep their directional color; unaligned zones are gray and labeled
 `UNALIGNED`. This display change does not affect POI selection, scoring, Grade,
+or Alerts.
+
+The v0.12.0 Breaker baseline converts a completed-close OB invalidation into
+an opposite-direction 4H or 1H Breaker. The latest active Breaker on each HTF
+is anchored to the original OB source time and price, uses a dotted border,
+and tracks `FRESH`, `MITIGATED`, and `INVALID` states. It remains chart context
+only and does not affect the compact Dashboard, POI selection, scoring, Grade,
 or Alerts.
 
 The Pine source and TradingView test notes are stored under `pine/`.

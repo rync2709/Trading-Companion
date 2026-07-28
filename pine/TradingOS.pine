@@ -8,14 +8,14 @@ indicator(
     max_labels_count = 300
 )
 
-// Trading OS Pine Track v0.11.2-alpha
-// Modules: confirmed 4H/1H Bias, aligned HTF FVG and latest Order Block context,
-// daily liquidity, confirmed execution-chart BOS/CHOCH/MSS, strict CISD
-// context, execution-chart displacement with follow-through, Entry FVG
-// confirmation, an automated setup score, a locked Entry/Risk planning
-// baseline, and confirmed-bar event alerts. Full chart context is enabled by
-// default. This indicator remains decision support and does not generate
-// Buy/Sell signals.
+// Trading OS Pine Track v0.12.0-alpha
+// Modules: confirmed 4H/1H Bias, aligned HTF FVG, latest Order Block and
+// Breaker context, daily liquidity, confirmed execution-chart BOS/CHOCH/MSS,
+// strict CISD context, execution-chart displacement with follow-through,
+// Entry FVG confirmation, an automated setup score, a locked Entry/Risk
+// planning baseline, and confirmed-bar event alerts. Full chart context is
+// enabled by default. This indicator remains decision support and does not
+// generate Buy/Sell signals.
 
 string primaryTimeframe = input.timeframe("240", "Primary HTF", group = "HTF Bias")
 string secondaryTimeframe = input.timeframe("60", "Secondary HTF", group = "HTF Bias")
@@ -48,6 +48,12 @@ bool showHtfOrderBlocks = input.bool(
     "Show latest HTF Order Blocks",
     tooltip = "Draws the latest active 4H and 1H Order Blocks. Zones aligned with HTF Bias use directional color; unaligned zones remain visible in gray.",
     group = "HTF Order Block"
+)
+bool showHtfBreakers = input.bool(
+    true,
+    "Show latest HTF Breakers",
+    tooltip = "Converts a completed-close OB invalidation into an opposite-direction Breaker. Aligned zones use directional color; unaligned zones remain visible in gray.",
+    group = "HTF Breaker"
 )
 int structureSwingLength = input.int(
     3,
@@ -442,6 +448,16 @@ f_ob_state(
     var float bearishBottom = na
     var int bearishStart = na
     var int bearishStatus = 0
+    var float bullishBreakerTop = na
+    var float bullishBreakerBottom = na
+    var int bullishBreakerSourceStart = na
+    var int bullishBreakerActivation = na
+    var int bullishBreakerStatus = 0
+    var float bearishBreakerTop = na
+    var float bearishBreakerBottom = na
+    var int bearishBreakerSourceStart = na
+    var int bearishBreakerActivation = na
+    var int bearishBreakerStatus = 0
 
     float completedBody = math.abs(close[1] - open[1])
     float completedRange = high[1] - low[1]
@@ -505,6 +521,8 @@ f_ob_state(
 
     bool bullishCreated = not na(bullishCandidateStart)
     bool bearishCreated = not na(bearishCandidateStart)
+    bool bullishBreakerCreated = false
+    bool bearishBreakerCreated = false
 
     if bullishCreated
         bullishTop := bullishCandidateTop
@@ -514,6 +532,12 @@ f_ob_state(
     else if f_ob_active(bullishStatus)
         if close[1] < bullishBottom
             bullishStatus := 3
+            bearishBreakerTop := bullishTop
+            bearishBreakerBottom := bullishBottom
+            bearishBreakerSourceStart := bullishStart
+            bearishBreakerActivation := time[1]
+            bearishBreakerStatus := 1
+            bearishBreakerCreated := true
         else if low[1] <= bullishTop
             bullishStatus := 2
 
@@ -525,10 +549,38 @@ f_ob_state(
     else if f_ob_active(bearishStatus)
         if close[1] > bearishTop
             bearishStatus := 3
+            bullishBreakerTop := bearishTop
+            bullishBreakerBottom := bearishBottom
+            bullishBreakerSourceStart := bearishStart
+            bullishBreakerActivation := time[1]
+            bullishBreakerStatus := 1
+            bullishBreakerCreated := true
         else if high[1] >= bearishBottom
             bearishStatus := 2
 
-    [bullishTop, bullishBottom, bullishStart, bullishStatus, bearishTop, bearishBottom, bearishStart, bearishStatus]
+    bullishBreakerStatus := (
+        bullishBreakerCreated or not f_ob_active(bullishBreakerStatus) ?
+        bullishBreakerStatus :
+        close[1] < bullishBreakerBottom ? 3 :
+        (
+            time[1] > bullishBreakerActivation and
+            low[1] <= bullishBreakerTop
+        ) ? 2 :
+        bullishBreakerStatus
+    )
+
+    bearishBreakerStatus := (
+        bearishBreakerCreated or not f_ob_active(bearishBreakerStatus) ?
+        bearishBreakerStatus :
+        close[1] > bearishBreakerTop ? 3 :
+        (
+            time[1] > bearishBreakerActivation and
+            high[1] >= bearishBreakerBottom
+        ) ? 2 :
+        bearishBreakerStatus
+    )
+
+    [bullishTop, bullishBottom, bullishStart, bullishStatus, bearishTop, bearishBottom, bearishStart, bearishStatus, bullishBreakerTop, bullishBreakerBottom, bullishBreakerSourceStart, bullishBreakerActivation, bullishBreakerStatus, bearishBreakerTop, bearishBreakerBottom, bearishBreakerSourceStart, bearishBreakerActivation, bearishBreakerStatus]
 
 f_structure_event_text(int eventCode) =>
     eventCode == 1 ? "BOS" :
@@ -945,6 +997,92 @@ f_timeframe_label(string value) =>
      value == "5" ? "5M" :
      value
 
+f_update_breaker_box(
+    box currentBox,
+    bool shouldUpdate,
+    bool showZone,
+    bool zoneActive,
+    int sourceStart,
+    float zoneTop,
+    float zoneBottom,
+    int direction,
+    int status,
+    bool zoneAligned,
+    string timeframeLabel,
+    bool primaryZone
+) =>
+    box result = currentBox
+    if shouldUpdate
+        if showZone and zoneActive and not na(sourceStart)
+            color zoneColor = (
+                zoneAligned ?
+                f_state_color(direction) :
+                neutralColor
+            )
+            string zoneText = (
+                timeframeLabel + " " +
+                f_state_short(direction) + " BRK · " +
+                f_ob_status_text(status) +
+                (zoneAligned ? "" : " · UNALIGNED")
+            )
+            int borderTransparency = primaryZone ? 4 : 26
+            int backgroundTransparency = primaryZone ? 89 : 93
+            int textTransparency = primaryZone ? 0 : 14
+            int borderWidth = primaryZone ? 2 : 1
+            if na(result)
+                result := box.new(
+                    left = sourceStart,
+                    top = zoneTop,
+                    right = time,
+                    bottom = zoneBottom,
+                    xloc = xloc.bar_time,
+                    extend = extend.right,
+                    border_color = color.new(
+                        zoneColor,
+                        borderTransparency
+                    ),
+                    border_width = borderWidth,
+                    border_style = line.style_dotted,
+                    bgcolor = color.new(
+                        zoneColor,
+                        backgroundTransparency
+                    ),
+                    text = zoneText,
+                    text_color = color.new(
+                        zoneColor,
+                        textTransparency
+                    ),
+                    text_size = size.tiny,
+                    text_halign = text.align_left,
+                    text_valign = text.align_top
+                )
+            else
+                box.set_left(result, sourceStart)
+                box.set_top(result, zoneTop)
+                box.set_right(result, time)
+                box.set_bottom(result, zoneBottom)
+                box.set_extend(result, extend.right)
+                box.set_border_color(
+                    result,
+                    color.new(zoneColor, borderTransparency)
+                )
+                box.set_border_width(result, borderWidth)
+                box.set_border_style(result, line.style_dotted)
+                box.set_bgcolor(
+                    result,
+                    color.new(zoneColor, backgroundTransparency)
+                )
+                box.set_text(result, zoneText)
+                box.set_text_color(
+                    result,
+                    color.new(zoneColor, textTransparency)
+                )
+        else if not na(result)
+            box.delete(result)
+            result := na
+
+    result
+
 // A one-bar offset with lookahead_on returns the last completed HTF state.
 // This avoids using a still-forming higher-timeframe bar.
 int primaryState = request.security(
@@ -976,7 +1114,7 @@ int secondaryState = request.security(
     gaps = barmerge.gaps_off,
     lookahead = barmerge.lookahead_on
 )
-[primaryBullObTop, primaryBullObBottom, primaryBullObStart, primaryBullObStatus, primaryBearObTop, primaryBearObBottom, primaryBearObStart, primaryBearObStatus] = request.security(
+[primaryBullObTop, primaryBullObBottom, primaryBullObStart, primaryBullObStatus, primaryBearObTop, primaryBearObBottom, primaryBearObStart, primaryBearObStatus, primaryBullBreakerTop, primaryBullBreakerBottom, primaryBullBreakerSourceStart, primaryBullBreakerActivation, primaryBullBreakerStatus, primaryBearBreakerTop, primaryBearBreakerBottom, primaryBearBreakerSourceStart, primaryBearBreakerActivation, primaryBearBreakerStatus] = request.security(
     syminfo.tickerid,
     primaryTimeframe,
     f_ob_state(
@@ -991,7 +1129,7 @@ int secondaryState = request.security(
     gaps = barmerge.gaps_off,
     lookahead = barmerge.lookahead_on
 )
-[secondaryBullObTop, secondaryBullObBottom, secondaryBullObStart, secondaryBullObStatus, secondaryBearObTop, secondaryBearObBottom, secondaryBearObStart, secondaryBearObStatus] = request.security(
+[secondaryBullObTop, secondaryBullObBottom, secondaryBullObStart, secondaryBullObStatus, secondaryBearObTop, secondaryBearObBottom, secondaryBearObStart, secondaryBearObStatus, secondaryBullBreakerTop, secondaryBullBreakerBottom, secondaryBullBreakerSourceStart, secondaryBullBreakerActivation, secondaryBullBreakerStatus, secondaryBearBreakerTop, secondaryBearBreakerBottom, secondaryBearBreakerSourceStart, secondaryBearBreakerActivation, secondaryBearBreakerStatus] = request.security(
     syminfo.tickerid,
     secondaryTimeframe,
     f_ob_state(
@@ -1132,6 +1270,92 @@ bool secondaryObActive = (
 bool secondaryObAligned = (
     combinedState != 0 and
     secondaryObDirection == combinedState
+)
+
+bool primaryBullBreakerAvailable = f_ob_active(primaryBullBreakerStatus)
+bool primaryBearBreakerAvailable = f_ob_active(primaryBearBreakerStatus)
+int primaryBreakerDirection = (
+    primaryBullBreakerAvailable and primaryBearBreakerAvailable ?
+    (
+        nz(primaryBullBreakerActivation, 0) >=
+        nz(primaryBearBreakerActivation, 0) ?
+        1 :
+        -1
+    ) :
+    primaryBullBreakerAvailable ? 1 :
+    primaryBearBreakerAvailable ? -1 :
+    0
+)
+float primaryBreakerTop = (
+    primaryBreakerDirection == 1 ? primaryBullBreakerTop :
+    primaryBreakerDirection == -1 ? primaryBearBreakerTop :
+    na
+)
+float primaryBreakerBottom = (
+    primaryBreakerDirection == 1 ? primaryBullBreakerBottom :
+    primaryBreakerDirection == -1 ? primaryBearBreakerBottom :
+    na
+)
+int primaryBreakerSourceStart = (
+    primaryBreakerDirection == 1 ? primaryBullBreakerSourceStart :
+    primaryBreakerDirection == -1 ? primaryBearBreakerSourceStart :
+    na
+)
+int primaryBreakerStatus = (
+    primaryBreakerDirection == 1 ? primaryBullBreakerStatus :
+    primaryBreakerDirection == -1 ? primaryBearBreakerStatus :
+    0
+)
+bool primaryBreakerActive = (
+    primaryBreakerDirection != 0 and
+    f_ob_active(primaryBreakerStatus)
+)
+bool primaryBreakerAligned = (
+    combinedState != 0 and
+    primaryBreakerDirection == combinedState
+)
+
+bool secondaryBullBreakerAvailable = f_ob_active(secondaryBullBreakerStatus)
+bool secondaryBearBreakerAvailable = f_ob_active(secondaryBearBreakerStatus)
+int secondaryBreakerDirection = (
+    secondaryBullBreakerAvailable and secondaryBearBreakerAvailable ?
+    (
+        nz(secondaryBullBreakerActivation, 0) >=
+        nz(secondaryBearBreakerActivation, 0) ?
+        1 :
+        -1
+    ) :
+    secondaryBullBreakerAvailable ? 1 :
+    secondaryBearBreakerAvailable ? -1 :
+    0
+)
+float secondaryBreakerTop = (
+    secondaryBreakerDirection == 1 ? secondaryBullBreakerTop :
+    secondaryBreakerDirection == -1 ? secondaryBearBreakerTop :
+    na
+)
+float secondaryBreakerBottom = (
+    secondaryBreakerDirection == 1 ? secondaryBullBreakerBottom :
+    secondaryBreakerDirection == -1 ? secondaryBearBreakerBottom :
+    na
+)
+int secondaryBreakerSourceStart = (
+    secondaryBreakerDirection == 1 ? secondaryBullBreakerSourceStart :
+    secondaryBreakerDirection == -1 ? secondaryBearBreakerSourceStart :
+    na
+)
+int secondaryBreakerStatus = (
+    secondaryBreakerDirection == 1 ? secondaryBullBreakerStatus :
+    secondaryBreakerDirection == -1 ? secondaryBearBreakerStatus :
+    0
+)
+bool secondaryBreakerActive = (
+    secondaryBreakerDirection != 0 and
+    f_ob_active(secondaryBreakerStatus)
+)
+bool secondaryBreakerAligned = (
+    combinedState != 0 and
+    secondaryBreakerDirection == combinedState
 )
 
 bool primaryBullAvailable = f_fvg_active(primaryBullStatus)
@@ -2061,6 +2285,37 @@ if barstate.islast
     else if not na(secondaryObBox)
         box.delete(secondaryObBox)
         secondaryObBox := na
+
+var box primaryBreakerBox = na
+var box secondaryBreakerBox = na
+primaryBreakerBox := f_update_breaker_box(
+    primaryBreakerBox,
+    barstate.islast,
+    showHtfBreakers,
+    primaryBreakerActive,
+    primaryBreakerSourceStart,
+    primaryBreakerTop,
+    primaryBreakerBottom,
+    primaryBreakerDirection,
+    primaryBreakerStatus,
+    primaryBreakerAligned,
+    f_timeframe_label(primaryTimeframe),
+    true
+)
+secondaryBreakerBox := f_update_breaker_box(
+    secondaryBreakerBox,
+    barstate.islast,
+    showHtfBreakers,
+    secondaryBreakerActive,
+    secondaryBreakerSourceStart,
+    secondaryBreakerTop,
+    secondaryBreakerBottom,
+    secondaryBreakerDirection,
+    secondaryBreakerStatus,
+    secondaryBreakerAligned,
+    f_timeframe_label(secondaryTimeframe),
+    false
+)
 
 var label pdhLabel = na
 var label pdlLabel = na
@@ -3059,7 +3314,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.11.2",
+        "TRADING OS · HTF v0.12.0",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,

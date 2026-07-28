@@ -2,6 +2,43 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.12.0-alpha - 2026-07-28
+
+### Added
+
+- Added completed-close 4H and 1H Breaker detection from invalidated Order
+  Blocks.
+- Converted invalidated Bullish OBs into Bearish Breakers and invalidated
+  Bearish OBs into Bullish Breakers.
+- Retained the invalidated OB's full-candle range and source time.
+- Added Fresh, Mitigated, and Invalid Breaker lifecycle states.
+- Selected the newest active Bullish or Bearish Breaker on each HTF by
+  activation time.
+- Added dotted 4H and 1H Breaker boxes with directional color when Bias-aligned
+  and gray `UNALIGNED` presentation otherwise.
+- Added a Display switch for latest HTF Breakers.
+
+### Kept
+
+- Kept the compact ten-row Dashboard and `Small` default size unchanged.
+- Kept selected FVG POI, score, Grade, Alerts, and automatic execution behavior
+  unchanged.
+- Kept Breaker as chart context pending manual calibration.
+
+### Validated
+
+- Compiled Pine v0.12.0-alpha successfully in TradingView Pine Editor.
+- Confirmed visible `BEAR BRK · MITIGATED · UNALIGNED` chart context on XAUUSD.
+- Confirmed one valid indicator instance and no compile or runtime errors on
+  XAUUSD at 5M, 15M, 1H, and 4H.
+- Returned the chart to 15M and saved the private script as
+  `Trading OS HTF Context v0.12.0` without publishing.
+
+### Pending Manual Review
+
+- Compare Breaker activation, mitigation, invalidation, and source-zone
+  selection against manual 4H and 1H markup.
+
 ## Pine v0.11.2-alpha - 2026-07-28
 
 ### Changed
