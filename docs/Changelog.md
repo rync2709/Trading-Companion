@@ -2,6 +2,46 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.10.0-alpha - 2026-07-28
+
+### Added
+
+- Added one master Alert switch and independent switches for POI, Liquidity,
+  Structure, CISD, Displacement, Entry FVG, Risk Review, READY, and NO TRADE.
+- Added confirmed-bar event pulses for the existing automated modules.
+- Added transition-only alerts for RISK REVIEW, READY TO ENTER, and NO TRADE.
+- Added one aggregated dynamic message for multiple enabled events on the same
+  candle.
+- Added symbol, timeframe, Setup State, Score, Grade, planned RR, and close
+  price to the Alert message.
+
+### Kept
+
+- Kept the compact ten-row Dashboard and `Small` default size unchanged.
+- Kept the indicator as decision support without Buy/Sell orders or automatic
+  execution.
+- Kept Alert delivery disabled unless the trader creates a running TradingView
+  alert using `Any alert() function call`.
+
+### Validated
+
+- Compiled Pine v0.10.0-alpha successfully in TradingView Pine Editor.
+- Confirmed the master switch and all nine Alert event groups load in Settings.
+- Confirmed one valid v0.10.0 indicator instance and no compile or runtime
+  errors on XAUUSD at 5M, 15M, 1H, and 4H.
+- Removed the discarded compile-error chart instance.
+- Returned the chart to 15M, saved the layout, and saved the private script as
+  `Trading OS HTF Context v0.10.0` without publishing.
+- Confirmed the local Pine source exactly matches the compiled and saved
+  TradingView payload.
+
+### Pending Manual Review
+
+- Create a temporary running TradingView alert and validate realtime delivery
+  for each event group before relying on notifications.
+- Validate the alert message against a future Trading Companion webhook
+  contract before integration.
+
 ## Pine v0.9.0-alpha - 2026-07-28
 
 ### Added

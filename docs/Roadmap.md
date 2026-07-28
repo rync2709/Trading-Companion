@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.9.0-alpha
+Version: v0.11.1 / Pine v0.10.0-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -686,6 +686,13 @@ First milestone:
 - [x] Add READY state, final 0-100 score, and A+ to D Grade.
 - [x] Keep the ten-row Dashboard and `Small` default size unchanged.
 - [x] Compile, load, smoke-test, and save Pine v0.9.0 privately in TradingView.
+- [x] Add a master Alert switch and nine configurable event groups.
+- [x] Aggregate enabled same-candle events into one dynamic message.
+- [x] Restrict Alert evaluation to confirmed chart candles and state
+  transitions.
+- [x] Compile, load, smoke-test, and save Pine v0.10.0 privately in TradingView.
+- [ ] Create a temporary running TradingView alert and validate realtime
+  notification delivery.
 - [ ] Compare the output against manually marked 4H/1H structure.
 - [ ] Compare FVG candidates and status transitions against manual markup.
 - [ ] Compare execution BOS/CHOCH/MSS events against manual markup.
@@ -708,7 +715,7 @@ Planned modules:
 - [x] FVG / Entry Zone baseline
 - [x] Risk / Entry planning baseline
 - [x] Score Engine baseline
-- [ ] Alert System
+- [x] Alert System baseline
 
 Expected outputs:
 
@@ -761,4 +768,5 @@ Expected outputs:
 | Pine v0.7.0-alpha | Displacement-linked Entry FVG and retracement baseline |
 | Pine v0.8.0-alpha | Provisional automated Setup State and Score Engine |
 | Pine v0.9.0-alpha | Locked Entry/Risk plan, planned RR, READY state, and final Grade |
+| Pine v0.10.0-alpha | Configurable confirmed-bar Alert System |
 | v1.0.0 | Trading OS MVP |

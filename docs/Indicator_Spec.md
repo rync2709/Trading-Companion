@@ -1,7 +1,7 @@
 # Trading OS Indicator Specification
 
-Version: v0.3.0
-Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, Risk / Entry, and Score baselines
+Version: v0.3.1
+Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, Risk / Entry, Score, and Alert baselines
 
 ## Purpose
 
@@ -499,7 +499,50 @@ Output:
 
 - score: 0 to 100
 - grade: A+, A, B, C, or D
-- final_state: NO_TRADE, WAITING, DEVELOPING, or READY
+- final_state: NO_TRADE, WAITING, DEVELOPING, RISK_REVIEW, or READY
+
+## Module 11 - Alert System
+
+Implementation status: `Pine v0.10.0-alpha - configurable confirmed-bar Alert System`
+
+Input:
+
+- Selected HTF POI interaction
+- PDH and PDL sweep pulses
+- BOS, CHOCH, and MSS pulses
+- Valid CISD event pulse
+- Confirmed Displacement pulse
+- Entry FVG creation, retracement, and fill pulses
+- Setup State transitions
+- Master Alert switch and individual event-group switches
+
+Process:
+
+- Evaluate Alert events only after the current chart candle is confirmed.
+- Suppress disabled event groups.
+- Trigger POI interaction once for the active selected zone.
+- Trigger Risk Review, READY, and NO TRADE only when the Setup State enters the
+  matching state.
+- Combine multiple enabled same-candle events into one message.
+- Include symbol, chart timeframe, event list, Setup State, Score, Grade,
+  planned RR, and close price.
+- Call `alert()` once per confirmed bar at most.
+
+Output:
+
+- alert_event_count: zero or more enabled events on the confirmed candle
+- alert_event_list: human-readable aggregated event description
+- alert_message: dynamic TradingView notification payload
+- alert_frequency: once per bar close
+
+Current limitation:
+
+- The script does not create a running TradingView alert automatically.
+- Notifications begin only after the trader creates an alert using
+  `Any alert() function call`.
+- Alert execution is realtime only; historical bars do not deliver
+  notifications.
+- No webhook receiver or direct Trading Companion data bridge exists yet.
 
 ## Current Checklist Mapping
 

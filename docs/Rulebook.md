@@ -1,6 +1,6 @@
 # Trading OS Rulebook
 
-Version: v0.1.2
+Version: v0.1.3
 Phase: 1 - Core Trading App
 
 ## Purpose
@@ -230,3 +230,17 @@ shown only when the setup reaches READY TO ENTER. Before that point the score
 shows setup maturity, while the grade remains pending. New trade records store
 their score profile and category breakdown so the weights can be calibrated
 against real outcomes before Pine Script automation.
+
+## Rule 14 - Alerts
+
+Alerts are decision-support notifications, not Buy/Sell instructions.
+
+- Notify only after a chart candle confirms a meaningful event or Setup State
+  transition.
+- Do not repeat the same state on every candle.
+- Allow each event group to be enabled or disabled independently.
+- Combine simultaneous events so one candle does not create unnecessary
+  notification noise.
+- READY TO ENTER still requires final trader review and approval.
+- Changing the monitored symbol, timeframe, or indicator settings requires the
+  trader to recreate the running TradingView alert with the intended context.

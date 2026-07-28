@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.9.0-alpha
+Version: v0.10.0-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -17,6 +17,7 @@ The Pine track automates selected Trading OS context checks without replacing tr
 - Module 8 baseline: Displacement-linked Entry FVG and retracement
 - Module 9 baseline: locked Entry, Stop, Target, and planned RR
 - Module 10 baseline: automated Setup State, Score, and final Grade
+- Module 11 baseline: configurable confirmed-bar Alert System
 
 Defaults:
 
@@ -182,7 +183,7 @@ The first Displacement module runs on the current chart timeframe:
 - Watch and confirmed Displacement ranges can be drawn as chart boxes with confirmed-event labels.
 
 Displacement remains decision-support context. It does not generate a Buy/Sell
-signal, alert, or automatic Entry by itself.
+signal or automatic Entry by itself.
 
 ## Entry FVG / Entry Zone Baseline
 
@@ -202,8 +203,8 @@ The first Entry FVG module runs on the current chart timeframe:
 - Exact direction, status, boundaries, event pulses, creation bar, and price-interaction state remain available in the Data Window.
 
 This baseline tracks the latest Entry FVG only. It does not automate
-invalidation beyond a full fill, a broker Entry trigger, or alerts. Module 9
-uses the active zone as the source for a proposed risk plan.
+invalidation beyond a full fill or a broker Entry trigger. Module 9 uses the
+active zone as the source for a proposed risk plan.
 
 ## Entry / Risk Planning Baseline
 
@@ -262,6 +263,39 @@ shows the short state, final score, and Grade. Automated category scores, final
 score, planned RR, Entry readiness, Grade code, and the next-step code remain
 available in the Data Window.
 
+## Alert System
+
+The v0.10.0 Alert System runs only on confirmed chart candles and supports:
+
+- First interaction with the selected HTF POI
+- Confirmed PDH or PDL sweep
+- Confirmed BOS, CHOCH, or MSS
+- Valid Bullish or Bearish CISD
+- Confirmed Bullish or Bearish Displacement
+- Entry FVG creation, retracement, or fill
+- Transition into RISK REVIEW
+- Transition into READY TO ENTER
+- Transition into NO TRADE
+
+The Alerts settings include one master switch and an independent switch for
+each event group. When several enabled events occur on the same confirmed
+candle, the script combines them into one dynamic message containing the
+symbol, chart timeframe, event list, Setup State, Score, Grade, planned RR, and
+close price.
+
+The Pine script exposes one `alert()` call with once-per-bar-close frequency.
+It does not create or start a TradingView alert automatically. To receive
+notifications:
+
+1. Add the saved indicator to the chart.
+2. Configure the event switches under the indicator's Alerts settings.
+3. Select Create alert in TradingView.
+4. Select `Trading OS - HTF Context` as the condition.
+5. Select `Any alert() function call`.
+6. Choose the required notification channel and create the alert.
+7. Recreate the alert after changing the symbol, timeframe, or indicator
+   settings that the running alert must use.
+
 ## Non-Repainting Baseline
 
 The script requests the previous completed HTF state. Confirmed pivots also require bars on both sides, so the output intentionally lags live price. This tradeoff avoids treating a still-forming HTF structure as confirmed.
@@ -319,6 +353,16 @@ Compile status:
   returned the chart to 15M, and saved the layout.
 - Saved the private TradingView script as
   `Trading OS HTF Context v0.9.0` without publishing.
+- The v0.10.0 Alert System compiled successfully in TradingView.
+- Confirmed the Alerts settings expose the master switch and all nine event
+  groups.
+- Confirmed one valid v0.10.0 indicator instance and no compile or runtime
+  errors on XAUUSD at 5M, 15M, 1H, and 4H.
+- Removed the discarded compile-error chart instance, returned the chart to
+  15M, and saved the layout.
+- Saved the private TradingView script as
+  `Trading OS HTF Context v0.10.0` without publishing.
+- No running TradingView alert was created during implementation.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.
@@ -343,7 +387,9 @@ Compile status:
 17. Confirm all drawings remain anchored to their source bar time and price while scrolling or zooming.
 18. Compare the locked Entry midpoint, swing invalidation, PDH/PDL Target, and
     planned RR against manual plans.
-19. Record disagreements before changing the Structure, CISD, Displacement, FVG, Liquidity, or Risk rules.
+19. Create a temporary `Any alert() function call` alert and confirm each
+    enabled event group on realtime candles before relying on notifications.
+20. Record disagreements before changing the Structure, CISD, Displacement, FVG, Liquidity, Risk, or Alert rules.
 
 ## Current Limits
 
@@ -360,6 +406,9 @@ Compile status:
   calibrated against manual plans.
 - The final Grade covers automated evidence and planned RR only; it does not
   include emotion, news, spread, slippage, or position-size checks.
-- No order execution or alert.
+- No order execution.
+- Alert code is implemented, but notifications require a user-created running
+  TradingView alert and only trigger on realtime confirmed candles.
+- Alert delivery and webhook integration have not yet been validated.
 - Premium/discount and displacement are not yet included in HTF confidence.
 - Compilation and rendering are confirmed, but manual comparison and heuristic calibration are still required before release readiness.
