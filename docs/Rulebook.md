@@ -1,6 +1,6 @@
 # Trading OS Rulebook
 
-Version: v0.1.6
+Version: v0.1.7
 Phase: 1 - Core Trading App
 
 ## Purpose
@@ -262,6 +262,12 @@ shown only when the setup reaches READY TO ENTER. Before that point the score
 shows setup maturity, while the grade remains pending. New trade records store
 their score profile and category breakdown so the weights can be calibrated
 against real outcomes before Pine Script automation.
+
+The Pine Manual Assessment is an operator aid and may show a provisional Grade
+before READY so the trader can compare setup quality while confirmations are
+forming. Setup Status remains authoritative: READY still requires directional
+Narrative, every core confirmation, and Risk / RR approval. Selecting manual
+NO TRADE overrides the checklist and resets the displayed score to zero.
 
 ## Rule 14 - Alerts
 

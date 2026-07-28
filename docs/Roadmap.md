@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.12.0-alpha
+Version: v0.11.1 / Pine v0.13.0-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -709,6 +709,14 @@ First milestone:
 - [x] Draw dotted Bias-aligned or gray `UNALIGNED` Breaker chart context.
 - [x] Keep Breaker context separate from the Dashboard, scoring, and Alerts.
 - [x] Compile, smoke-test, and save Pine v0.12.0 privately in TradingView.
+- [x] Add Manual Assessment as the default Dashboard mode.
+- [x] Add manual Bullish, Bearish, and Neutral Narrative selection.
+- [x] Add eight weighted checklist confirmations and a NO TRADE override.
+- [x] Calculate manual Setup Status, 0-100 Score, and A+ to D Grade.
+- [x] Keep Automatic mode available without changing chart drawings, Data
+  Window outputs, or confirmed-bar Alerts.
+- [x] Keep the compact ten-row Dashboard and `Small` default size unchanged.
+- [x] Compile, smoke-test, and save Pine v0.13.0 privately in TradingView.
 - [ ] Compare Order Block source, mitigation, and invalidation against manual
   4H/1H markup.
 - [ ] Compare Breaker activation, mitigation, and invalidation against manual
@@ -795,4 +803,5 @@ Expected outputs:
 | Pine v0.11.1-alpha | Centered BOS/CHOCH/MSS Structure labels |
 | Pine v0.11.2-alpha | Latest active HTF Order Block visibility with gray unaligned context |
 | Pine v0.12.0-alpha | Completed-close 4H/1H Breaker chart context |
+| Pine v0.13.0-alpha | Manual Narrative, weighted checklist Score, Grade, and Setup Status |
 | v1.0.0 | Trading OS MVP |

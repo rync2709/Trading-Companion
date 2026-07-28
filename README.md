@@ -12,7 +12,7 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Phase: Validation Sprint after Phase 11
 - Validation target: 20 real-use outcomes with at least 80% R and review coverage
 - Version: v0.11.1
-- Pine indicator: v0.12.0-alpha - completed-close 4H/1H Breaker chart context
+- Pine indicator: v0.13.0-alpha - manual Narrative, checklist Score, Grade, and Setup Status
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -343,6 +343,12 @@ is anchored to the original OB source time and price, uses a dotted border,
 and tracks `FRESH`, `MITIGATED`, and `INVALID` states. It remains chart context
 only and does not affect the compact Dashboard, POI selection, scoring, Grade,
 or Alerts.
+
+The v0.13.0 Manual Assessment update makes trader confirmation the default
+Dashboard source. Narrative is selected manually and eight weighted checklist
+items produce the 0-100 Score, A+ to D Grade, and Setup Status. Automatic mode
+remains available for comparison, while chart drawings and confirmed-bar
+Alerts continue to use the existing detection logic.
 
 The Pine source and TradingView test notes are stored under `pine/`.
 

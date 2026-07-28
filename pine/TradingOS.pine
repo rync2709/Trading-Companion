@@ -8,14 +8,74 @@ indicator(
     max_labels_count = 300
 )
 
-// Trading OS Pine Track v0.12.0-alpha
+// Trading OS Pine Track v0.13.0-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG, latest Order Block and
 // Breaker context, daily liquidity, confirmed execution-chart BOS/CHOCH/MSS,
 // strict CISD context, execution-chart displacement with follow-through,
-// Entry FVG confirmation, an automated setup score, a locked Entry/Risk
-// planning baseline, and confirmed-bar event alerts. Full chart context is
-// enabled by default. This indicator remains decision support and does not
-// generate Buy/Sell signals.
+// Entry FVG confirmation, manual and automated assessment modes, a locked
+// Entry/Risk planning baseline, and confirmed-bar event alerts. Full chart
+// context is enabled by default. This indicator remains decision support and
+// does not generate Buy/Sell signals.
+
+string assessmentModeInput = input.string(
+    "Manual",
+    "Dashboard assessment mode",
+    options = ["Manual", "Automatic"],
+    tooltip = "Manual uses the checklist below for Dashboard Score, Grade, and Setup Status. Automatic uses confirmed indicator events.",
+    group = "Manual Assessment"
+)
+string manualNarrativeInput = input.string(
+    "Neutral",
+    "Narrative",
+    options = ["Bullish", "Bearish", "Neutral"],
+    group = "Manual Assessment"
+)
+bool manualHtfConfirmed = input.bool(
+    false,
+    "HTF Narrative confirmed (+20)",
+    group = "Manual Assessment"
+)
+bool manualPoiConfirmed = input.bool(
+    false,
+    "HTF POI confirmed (+15)",
+    group = "Manual Assessment"
+)
+bool manualLiquidityConfirmed = input.bool(
+    false,
+    "Liquidity event confirmed (+15)",
+    group = "Manual Assessment"
+)
+bool manualStructureConfirmed = input.bool(
+    false,
+    "MSS / CHOCH / BOS confirmed (+15)",
+    group = "Manual Assessment"
+)
+bool manualCisdConfirmed = input.bool(
+    false,
+    "CISD confirmed (+15)",
+    group = "Manual Assessment"
+)
+bool manualDisplacementConfirmed = input.bool(
+    false,
+    "Displacement confirmed (+10)",
+    group = "Manual Assessment"
+)
+bool manualEntryFvgConfirmed = input.bool(
+    false,
+    "Entry FVG / Retrace confirmed (+5)",
+    group = "Manual Assessment"
+)
+bool manualRiskConfirmed = input.bool(
+    false,
+    "Risk / RR confirmed (+5)",
+    group = "Manual Assessment"
+)
+bool manualNoTrade = input.bool(
+    false,
+    "Block setup / NO TRADE",
+    tooltip = "Overrides the manual checklist and sets the Dashboard status to NO TRADE with a score of 0.",
+    group = "Manual Assessment"
+)
 
 string primaryTimeframe = input.timeframe("240", "Primary HTF", group = "HTF Bias")
 string secondaryTimeframe = input.timeframe("60", "Secondary HTF", group = "HTF Bias")
@@ -1921,21 +1981,179 @@ string finalGrade = (
     finalGradeCode == 1 ? "D" :
     "--"
 )
-string dashboardStatusLabel = "Setup"
-string dashboardStatusValue = (
-    setupState + " · " +
-    str.tostring(setupScore) + "/100 · " +
-    finalGrade
+
+bool manualAssessmentEnabled = assessmentModeInput == "Manual"
+int manualNarrativeState = (
+    manualNarrativeInput == "Bullish" ? 1 :
+    manualNarrativeInput == "Bearish" ? -1 :
+    0
 )
-bool dashboardStatusActive = setupStateCode != 0
+int manualChecklistCount = (
+    (manualHtfConfirmed ? 1 : 0) +
+    (manualPoiConfirmed ? 1 : 0) +
+    (manualLiquidityConfirmed ? 1 : 0) +
+    (manualStructureConfirmed ? 1 : 0) +
+    (manualCisdConfirmed ? 1 : 0) +
+    (manualDisplacementConfirmed ? 1 : 0) +
+    (manualEntryFvgConfirmed ? 1 : 0) +
+    (manualRiskConfirmed ? 1 : 0)
+)
+int manualScoreRaw = (
+    (manualHtfConfirmed ? 20 : 0) +
+    (manualPoiConfirmed ? 15 : 0) +
+    (manualLiquidityConfirmed ? 15 : 0) +
+    (manualStructureConfirmed ? 15 : 0) +
+    (manualCisdConfirmed ? 15 : 0) +
+    (manualDisplacementConfirmed ? 10 : 0) +
+    (manualEntryFvgConfirmed ? 5 : 0) +
+    (manualRiskConfirmed ? 5 : 0)
+)
+int manualScore = manualNoTrade ? 0 : manualScoreRaw
+bool manualCoreComplete = (
+    manualNarrativeState != 0 and
+    manualHtfConfirmed and
+    manualPoiConfirmed and
+    manualLiquidityConfirmed and
+    manualStructureConfirmed and
+    manualCisdConfirmed and
+    manualDisplacementConfirmed and
+    manualEntryFvgConfirmed
+)
+int manualStateCode = (
+    manualNoTrade ? -1 :
+    manualCoreComplete and manualRiskConfirmed ? 3 :
+    manualCoreComplete ? 2 :
+    manualScore >= 25 ? 1 :
+    0
+)
+string manualState = (
+    manualStateCode == -1 ? "NO TRADE" :
+    manualStateCode == 3 ? "READY" :
+    manualStateCode == 2 ? "RISK REVIEW" :
+    manualStateCode == 1 ? "DEVELOPING" :
+    "WAITING"
+)
+int manualGradeCode = (
+    manualStateCode == -1 ? -1 :
+    manualScore == 0 ? 0 :
+    manualScore >= 90 ? 5 :
+    manualScore >= 80 ? 4 :
+    manualScore >= 70 ? 3 :
+    manualScore >= 60 ? 2 :
+    1
+)
+string manualGrade = (
+    manualGradeCode == -1 ? "NO TRADE" :
+    manualGradeCode == 5 ? "A+" :
+    manualGradeCode == 4 ? "A" :
+    manualGradeCode == 3 ? "B" :
+    manualGradeCode == 2 ? "C" :
+    manualGradeCode == 1 ? "D" :
+    "--"
+)
+
+int dashboardNarrativeState = (
+    manualAssessmentEnabled ?
+    manualNarrativeState :
+    combinedState
+)
+string dashboardBiasValue = (
+    manualAssessmentEnabled ?
+    f_state_text(manualNarrativeState) + " · MANUAL" :
+    f_state_text(combinedState) + " · " + confidence
+)
+color dashboardBiasColor = f_state_color(dashboardNarrativeState)
+string dashboardContextValue = (
+    manualAssessmentEnabled ?
+    "MANUAL " + str.tostring(manualChecklistCount) + "/8" :
+    alignmentState
+)
+color dashboardContextColor = (
+    manualAssessmentEnabled ?
+    (manualChecklistCount > 0 ? warningColor : neutralColor) :
+    alignmentColor
+)
+bool dashboardContextActive = (
+    manualAssessmentEnabled ?
+    manualChecklistCount > 0 :
+    aligned or primaryOnly or conflict
+)
+string dashboardPoiValue = (
+    manualAssessmentEnabled ?
+    (manualPoiConfirmed ? "PASS" : "WAIT") :
+    (poiActive ? poiTimeframe + " " + f_state_short(poiDirection) + " FVG" : "NONE")
+)
+color dashboardPoiColor = (
+    manualAssessmentEnabled ?
+    (manualPoiConfirmed ? f_state_color(manualNarrativeState) : neutralColor) :
+    (poiInteractionActive ? f_state_color(poiDirection) : neutralColor)
+)
+bool dashboardPoiActive = (
+    manualAssessmentEnabled ?
+    manualPoiConfirmed :
+    poiInteractionActive
+)
+string dashboardStatusLabel = manualAssessmentEnabled ? "Manual" : "Setup"
+string dashboardStatusValue = (
+    (manualAssessmentEnabled ? manualState : setupState) + " · " +
+    str.tostring(manualAssessmentEnabled ? manualScore : setupScore) + "/100 · " +
+    (manualAssessmentEnabled ? manualGrade : finalGrade)
+)
+int dashboardStateCode = manualAssessmentEnabled ? manualStateCode : setupStateCode
+bool dashboardStatusActive = dashboardStateCode != 0
 color dashboardStatusColor = (
-    setupStateCode == -1 ? bearishColor :
-    setupStateCode == 2 ? warningColor :
-    setupStateCode == 3 and combinedState != 0 ?
-    f_state_color(combinedState) :
-    setupStateCode == 1 and combinedState != 0 ?
-    f_state_color(combinedState) :
+    dashboardStateCode == -1 ? bearishColor :
+    dashboardStateCode == 2 ? warningColor :
+    dashboardStateCode == 3 and dashboardNarrativeState != 0 ?
+    f_state_color(dashboardNarrativeState) :
+    dashboardStateCode == 1 and dashboardNarrativeState != 0 ?
+    f_state_color(dashboardNarrativeState) :
     neutralColor
+)
+string dashboardStructureValue = (
+    manualAssessmentEnabled ?
+    (manualStructureConfirmed ? "PASS" : "WAIT") :
+    structureState
+)
+color dashboardStructureColor = (
+    manualAssessmentEnabled ?
+    (manualStructureConfirmed ? f_state_color(manualNarrativeState) : neutralColor) :
+    structureStateColor
+)
+bool dashboardStructureActive = (
+    manualAssessmentEnabled ?
+    manualStructureConfirmed :
+    structureEventActive
+)
+string dashboardCisdValue = (
+    manualAssessmentEnabled ?
+    (manualCisdConfirmed ? "PASS" : "WAIT") :
+    cisdState
+)
+color dashboardCisdColor = (
+    manualAssessmentEnabled ?
+    (manualCisdConfirmed ? f_state_color(manualNarrativeState) : neutralColor) :
+    cisdStateColor
+)
+bool dashboardCisdActive = (
+    manualAssessmentEnabled ?
+    manualCisdConfirmed :
+    cisdEventActive
+)
+string dashboardDisplacementValue = (
+    manualAssessmentEnabled ?
+    (manualDisplacementConfirmed ? "PASS" : "WAIT") :
+    displacementState
+)
+color dashboardDisplacementColor = (
+    manualAssessmentEnabled ?
+    (manualDisplacementConfirmed ? f_state_color(manualNarrativeState) : neutralColor) :
+    displacementStateColor
+)
+bool dashboardDisplacementActive = (
+    manualAssessmentEnabled ?
+    manualDisplacementConfirmed :
+    displacementCandidateActive or displacementEventActive
 )
 
 var int latestPoiAlertStart = na
@@ -2118,6 +2336,21 @@ color liquidityStateColor = (
     pdhSweptToday ? bearishColor :
     pdlSweptToday ? bullishColor :
     neutralColor
+)
+string dashboardLiquidityValue = (
+    manualAssessmentEnabled ?
+    (manualLiquidityConfirmed ? "PASS" : "WAIT") :
+    liquidityState
+)
+color dashboardLiquidityColor = (
+    manualAssessmentEnabled ?
+    (manualLiquidityConfirmed ? f_state_color(manualNarrativeState) : neutralColor) :
+    liquidityStateColor
+)
+bool dashboardLiquidityActive = (
+    manualAssessmentEnabled ?
+    manualLiquidityConfirmed :
+    pdhSweptToday or pdlSweptToday
 )
 
 color backgroundColor = (
@@ -3314,7 +3547,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.12.0",
+        "TRADING OS · HTF v0.13.0",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,
@@ -3358,9 +3591,9 @@ if barstate.islast
         biasPanel,
         1,
         2,
-        f_state_text(combinedState) + " · " + confidence,
-        bgcolor = color.new(f_state_color(combinedState), 84),
-        text_color = f_state_color(combinedState),
+        dashboardBiasValue,
+        bgcolor = color.new(dashboardBiasColor, 84),
+        text_color = dashboardBiasColor,
         text_size = dashboardTextSize
     )
     table.cell(
@@ -3377,9 +3610,11 @@ if barstate.islast
         biasPanel,
         1,
         3,
-        alignmentState,
-        bgcolor = color.new(alignmentColor, 86),
-        text_color = alignmentColor,
+        dashboardContextValue,
+        bgcolor = dashboardContextActive ?
+            color.new(dashboardContextColor, 86) :
+            panelColor,
+        text_color = dashboardContextColor,
         text_size = dashboardTextSize
     )
     table.cell(
@@ -3396,17 +3631,11 @@ if barstate.islast
         biasPanel,
         1,
         4,
-        (
-            poiActive ?
-            poiTimeframe + " " + f_state_short(poiDirection) + " FVG" :
-            "NONE"
-        ),
-        bgcolor = poiInteractionActive ?
-            color.new(f_state_color(poiDirection), 84) :
+        dashboardPoiValue,
+        bgcolor = dashboardPoiActive ?
+            color.new(dashboardPoiColor, 84) :
             panelColor,
-        text_color = poiInteractionActive ?
-            f_state_color(poiDirection) :
-            neutralColor,
+        text_color = dashboardPoiColor,
         text_size = dashboardTextSize
     )
     table.cell(
@@ -3444,11 +3673,11 @@ if barstate.islast
         biasPanel,
         1,
         6,
-        liquidityState,
-        bgcolor = pdhSweptToday or pdlSweptToday ?
-            color.new(liquidityStateColor, 86) :
+        dashboardLiquidityValue,
+        bgcolor = dashboardLiquidityActive ?
+            color.new(dashboardLiquidityColor, 86) :
             panelColor,
-        text_color = liquidityStateColor,
+        text_color = dashboardLiquidityColor,
         text_size = dashboardTextSize
     )
     table.cell(
@@ -3465,11 +3694,11 @@ if barstate.islast
         biasPanel,
         1,
         7,
-        structureState,
-        bgcolor = structureEventActive ?
-            color.new(structureStateColor, 86) :
+        dashboardStructureValue,
+        bgcolor = dashboardStructureActive ?
+            color.new(dashboardStructureColor, 86) :
             panelColor,
-        text_color = structureStateColor,
+        text_color = dashboardStructureColor,
         text_size = dashboardTextSize
     )
     table.cell(
@@ -3486,11 +3715,11 @@ if barstate.islast
         biasPanel,
         1,
         8,
-        cisdState,
-        bgcolor = cisdEventActive ?
-            color.new(cisdStateColor, 86) :
+        dashboardCisdValue,
+        bgcolor = dashboardCisdActive ?
+            color.new(dashboardCisdColor, 86) :
             panelColor,
-        text_color = cisdStateColor,
+        text_color = dashboardCisdColor,
         text_size = dashboardTextSize
     )
     table.cell(
@@ -3507,10 +3736,10 @@ if barstate.islast
         biasPanel,
         1,
         9,
-        displacementState,
-        bgcolor = displacementCandidateActive or displacementEventActive ?
-            color.new(displacementStateColor, 86) :
+        dashboardDisplacementValue,
+        bgcolor = dashboardDisplacementActive ?
+            color.new(dashboardDisplacementColor, 86) :
             panelColor,
-        text_color = displacementStateColor,
+        text_color = dashboardDisplacementColor,
         text_size = dashboardTextSize
     )

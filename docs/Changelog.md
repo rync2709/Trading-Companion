@@ -2,6 +2,40 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.13.0-alpha - 2026-07-28
+
+### Added
+
+- Added Manual Assessment as the default Dashboard mode.
+- Added manual Bullish, Bearish, and Neutral Narrative selection.
+- Added eight weighted checklist confirmations for HTF Narrative, POI,
+  Liquidity, Structure, CISD, Displacement, Entry FVG / Retrace, and Risk / RR.
+- Added a manual NO TRADE override.
+- Added manual WAITING, DEVELOPING, RISK REVIEW, READY, and NO TRADE states.
+- Added a manual 0-100 Score and provisional A+ to D Grade.
+
+### Kept
+
+- Kept Automatic mode available for comparison.
+- Kept the compact ten-row Dashboard and `Small` default size unchanged.
+- Kept chart drawings, automatic event calculations, Data Window outputs, and
+  confirmed-bar Alerts unchanged.
+- Kept manual selections as decision support only; no order execution or
+  Trading Companion data bridge was added.
+
+### Validated
+
+- Compiled Pine v0.13.0-alpha successfully in TradingView Pine Editor.
+- Confirmed all Manual Assessment inputs appear in the indicator Settings.
+- Confirmed Bullish Narrative with all eight checks produces
+  `READY · 100/100 · A+`.
+- Reset the saved chart instance to Manual, Neutral, and all checks clear,
+  producing `WAITING · 0/100 · --`.
+- Confirmed one valid indicator instance and no compile or runtime errors on
+  XAUUSD at 5M, 15M, 1H, and 4H.
+- Returned the chart to 15M and saved the private script as
+  `Trading OS HTF Context v0.13.0` without publishing.
+
 ## Pine v0.12.0-alpha - 2026-07-28
 
 ### Added

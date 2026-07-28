@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.12.0-alpha
+Version: v0.13.0-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -16,11 +16,14 @@ The Pine track automates selected Trading OS context checks without replacing tr
 - Module 7 baseline: execution-chart Displacement and follow-through
 - Module 8 baseline: Displacement-linked Entry FVG and retracement
 - Module 9 baseline: locked Entry, Stop, Target, and planned RR
-- Module 10 baseline: automated Setup State, Score, and final Grade
+- Module 10 baseline: manual or automated Setup State, Score, and final Grade
 - Module 11 baseline: configurable confirmed-bar Alert System
 
 Defaults:
 
+- Dashboard assessment mode: Manual
+- Manual Narrative: Neutral
+- Manual checklist: all eight items unchecked
 - Primary HTF: 4H
 - Secondary HTF: 1H
 - Confirmed swing length: 3
@@ -130,19 +133,19 @@ POI, affect the Dashboard, score, Grade, or Alerts, or create Buy/Sell orders.
 The dashboard uses ten rows to reduce chart obstruction. Its text size defaults to `Small` and can be changed under Display to `Tiny`, `Small`, or `Normal`.
 
 - HTF: grouped Primary and Secondary states
-- Bias: Combined Bias and Confidence
-- Context: HTF alignment
-- POI: selected timeframe, direction, and FVG type
-- Setup: automated setup state, final score, and Grade when READY
-- Liquidity: confirmed PDH/PDL sweep state
-- Structure: active BOS, CHOCH, MSS, or WAIT
-- CISD: active direction with Weak, Medium, Strong, or WAIT quality
-- Displacement: Watch candidate, confirmed Medium/Strong direction, conflict, or WAIT
+- Bias: manually selected Narrative by default, or automated Bias and Confidence
+- Context: manual checklist progress, or automated HTF alignment
+- POI: manual PASS/WAIT, or selected timeframe, direction, and FVG type
+- Manual/Setup: current state, score, and Grade
+- Liquidity: manual PASS/WAIT, or confirmed PDH/PDL sweep state
+- Structure: manual PASS/WAIT, or active BOS, CHOCH, MSS, or WAIT
+- CISD: manual PASS/WAIT, or active direction and quality
+- Displacement: manual PASS/WAIT, or automated Watch/Medium/Strong state
 
-The POI row remains neutral gray until price touches or enters the zone. The
-Setup row is neutral while waiting, directional while developing or ready,
-yellow during Risk Review, and red when blocked. Bias and Context colors remain
-directional because they describe market context rather than POI interaction.
+Manual confirmations are changed under the indicator's `Manual Assessment`
+settings because Pine tables are not clickable. Automatic mode remains
+available from the same setting. The Dashboard size stays at ten rows in both
+modes.
 
 ## Daily Liquidity Baseline
 
@@ -285,38 +288,32 @@ approval.
 
 ## Setup State / Score Engine
 
-The automated score baseline maps confirmed Pine outputs to the
-versioned `score-v1` weights:
+Manual Assessment is the default Dashboard mode in v0.13.0. The trader selects
+Bullish, Bearish, or Neutral Narrative and checks the evidence that has been
+confirmed:
 
-- HTF Context: up to 20
-- POI: up to 15
-- Liquidity: up to 15
-- Structure: up to 15
-- CISD: up to 15
-- Displacement: up to 10
-- FVG / Entry Zone: up to 5
-- Entry / Risk: 5 when the locked plan has valid geometry and meets minimum RR
+- HTF Narrative: 20
+- HTF POI: 15
+- Liquidity event: 15
+- MSS / CHOCH / BOS: 15
+- CISD: 15
+- Displacement: 10
+- Entry FVG / Retrace: 5
+- Risk / RR: 5
 
-The final score can reach 100. A final A+ to D Grade appears only after the
-setup reaches READY; pending states continue to show `--`.
+The manual score can reach 100 and displays an A+ to D Grade as soon as the
+score is non-zero. Setup Status remains separate: all core confirmations,
+directional Narrative, and Risk / RR are required for `READY`. The explicit
+`Block setup / NO TRADE` switch overrides the checklist and returns a score of
+zero.
 
-Setup states:
+Automatic mode preserves the existing score-v1 mapping and remains available
+for side-by-side comparison. In automatic mode, a final Grade appears only
+after the setup reaches READY.
 
-- `NO TRADE`: an active timeframe or direction conflict blocks the setup.
-- `WAITING`: the automated score is below 25 and no blocker is active.
-- `DEVELOPING`: the automated score is at least 25 but the confirmation chain
-  is incomplete.
-- `RISK REVIEW`: HTF alignment, recent POI interaction, direction-aligned
-  liquidity, Structure, CISD, Displacement, active Entry FVG, and retracement
-  are all present, but valid Entry/Stop/Target geometry or minimum RR is
-  missing.
-- `READY`: the complete confirmation chain and locked risk plan pass on a
-  confirmed chart candle.
-
-The existing Dashboard remains ten rows. Its Status row becomes `Setup` and
-shows the short state, final score, and Grade. Automated category scores, final
-score, planned RR, Entry readiness, Grade code, and the next-step code remain
-available in the Data Window.
+Chart drawings, automatic event calculations, Data Window outputs, and Alerts
+remain unchanged. Manual Dashboard selections do not send orders or create a
+webhook.
 
 ## Alert System
 
@@ -450,6 +447,16 @@ Compile status:
   XAUUSD at 5M, 15M, 1H, and 4H.
 - Returned the chart to 15M and saved the private script as
   `Trading OS HTF Context v0.12.0` without publishing.
+- The v0.13.0 Manual Assessment update compiled successfully in TradingView.
+- Confirmed all Manual Assessment inputs appear under the indicator Settings.
+- Confirmed Bullish Narrative with all eight checks produces
+  `READY · 100/100 · A+`.
+- Reset the saved chart instance to Manual, Neutral, and all checks clear,
+  producing `WAITING · 0/100 · --`.
+- Confirmed one valid indicator instance and no compile or runtime errors on
+  XAUUSD at 5M, 15M, 1H, and 4H.
+- Returned the chart to 15M and saved the private script as
+  `Trading OS HTF Context v0.13.0` without publishing.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.

@@ -1,7 +1,7 @@
 # Trading OS Indicator Specification
 
-Version: v0.3.5
-Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, Risk / Entry, Score, Alert, HTF Order Block, and Breaker baselines
+Version: v0.3.6
+Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, Risk / Entry, Manual/Automatic Score, Alert, HTF Order Block, and Breaker baselines
 
 ## Purpose
 
@@ -483,7 +483,7 @@ Current limitation:
 
 ## Module 10 - Score Engine
 
-Implementation status: `Pine v0.9.0-alpha - automated score and final Grade baseline`
+Implementation status: `Pine v0.13.0-alpha - manual and automated assessment modes`
 
 Input:
 
@@ -497,6 +497,13 @@ Process:
 - Assign weights to each required condition.
 - Penalize conflicts, invalidation, weak displacement, or missing confirmation.
 - Convert numeric score into grade.
+- Use Manual Assessment as the default Dashboard source.
+- Let the trader select Bullish, Bearish, or Neutral Narrative.
+- Let the trader confirm eight weighted checklist categories.
+- Keep Setup Status separate from score and require all core confirmations plus
+  Risk / RR for manual READY.
+- Allow an explicit manual NO TRADE override.
+- Preserve Automatic mode for comparison with confirmed indicator events.
 
 Initial scoring draft:
 
@@ -548,6 +555,16 @@ Output:
 - score: 0 to 100
 - grade: A+, A, B, C, or D
 - final_state: NO_TRADE, WAITING, DEVELOPING, RISK_REVIEW, or READY
+
+Current limitation:
+
+- Pine Dashboard tables are not interactive; manual values are changed in the
+  indicator's Settings panel.
+- Manual selections affect Dashboard presentation only.
+- Data Window score fields and confirmed-bar Alerts continue to use Automatic
+  mode until a versioned Trading Companion integration contract is implemented.
+- Manual Assessment does not place orders or send data directly to GitHub
+  Pages.
 
 ## Module 11 - Alert System
 
