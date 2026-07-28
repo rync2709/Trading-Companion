@@ -8,7 +8,8 @@
     history: "tradingCompanionHistoryV1",
     weeklyReviews: "tradingCompanionWeeklyReviewsV1",
     sessionPlans: "tradingCompanionSessionPlansV1",
-    watchlist: "tradingCompanionWatchlistV1"
+    watchlist: "tradingCompanionWatchlistV1",
+    indicatorAlerts: "tradingCompanionIndicatorAlertsV1"
   };
   const VALIDATION_TARGET = 20;
   const JOURNAL_EMOTIONS = ["calm", "neutral", "fearful", "angry", "overconfident"];
@@ -191,6 +192,140 @@
       Object.values(draft.tradePlan || {}).some(Boolean) ||
       Object.keys(draft.answers || {}).length
     );
+  }
+
+  function normalizeIndicatorAlert(alert) {
+    const source = alert && typeof alert === "object" ? alert : {};
+    const checklistSource = source.checklist && typeof source.checklist === "object" ?
+      source.checklist : {};
+    const riskSource = source.risk && typeof source.risk === "object" ?
+      source.risk : {};
+    const score = Number(source.score);
+    const close = Number(source.close);
+    const rr = riskSource.rr === null || riskSource.rr === undefined ||
+      riskSource.rr === "" ? null : Number(riskSource.rr);
+    const allowedDecisions = ["new", "wait", "skip", "review"];
+    const allowedStates = ["no-trade", "waiting", "developing", "risk-review", "ready"];
+    const allowedNarratives = ["bullish", "bearish", "neutral"];
+    const allowedModes = ["manual", "automatic"];
+    const checklist = {};
+
+    [
+      "htf",
+      "poi",
+      "liquidity",
+      "structure",
+      "cisd",
+      "displacement",
+      "entryFvg",
+      "risk"
+    ].forEach(function (key) {
+      checklist[key] = checklistSource[key] === true;
+    });
+
+    return {
+      id: typeof source.id === "string" && source.id ?
+        source.id.slice(0, 120) : createId(),
+      schema: "trading-companion.alert.v1",
+      source: "tradingview",
+      indicator: "trading-os",
+      indicatorVersion: typeof source.indicatorVersion === "string" ?
+        source.indicatorVersion.slice(0, 30) : "",
+      event: typeof source.event === "string" ? source.event.slice(0, 400) : "",
+      symbol: typeof source.symbol === "string" ? source.symbol.slice(0, 80) : "",
+      ticker: typeof source.ticker === "string" ? source.ticker.slice(0, 40) : "",
+      timeframe: typeof source.timeframe === "string" ?
+        source.timeframe.slice(0, 12) : "",
+      time: Number.isFinite(Number(source.time)) ? Number(source.time) : null,
+      occurredAt: typeof source.occurredAt === "string" ?
+        source.occurredAt.slice(0, 40) : null,
+      mode: allowedModes.includes(source.mode) ? source.mode : "automatic",
+      narrative: allowedNarratives.includes(source.narrative) ?
+        source.narrative : "neutral",
+      state: allowedStates.includes(source.state) ? source.state : "waiting",
+      score: Number.isFinite(score) ? Math.max(0, Math.min(Math.round(score), 100)) : 0,
+      grade: typeof source.grade === "string" ? source.grade.slice(0, 12) : "--",
+      blocked: source.blocked === true,
+      checklist,
+      risk: {
+        entry: riskSource.entry === null || riskSource.entry === undefined ?
+          null : Number(riskSource.entry),
+        stop: riskSource.stop === null || riskSource.stop === undefined ?
+          null : Number(riskSource.stop),
+        target: riskSource.target === null || riskSource.target === undefined ?
+          null : Number(riskSource.target),
+        rr: rr !== null && Number.isFinite(rr) ? rr : null
+      },
+      close: Number.isFinite(close) ? close : null,
+      decision: allowedDecisions.includes(source.decision) ? source.decision : "new",
+      importedAt: typeof source.importedAt === "string" ?
+        source.importedAt : new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  function indicatorAlertFingerprint(alert) {
+    return [
+      alert.schema,
+      alert.symbol,
+      alert.timeframe,
+      alert.time,
+      alert.event
+    ].join("|");
+  }
+
+  function loadIndicatorAlerts() {
+    const saved = parse(localStorage.getItem(KEYS.indicatorAlerts), []);
+    if (!Array.isArray(saved)) return [];
+    return saved.slice(0, 50).map(normalizeIndicatorAlert);
+  }
+
+  function saveIndicatorAlert(alert) {
+    const incoming = normalizeIndicatorAlert(alert);
+    const fingerprint = indicatorAlertFingerprint(incoming);
+    const alerts = loadIndicatorAlerts();
+    const existing = alerts.find(function (item) {
+      return indicatorAlertFingerprint(item) === fingerprint;
+    });
+    const nextAlert = normalizeIndicatorAlert({
+      ...incoming,
+      id: existing ? existing.id : incoming.id,
+      decision: existing ? existing.decision : incoming.decision,
+      importedAt: existing ? existing.importedAt : incoming.importedAt
+    });
+    const next = [
+      nextAlert,
+      ...alerts.filter(function (item) {
+        return indicatorAlertFingerprint(item) !== fingerprint;
+      })
+    ].slice(0, 50);
+    localStorage.setItem(KEYS.indicatorAlerts, JSON.stringify(next));
+    return nextAlert;
+  }
+
+  function updateIndicatorAlertDecision(id, decision) {
+    if (!["new", "wait", "skip", "review"].includes(decision)) return null;
+    let updated = null;
+    const next = loadIndicatorAlerts().map(function (item) {
+      if (item.id !== id) return item;
+      updated = normalizeIndicatorAlert({
+        ...item,
+        decision
+      });
+      return updated;
+    });
+    localStorage.setItem(KEYS.indicatorAlerts, JSON.stringify(next));
+    return updated;
+  }
+
+  function deleteIndicatorAlert(id) {
+    const alerts = loadIndicatorAlerts();
+    const next = alerts.filter(function (item) {
+      return item.id !== id;
+    });
+    if (next.length === alerts.length) return false;
+    localStorage.setItem(KEYS.indicatorAlerts, JSON.stringify(next));
+    return true;
   }
 
   function loadHistory() {
@@ -808,6 +943,11 @@
     loadDraft,
     saveDraft,
     clearDraft,
+    normalizeIndicatorAlert,
+    loadIndicatorAlerts,
+    saveIndicatorAlert,
+    updateIndicatorAlertDecision,
+    deleteIndicatorAlert,
     normalizeAssistantSession,
     loadAssistantSession,
     saveAssistantSession,

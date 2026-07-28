@@ -11,8 +11,8 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Repository name: Trading-Companion
 - Phase: Validation Sprint after Phase 11
 - Validation target: 20 real-use outcomes with at least 80% R and review coverage
-- Version: v0.11.1
-- Pine indicator: v0.13.0-alpha - manual Narrative, checklist Score, Grade, and Setup Status
+- Version: v0.12.0
+- Pine indicator: v0.14.0-alpha - versioned Trading Companion Alert JSON payload
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -150,6 +150,10 @@ The first Phase 10 milestone includes:
 - UTF-8 CSV export with Trade, result, risk, and review fields
 - Printable Journal report for browser Save as PDF
 - 30-day, 90-day, and all-time export ranges
+- Versioned `trading-companion.alert.v1` JSON import
+- Local Indicator Alert Inbox with duplicate protection
+- WAIT, SKIP, and Review Entry triage
+- Safe transfer of compatible Alert evidence into a New Trade Draft
 - Clear boundary: no live prices, indicators, or order placement
 
 ## Phase 11 Milestone
@@ -383,6 +387,7 @@ The Pine source and TradingView test notes are stored under `pine/`.
 `-- docs/
     |-- Rulebook.md
     |-- Indicator_Spec.md
+    |-- TradingView_Alert_Contract.md
     |-- Roadmap.md
     `-- Changelog.md
 ```
@@ -391,9 +396,10 @@ The Pine source and TradingView test notes are stored under `pine/`.
 
 - [Rulebook](docs/Rulebook.md): Trading rules and setup validation framework
 - [Indicator Specification](docs/Indicator_Spec.md): Modules, inputs, process, and outputs for automation
+- [TradingView Alert Contract](docs/TradingView_Alert_Contract.md): Versioned Pine-to-web JSON payload and local import rules
 - [Roadmap](docs/Roadmap.md): Development phases from Phase 0 to Trading OS v1
 - [Changelog](docs/Changelog.md): Version history and project changes
 
 ## Data Note
 
-Drafts, Decision Assistant sessions, Playbook Notes, assessment history, Weekly Reviews, Daily Session Plans, Watchlist Context, and Screenshots are stored only in the browser on the current device. Screenshots use IndexedDB so image files do not consume the smaller checklist storage area. Watchlist status is entered manually and is not live market data. Advanced Tool inputs are calculated locally and are not saved. The Currency Converter requests only the selected fiat currency pair from Frankfurter; it does not send the entered amount. The Decision Assistant uses the local Rulebook engine without an external AI API. CSV and PDF-ready reports are generated locally from Journal data. Trading Companion does not directly access TradingView market data, place orders, or send trade data to a server.
+Drafts, Indicator Alert Inbox items, Decision Assistant sessions, Playbook Notes, assessment history, Weekly Reviews, Daily Session Plans, Watchlist Context, and Screenshots are stored only in the browser on the current device. Screenshots use IndexedDB so image files do not consume the smaller checklist storage area. Indicator Alerts are imported as validated JSON and are not received by a server. Watchlist status is entered manually and is not live market data. Advanced Tool inputs are calculated locally and are not saved. The Currency Converter requests only the selected fiat currency pair from Frankfurter; it does not send the entered amount. The Decision Assistant uses the local Rulebook engine without an external AI API. CSV and PDF-ready reports are generated locally from Journal data. Trading Companion does not place orders or send trade data to a server.

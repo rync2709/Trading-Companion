@@ -1,7 +1,7 @@
 # Trading OS Indicator Specification
 
-Version: v0.3.6
-Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, Risk / Entry, Manual/Automatic Score, Alert, HTF Order Block, and Breaker baselines
+Version: v0.3.7
+Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, Risk / Entry, Manual/Automatic Score, Alert JSON, HTF Order Block, and Breaker baselines
 
 ## Purpose
 
@@ -568,7 +568,7 @@ Current limitation:
 
 ## Module 11 - Alert System
 
-Implementation status: `Pine v0.10.0-alpha - configurable confirmed-bar Alert System`
+Implementation status: `Pine v0.14.0-alpha - confirmed-bar Alert System with Trading Companion JSON contract`
 
 Input:
 
@@ -589,15 +589,17 @@ Process:
 - Trigger Risk Review, READY, and NO TRADE only when the Setup State enters the
   matching state.
 - Combine multiple enabled same-candle events into one message.
-- Include symbol, chart timeframe, event list, Setup State, Score, Grade,
-  planned RR, and close price.
+- Emit `trading-companion.alert.v1` JSON.
+- Include symbol, ticker, chart timeframe, close time, event list, assessment
+  mode, Narrative, Setup State, Score, Grade, blocked state, eight checklist
+  values, available risk plan, and close price.
 - Call `alert()` once per confirmed bar at most.
 
 Output:
 
 - alert_event_count: zero or more enabled events on the confirmed candle
 - alert_event_list: human-readable aggregated event description
-- alert_message: dynamic TradingView notification payload
+- alert_message: valid `trading-companion.alert.v1` JSON
 - alert_frequency: once per bar close
 
 Current limitation:
@@ -607,7 +609,9 @@ Current limitation:
   `Any alert() function call`.
 - Alert execution is realtime only; historical bars do not deliver
   notifications.
-- No webhook receiver or direct Trading Companion data bridge exists yet.
+- Trading Companion supports validated manual JSON import into its local Alert
+  Inbox.
+- No webhook receiver or automatic delivery exists yet.
 
 ## Current Checklist Mapping
 

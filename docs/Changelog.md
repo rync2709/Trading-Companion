@@ -2,6 +2,65 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## v0.12.0 - 2026-07-28
+
+### Added
+
+- Added a local Indicator Alert Inbox to TradingView Hub.
+- Added validation for the versioned `trading-companion.alert.v1` JSON
+  contract.
+- Added duplicate protection using Symbol, Timeframe, close time, and event.
+- Added WAIT, SKIP, Review Entry, and delete actions for imported Alerts.
+- Added compatible Indicator-evidence mapping into the New Trade Draft.
+- Added `docs/TradingView_Alert_Contract.md` as the source of truth for the
+  Alert payload.
+
+### Kept
+
+- Kept Trading Companion on GitHub Pages without adding a backend.
+- Kept imported Alerts in the current browser's localStorage.
+- Kept the detailed New Trade checklist, risk review, and score recalculation
+  as the authority before ENTRY.
+- Kept order placement outside the application.
+
+### Validated
+
+- Confirmed valid Alert JSON imports into the Inbox.
+- Confirmed duplicate Alert JSON updates one record instead of creating a
+  second record.
+- Confirmed WAIT and SKIP decisions update the Inbox summary.
+- Confirmed Review Entry opens a partially completed New Trade Draft and does
+  not bypass detailed risk validation.
+- Confirmed unsupported symbols remain in the Inbox instead of defaulting to
+  XAUUSD.
+- Confirmed the Inbox and action controls fit narrow mobile and desktop
+  layouts without horizontal overflow.
+
+## Pine v0.14.0-alpha - 2026-07-28
+
+### Added
+
+- Changed confirmed-bar `alert()` messages to
+  `trading-companion.alert.v1` JSON.
+- Added Symbol, Ticker, Timeframe, event time, assessment mode, Narrative,
+  Setup State, Score, Grade, blocked state, checklist evidence, Risk Plan, and
+  close price to the payload.
+- Made the payload use Manual Assessment values in Manual mode and confirmed
+  automatic values in Automatic mode.
+
+### Kept
+
+- Kept existing confirmed-bar Alert event gates and toggles.
+- Kept the compact ten-row Dashboard and `Small` default size unchanged.
+- Kept chart drawings and automatic calculations unchanged.
+- Kept the payload as decision support only; it does not place an order.
+
+### Pending Validation
+
+- Compile Pine v0.14.0-alpha in TradingView Pine Editor.
+- Smoke-test one valid indicator instance at 5M, 15M, 1H, and 4H.
+- Save the private script without publishing.
+
 ## Pine v0.13.0-alpha - 2026-07-28
 
 ### Added

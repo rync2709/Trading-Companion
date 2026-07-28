@@ -8,7 +8,7 @@ indicator(
     max_labels_count = 300
 )
 
-// Trading OS Pine Track v0.13.0-alpha
+// Trading OS Pine Track v0.14.0-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG, latest Order Block and
 // Breaker context, daily liquidity, confirmed execution-chart BOS/CHOCH/MSS,
 // strict CISD context, execution-chart displacement with follow-through,
@@ -2196,6 +2196,58 @@ bool noTradeAlertPulse = (
     setupStateCode == -1 and
     nz(setupStateCode[1], 0) != -1
 )
+string alertPayloadMode = manualAssessmentEnabled ? "manual" : "automatic"
+string alertPayloadNarrative = (
+    dashboardNarrativeState == 1 ? "bullish" :
+    dashboardNarrativeState == -1 ? "bearish" :
+    "neutral"
+)
+string alertPayloadState = (
+    dashboardStateCode == -1 ? "no-trade" :
+    dashboardStateCode == 3 ? "ready" :
+    dashboardStateCode == 2 ? "risk-review" :
+    dashboardStateCode == 1 ? "developing" :
+    "waiting"
+)
+int alertPayloadScore = manualAssessmentEnabled ? manualScore : setupScore
+string alertPayloadGrade = manualAssessmentEnabled ? manualGrade : finalGrade
+bool alertPayloadBlocked = dashboardStateCode == -1
+bool alertPayloadHtf = manualAssessmentEnabled ? manualHtfConfirmed : aligned
+bool alertPayloadPoi = (
+    manualAssessmentEnabled ?
+    manualPoiConfirmed :
+    poiRecentlyInteracted
+)
+bool alertPayloadLiquidity = (
+    manualAssessmentEnabled ?
+    manualLiquidityConfirmed :
+    liquidityAligned
+)
+bool alertPayloadStructure = (
+    manualAssessmentEnabled ?
+    manualStructureConfirmed :
+    structureAligned
+)
+bool alertPayloadCisd = (
+    manualAssessmentEnabled ?
+    manualCisdConfirmed :
+    cisdValid and cisdAligned
+)
+bool alertPayloadDisplacement = (
+    manualAssessmentEnabled ?
+    manualDisplacementConfirmed :
+    displacementValid
+)
+bool alertPayloadEntryFvg = (
+    manualAssessmentEnabled ?
+    manualEntryFvgConfirmed :
+    entryFvgAligned and entryFvgInteractionActive
+)
+bool alertPayloadRisk = (
+    manualAssessmentEnabled ?
+    manualRiskConfirmed :
+    riskPlanValid
+)
 
 if enableAlerts and barstate.isconfirmed
     string barAlertEvents = ""
@@ -2304,21 +2356,61 @@ if enableAlerts and barstate.isconfirmed
         )
 
     if barAlertEvents != ""
-        string plannedRrAlertText = (
+        string plannedEntryAlertJson = (
             riskPlanAvailable ?
-            str.tostring(plannedRr, "#.##") + "R" :
-            "--"
+            str.tostring(plannedEntry, format.mintick) :
+            "null"
+        )
+        string plannedStopAlertJson = (
+            riskPlanAvailable ?
+            str.tostring(plannedStop, format.mintick) :
+            "null"
+        )
+        string plannedTargetAlertJson = (
+            riskPlanAvailable ?
+            str.tostring(plannedTarget, format.mintick) :
+            "null"
+        )
+        string plannedRrAlertJson = (
+            riskPlanAvailable ?
+            str.tostring(plannedRr, "#.##") :
+            "null"
         )
         string tradingOsAlertMessage = (
-            "Trading OS v0.10.0 | " +
-            syminfo.tickerid + " | " +
-            timeframe.period + " | " +
-            barAlertEvents + " | State " +
-            setupState + " | Score " +
-            str.tostring(setupScore) + "/100 | Grade " +
-            finalGrade + " | RR " +
-            plannedRrAlertText + " | Close " +
-            str.tostring(close, format.mintick)
+            "{" +
+            "\"schema\":\"trading-companion.alert.v1\"," +
+            "\"source\":\"tradingview\"," +
+            "\"indicator\":\"trading-os\"," +
+            "\"indicatorVersion\":\"0.14.0\"," +
+            "\"event\":\"" + barAlertEvents + "\"," +
+            "\"symbol\":\"" + syminfo.tickerid + "\"," +
+            "\"ticker\":\"" + syminfo.ticker + "\"," +
+            "\"timeframe\":\"" + timeframe.period + "\"," +
+            "\"time\":" + str.tostring(time_close) + "," +
+            "\"mode\":\"" + alertPayloadMode + "\"," +
+            "\"narrative\":\"" + alertPayloadNarrative + "\"," +
+            "\"state\":\"" + alertPayloadState + "\"," +
+            "\"score\":" + str.tostring(alertPayloadScore) + "," +
+            "\"grade\":\"" + alertPayloadGrade + "\"," +
+            "\"blocked\":" + str.tostring(alertPayloadBlocked) + "," +
+            "\"checklist\":{" +
+            "\"htf\":" + str.tostring(alertPayloadHtf) + "," +
+            "\"poi\":" + str.tostring(alertPayloadPoi) + "," +
+            "\"liquidity\":" + str.tostring(alertPayloadLiquidity) + "," +
+            "\"structure\":" + str.tostring(alertPayloadStructure) + "," +
+            "\"cisd\":" + str.tostring(alertPayloadCisd) + "," +
+            "\"displacement\":" + str.tostring(alertPayloadDisplacement) + "," +
+            "\"entryFvg\":" + str.tostring(alertPayloadEntryFvg) + "," +
+            "\"risk\":" + str.tostring(alertPayloadRisk) +
+            "}," +
+            "\"risk\":{" +
+            "\"entry\":" + plannedEntryAlertJson + "," +
+            "\"stop\":" + plannedStopAlertJson + "," +
+            "\"target\":" + plannedTargetAlertJson + "," +
+            "\"rr\":" + plannedRrAlertJson +
+            "}," +
+            "\"close\":" + str.tostring(close, format.mintick) +
+            "}"
         )
         alert(
             tradingOsAlertMessage,
@@ -3547,7 +3639,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.13.0",
+        "TRADING OS · HTF v0.14.0",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,

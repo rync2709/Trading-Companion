@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css?v=0.8.0">
-  <link rel="stylesheet" href="css/integration.css?v=0.10.0">
+  <link rel="stylesheet" href="css/integration.css?v=0.12.0">
 </head>
 <body>
   <header class="topbar">
@@ -97,7 +97,7 @@
     <header class="page-heading">
       <p class="eyebrow">Phase 10 · Supported web workflow</p>
       <h1>TradingView Hub</h1>
-      <p class="lede">เปิดกราฟ เก็บหลักฐาน และส่งออก Journal โดยไม่อ้างว่าดึงข้อมูลตลาดอัตโนมัติ</p>
+      <p class="lede">เปิดกราฟ รับ Indicator Snapshot และส่งต่อเข้ากระบวนการตัดสินใจโดยไม่ข้ามการตรวจ Risk</p>
     </header>
 
     <section class="integration-grid" aria-label="TradingView integration tools">
@@ -234,6 +234,66 @@
           <p class="integration-note">CSV รวมข้อมูล Trade และ Journal ส่วนรายงาน PDF จะเปิดหน้าสำหรับพิมพ์ จากนั้นเลือก Save as PDF ในหน้าต่างพิมพ์ของอุปกรณ์</p>
         </div>
       </article>
+
+      <article class="panel integration-panel integration-panel-wide">
+        <header class="integration-panel-header">
+          <div class="integration-panel-title">
+            <span class="integration-icon">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-arrow-left-right"></use></svg>
+            </span>
+            <div>
+              <p class="eyebrow">Trading OS Alert Contract</p>
+              <h2>Indicator Alert Inbox</h2>
+            </div>
+          </div>
+          <span>Local JSON import</span>
+        </header>
+        <div class="integration-panel-body alert-bridge-layout">
+          <section class="alert-import-pane" aria-labelledby="alertImportHeading">
+            <div class="alert-pane-heading">
+              <div>
+                <span id="alertImportHeading">Alert JSON</span>
+                <strong>วาง Snapshot จาก TradingView</strong>
+              </div>
+              <button class="button button-quiet" id="tvAlertExample" type="button">ใช้ตัวอย่าง</button>
+            </div>
+            <textarea
+              id="tvAlertPayload"
+              class="alert-payload"
+              rows="12"
+              spellcheck="false"
+              aria-label="TradingView Alert JSON"
+              placeholder='{"schema":"trading-companion.alert.v1", ...}'
+            ></textarea>
+            <div class="integration-actions">
+              <button class="button button-primary" id="tvAlertImport" type="button">
+                <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-download"></use></svg>
+                ตรวจและนำเข้า
+              </button>
+              <div class="integration-status">
+                <span>Import status</span>
+                <strong id="tvAlertState" data-state="idle">รอข้อมูล Alert</strong>
+              </div>
+            </div>
+            <p class="integration-note">ข้อมูลที่นำเข้าจะอยู่ในเบราว์เซอร์เครื่องนี้ การกดตรวจ Entry จะเติมเฉพาะหลักฐานที่ตรงกัน ส่วนเงื่อนไขย่อยและ Risk ต้องทบทวนใน New Trade</p>
+          </section>
+
+          <section class="alert-inbox-pane" aria-labelledby="alertInboxHeading">
+            <div class="alert-pane-heading">
+              <div>
+                <span id="alertInboxHeading">Local inbox</span>
+                <strong>เลือก WAIT, SKIP หรือ ตรวจ Entry</strong>
+              </div>
+              <div class="alert-inbox-metrics" aria-label="Indicator Alert summary">
+                <span><strong id="tvAlertNew">0</strong> Active</span>
+                <span><strong id="tvAlertCount">0</strong> Total</span>
+              </div>
+            </div>
+            <div class="indicator-alert-list" id="tvAlertList"></div>
+            <p class="export-empty" id="tvAlertEmpty">ยังไม่มี Indicator Alert</p>
+          </section>
+        </div>
+      </article>
     </section>
 
     <section class="integration-workflow" aria-labelledby="workflowHeading">
@@ -244,34 +304,34 @@
       <div class="workflow-steps">
         <article class="workflow-step">
           <span>Step 1</span>
-          <strong>สร้างแผน</strong>
-          <p>ประเมิน Context, Confirmation และ Risk ก่อนเข้าเทรด</p>
-          <a href="trade.html">เปิด New Trade</a>
+          <strong>รับ Alert</strong>
+          <p>นำเข้า JSON Snapshot ที่สร้างจาก Trading OS Indicator</p>
+          <a href="#tvAlertPayload">ไปที่ Alert Inbox</a>
         </article>
         <article class="workflow-step">
           <span>Step 2</span>
-          <strong>เปิดกราฟ</strong>
-          <p>ตรวจ Symbol และ Timeframe ใน TradingView จากแหล่งข้อมูลที่ใช้จริง</p>
-          <a href="#tvInstrument">ใช้ Chart Launcher</a>
+          <strong>คัดกรอง</strong>
+          <p>เลือก WAIT, SKIP หรือส่งรายการไปตรวจ Entry</p>
+          <a href="#alertInboxHeading">ดู Local Inbox</a>
         </article>
         <article class="workflow-step">
           <span>Step 3</span>
-          <strong>เก็บหลักฐาน</strong>
-          <p>แนบ Screenshot, TradingView link, Emotion, Mistake และ Lesson</p>
-          <a href="journal.html">เปิด Journal</a>
+          <strong>ทบทวน Entry</strong>
+          <p>ยืนยันเงื่อนไขย่อย, Setup Type, Entry, SL, TP และ RR</p>
+          <a href="trade.html">เปิด New Trade</a>
         </article>
         <article class="workflow-step">
           <span>Step 4</span>
-          <strong>ส่งออก</strong>
-          <p>เก็บสำเนา Journal เป็น CSV หรือรายงาน PDF สำหรับทบทวน</p>
-          <a href="#exportRange">ไปที่ Export</a>
+          <strong>บันทึกผล</strong>
+          <p>เลือก ENTERED หรือ SKIP แล้วเก็บหลักฐานใน Journal</p>
+          <a href="journal.html">เปิด Journal</a>
         </article>
       </div>
     </section>
 
     <aside class="integration-limits">
       <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-shield"></use></svg>
-      <p>Trading Companion ไม่ดึงราคา, Indicator หรือคำสั่งซื้อขายจาก TradingView โดยตรง และไม่ส่งคำสั่งเทรด ลิงก์จะเปิดเว็บไซต์ TradingView ภายนอก ส่วนข้อมูล Journal และไฟล์ส่งออกสร้างจากข้อมูลที่อยู่ในเบราว์เซอร์นี้เท่านั้น</p>
+      <p>Trading Companion ยังไม่มี Webhook Server และไม่ส่งคำสั่งเทรด การนำเข้า Alert รอบนี้ใช้ JSON ที่ตรวจ schema แล้วและเก็บในเบราว์เซอร์เครื่องนี้เท่านั้น ส่วนการรับอัตโนมัติจะเพิ่มหลังมี Backend ที่ยืนยันสิทธิ์และป้องกันข้อมูลซ้ำได้</p>
     </aside>
   </main>
 
@@ -342,8 +402,8 @@
     </details>
   </nav>
 
-  <script src="js/storage.js?v=0.10.0"></script>
+  <script src="js/storage.js?v=0.12.0"></script>
   <script src="js/app.js"></script>
-  <script src="js/integration.js?v=0.10.0"></script>
+  <script src="js/integration.js?v=0.12.0"></script>
 </body>
 </html>

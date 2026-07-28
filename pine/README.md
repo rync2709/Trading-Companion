@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.13.0-alpha
+Version: v0.14.0-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -317,7 +317,7 @@ webhook.
 
 ## Alert System
 
-The v0.10.0 Alert System runs only on confirmed chart candles and supports:
+The Alert System runs only on confirmed chart candles and supports:
 
 - First interaction with the selected HTF POI
 - Confirmed PDH or PDL sweep
@@ -331,9 +331,12 @@ The v0.10.0 Alert System runs only on confirmed chart candles and supports:
 
 The Alerts settings include one master switch and an independent switch for
 each event group. When several enabled events occur on the same confirmed
-candle, the script combines them into one dynamic message containing the
-symbol, chart timeframe, event list, Setup State, Score, Grade, planned RR, and
-close price.
+candle, the script combines them into one
+`trading-companion.alert.v1` JSON message. The payload includes Symbol, Ticker,
+Timeframe, event time, assessment mode, Narrative, Setup State, Score, Grade,
+all eight checklist values, available Entry/Stop/Target/RR, and close price.
+Manual mode exports the selected Manual Assessment; Automatic mode exports the
+confirmed indicator state.
 
 The Pine script exposes one `alert()` call with once-per-bar-close frequency.
 It does not create or start a TradingView alert automatically. To receive
@@ -457,6 +460,10 @@ Compile status:
   XAUUSD at 5M, 15M, 1H, and 4H.
 - Returned the chart to 15M and saved the private script as
   `Trading OS HTF Context v0.13.0` without publishing.
+- Pine v0.14.0 now emits the versioned
+  `trading-companion.alert.v1` JSON payload from confirmed-bar Alert events.
+- TradingView compile, multi-timeframe smoke testing, and private save remain
+  pending for Pine v0.14.0.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.
@@ -511,6 +518,8 @@ Compile status:
 - No order execution.
 - Alert code is implemented, but notifications require a user-created running
   TradingView alert and only trigger on realtime confirmed candles.
-- Alert delivery and webhook integration have not yet been validated.
+- Trading Companion can validate and import copied Alert JSON into its local
+  Indicator Alert Inbox.
+- Alert delivery and automatic webhook integration have not yet been validated.
 - Premium/discount and displacement are not yet included in HTF confidence.
 - Compilation and rendering are confirmed, but manual comparison and heuristic calibration are still required before release readiness.

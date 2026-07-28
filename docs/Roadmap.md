@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.11.1 / Pine v0.13.0-alpha
+Version: v0.12.0 / Pine v0.14.0-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -469,11 +469,20 @@ First milestone:
 - [x] Add a printable Journal report for browser Save as PDF.
 - [x] Generate export files locally without uploading Journal data.
 - [x] Document the limits around market data and order placement.
+- [x] Define the versioned `trading-companion.alert.v1` JSON contract.
+- [x] Add a local Indicator Alert Inbox with duplicate protection.
+- [x] Add WAIT, SKIP, Review Entry, and delete actions.
+- [x] Map compatible Indicator evidence into a New Trade Draft.
+- [x] Recalculate the detailed web score before allowing ENTRY.
+- [ ] Add an authenticated Webhook receiver for automatic delivery.
+- [ ] Define cross-device Inbox synchronization and retention.
 - [ ] Validate exported CSV and PDF reports against a larger real-trade sample.
 
 Supported scope:
 
 - Import screenshots
+- Import validated Trading OS Alert JSON
+- Triage Indicator Alerts locally
 - Open chart links
 - Attach trade ideas
 - Export journal as PDF
@@ -717,6 +726,11 @@ First milestone:
   Window outputs, or confirmed-bar Alerts.
 - [x] Keep the compact ten-row Dashboard and `Small` default size unchanged.
 - [x] Compile, smoke-test, and save Pine v0.13.0 privately in TradingView.
+- [x] Change confirmed-bar Alert messages to
+  `trading-companion.alert.v1` JSON.
+- [x] Include Manual or Automatic Narrative, State, Score, Grade, Checklist,
+  Risk Plan, Symbol, Timeframe, and event time.
+- [ ] Compile, smoke-test, and save Pine v0.14.0 privately in TradingView.
 - [ ] Compare Order Block source, mitigation, and invalidation against manual
   4H/1H markup.
 - [ ] Compare Breaker activation, mitigation, and invalidation against manual
@@ -779,6 +793,7 @@ Expected outputs:
 | v0.10.0 | TradingView evidence workflow and Journal export |
 | v0.11.0 | Personal Playbook Library |
 | v0.11.1 | Real-use Validation Center and v1.0 readiness |
+| v0.12.0 | Local Indicator Alert Inbox and TradingView JSON bridge |
 | Pine v0.1.0-alpha | Confirmed 4H/1H HTF Bias baseline |
 | Pine v0.2.0-alpha | Bias-aligned 4H/1H FVG candidate baseline |
 | Pine v0.2.1-alpha | TradingView compile compatibility and multi-timeframe render smoke test |
@@ -804,4 +819,5 @@ Expected outputs:
 | Pine v0.11.2-alpha | Latest active HTF Order Block visibility with gray unaligned context |
 | Pine v0.12.0-alpha | Completed-close 4H/1H Breaker chart context |
 | Pine v0.13.0-alpha | Manual Narrative, weighted checklist Score, Grade, and Setup Status |
+| Pine v0.14.0-alpha | Versioned Trading Companion Alert JSON payload |
 | v1.0.0 | Trading OS MVP |
