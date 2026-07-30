@@ -540,8 +540,8 @@ Compile status:
   Indicator Alert Inbox.
 - The production Worker and Trading Companion Sync path are validated with a
   contract-valid synthetic payload, including WAIT and delete synchronization.
-- A running TradingView alert is active. Realtime Worker delivery remains
-  pending until TradingView 2FA is enabled and the protected Webhook URL is
-  attached to the alert.
+- A running TradingView alert is active with app and protected Webhook
+  notifications. Live TradingView-to-Worker delivery was verified on
+  2026-07-30.
 - Premium/discount and displacement are not yet included in HTF confidence.
 - Compilation and rendering are confirmed, but manual comparison and heuristic calibration are still required before release readiness.

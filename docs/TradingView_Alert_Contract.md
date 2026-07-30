@@ -1,7 +1,7 @@
 # TradingView Alert Contract
 
 Version: v1
-Status: Production receiver and TradingView alert active; Webhook pending 2FA
+Status: Production receiver, TradingView alert, and protected Webhook active
 
 ## Purpose
 
@@ -81,9 +81,11 @@ synchronize the same payload from a private Webhook Worker.
 
 The production Worker and Trading Companion Sync path passed this workflow with
 a contract-valid synthetic Alert on 2026-07-30. Pine v0.14.1 compiled and a
-running `Any alert() function call` alert was created the same day. Realtime
-Webhook delivery remains pending until 2FA is enabled on the TradingView
-account and the protected Worker URL is added to that alert.
+running `Any alert() function call` alert was created the same day. After
+enabling TradingView two-factor authentication and attaching the protected
+Worker URL, a live TradingView price alert reached the production Worker. The
+temporary TradingView alert and remote test record were deleted after
+verification.
 
 ## Compact Fallback
 
@@ -124,9 +126,9 @@ Authorization: Bearer <SYNC_API_TOKEN>
 - GitHub Pages cannot receive TradingView webhooks.
 - The Worker, production D1, Secrets, allowed origin, and Companion connection
   are active.
-- The running chart alert is active with TradingView app notification.
-- Automatic Worker delivery is not active until TradingView 2FA is enabled and
-  the protected Webhook URL is attached and verified.
+- The running chart alert is active with TradingView app and protected Webhook
+  notifications.
+- Live TradingView-to-Worker delivery was verified on 2026-07-30.
 - Manual JSON transfer remains available and is stored in browser localStorage.
 - Alerts use the private user-created
   `Any alert() function call` TradingView alert.

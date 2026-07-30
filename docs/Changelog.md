@@ -32,12 +32,11 @@ All notable changes to Trading OS will be documented in this file.
 - Saved the private script as `Trading OS HTF Context v0.14.1`.
 - Confirmed `Any alert() function call` appears and created a running XAUUSD
   15M alert with app notifications enabled.
-
-### Pending Webhook
-
-- TradingView Webhook remains disabled until 2FA is enabled on the account.
-- After 2FA, add the protected Worker URL to the existing alert and validate a
-  realtime confirmed-candle delivery.
+- Enabled TradingView two-factor authentication and attached the protected
+  Worker Webhook URL to the running alert.
+- Verified a live TradingView price alert reached the production Worker.
+- Deleted the temporary TradingView alert and remote test record after
+  verification.
 
 ## v0.13.0 - 2026-07-30
 
@@ -88,8 +87,8 @@ All notable changes to Trading OS will be documented in this file.
 
 - Pine v0.14.1 later exposed and started the running
   `Any alert() function call` alert.
-- Realtime Worker delivery still requires TradingView 2FA before the protected
-  Webhook URL can be attached.
+- Enabled TradingView two-factor authentication, attached the protected
+  Webhook URL, and verified live TradingView-to-Worker delivery.
 - Validate cross-device synchronization with a second browser or device.
 
 ## v0.12.0 - 2026-07-28

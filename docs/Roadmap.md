@@ -457,8 +457,8 @@ Important rule:
 
 Goal: connect Trading OS with TradingView in ways that are realistic for a web app.
 
-Status: Production Worker connected; TradingView alert active, Webhook pending
-2FA.
+Status: Production Worker connected; TradingView alert and protected Webhook
+active with live delivery verified.
 
 First milestone:
 
@@ -486,8 +486,8 @@ First milestone:
   deletion tombstones with a synthetic contract-valid Alert.
 - [x] Expose `Any alert() function call`, compile Pine v0.14.1, save it
   privately, and create a running TradingView alert.
-- [ ] Enable TradingView 2FA, attach the protected Worker URL to the running
-  alert, and validate realtime delivery.
+- [x] Enable TradingView 2FA, attach the protected Worker URL to the running
+  alert, and validate live TradingView-to-Worker delivery.
 - [ ] Validate live cross-device synchronization and retention in production.
 - [ ] Validate exported CSV and PDF reports against a larger real-trade sample.
 
@@ -506,8 +506,8 @@ Constraints:
 
 - Direct TradingView data access has platform limitations. Integration should be designed around supported workflows.
 - GitHub Pages remains a static frontend and cannot receive the Webhook itself.
-- The production Worker is active. Automatic TradingView delivery remains
-  inactive until the running TradingView alert is created and verified.
+- The production Worker and protected TradingView Webhook are active. Delivery
+  occurs only when a running TradingView alert triggers.
 
 ## Decision Engine
 

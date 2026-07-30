@@ -1,7 +1,7 @@
 # Trading Companion Webhook Worker
 
 Version: v0.1.1
-Status: Production deployed; TradingView alert active, Webhook pending 2FA
+Status: Production deployed; TradingView alert and protected Webhook active
 
 This Cloudflare Worker receives Trading OS alerts from TradingView and stores
 them in D1 for cross-device Trading Companion Inbox synchronization.
@@ -69,10 +69,11 @@ Completed on 2026-07-30:
 - Smoke-test Alert removed after validation
 - Worker v0.1.1 compact snapshot decoding verified against production and its
   smoke-test record deleted
+- TradingView two-factor authentication enabled
+- Protected Worker URL attached to the running TradingView alert
+- Live TradingView price alert received by the production Worker
+- Temporary TradingView alert and remote test record removed after validation
 
 Still pending:
 
-- Enable TradingView 2FA and add the protected Worker URL to the running
-  `Any alert() function call` alert
-- Confirm Worker delivery from a realtime confirmed candle
 - Confirm synchronization on a second browser or device

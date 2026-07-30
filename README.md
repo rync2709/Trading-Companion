@@ -160,14 +160,17 @@ The first Phase 10 milestone includes:
 - Optional manual and 60-second cross-device Inbox synchronization
 - 30-day remote retention with deletion tombstones
 - Production smoke test covering Webhook receipt, Sync, WAIT, and delete
+- Live TradingView-to-Worker Webhook delivery verified
 - Clear boundary: no live prices, indicators, or order placement
 
 The Worker is deployed and Trading Companion is connected to its production
-Inbox. A private Pine v0.14.1 script and running
-`Any alert() function call` alert are active in TradingView. App notifications
-are enabled. TradingView Webhook delivery remains pending until 2FA is enabled
-on the TradingView account, after which the protected Worker URL can be added
-to the existing alert. Manual JSON import remains available without a backend.
+Inbox. A private Pine v0.14.1 script and a running
+`Any alert() function call` alert are active in TradingView. Two-factor
+authentication is enabled, and the alert has both app and protected Webhook
+notifications attached. A live TradingView price alert successfully reached
+the production Worker on 2026-07-30; the temporary Alert and remote test record
+were removed after verification. Manual JSON import remains available without
+a backend.
 
 ## Phase 11 Milestone
 
