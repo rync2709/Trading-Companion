@@ -1,10 +1,18 @@
 # Trading Companion Webhook Worker
 
 Version: v0.1.0
-Status: Deployment-ready source, not yet connected to production
+Status: Production deployed; live TradingView alert pending
 
 This Cloudflare Worker receives Trading OS alerts from TradingView and stores
 them in D1 for cross-device Trading Companion Inbox synchronization.
+
+Production base URL:
+
+```text
+https://trading-companion-webhook.trading-companion-rync2709.workers.dev
+```
+
+Never append or publish the protected Webhook token in documentation.
 
 ## Security Model
 
@@ -48,3 +56,20 @@ Expired records are removed during normal API activity.
 9. Add the protected webhook URL to the TradingView alert.
 
 Do not deploy until both tokens and the allowed production origin are set.
+
+## Production Validation
+
+Completed on 2026-07-30:
+
+- D1 database created in APAC and migration applied
+- Webhook and Sync Secrets configured separately
+- Worker health and authenticated Inbox requests verified
+- Contract-valid Alert accepted and synchronized into Trading Companion
+- Remote WAIT decision and deletion tombstone verified
+- Smoke-test Alert removed after validation
+
+Still pending:
+
+- Create and run the TradingView `Any alert() function call` alert
+- Confirm delivery from a realtime confirmed candle
+- Confirm synchronization on a second browser or device

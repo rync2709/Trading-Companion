@@ -154,14 +154,17 @@ The first Phase 10 milestone includes:
 - Local Indicator Alert Inbox with duplicate protection
 - WAIT, SKIP, and Review Entry triage
 - Safe transfer of compatible Alert evidence into a New Trade Draft
-- Deployment-ready authenticated Cloudflare Worker and D1 Inbox source
+- Production-deployed authenticated Cloudflare Worker and D1 Inbox
 - Separate TradingView Webhook and browser Sync tokens
 - Optional manual and 60-second cross-device Inbox synchronization
 - 30-day remote retention with deletion tombstones
+- Production smoke test covering Webhook receipt, Sync, WAIT, and delete
 - Clear boundary: no live prices, indicators, or order placement
 
-The Worker source is included but is not deployed or connected to production
-yet. Manual JSON import remains available without a backend.
+The Worker is deployed and Trading Companion is connected to its production
+Inbox. Manual JSON import remains available without a backend. Realtime
+TradingView delivery still requires a running alert using
+`Any alert() function call`; that final TradingView-side step remains pending.
 
 ## Phase 11 Milestone
 
@@ -416,4 +419,4 @@ The Pine source and TradingView test notes are stored under `pine/`.
 
 ## Data Note
 
-Drafts, Decision Assistant sessions, Playbook Notes, assessment history, Weekly Reviews, Daily Session Plans, Watchlist Context, and Screenshots remain stored only in the browser on the current device. Screenshots use IndexedDB so image files do not consume the smaller checklist storage area. Indicator Alerts also remain local unless the trader explicitly connects a private Worker; when connected, validated Alert payloads, Inbox decisions, and deletion tombstones synchronize through that Worker. The Worker source is not deployed by this repository. Watchlist status is entered manually and is not live market data. Advanced Tool inputs are calculated locally and are not saved. The Currency Converter requests only the selected fiat currency pair from Frankfurter; it does not send the entered amount. The Decision Assistant uses the local Rulebook engine without an external AI API. CSV and PDF-ready reports are generated locally from Journal data. Trading Companion does not place orders.
+Drafts, Decision Assistant sessions, Playbook Notes, assessment history, Weekly Reviews, Daily Session Plans, Watchlist Context, and Screenshots remain stored only in the browser on the current device. Screenshots use IndexedDB so image files do not consume the smaller checklist storage area. Indicator Alerts also remain local unless the trader explicitly connects the private Worker; when connected, validated Alert payloads, Inbox decisions, and deletion tombstones synchronize through the deployed production Worker. Journal, plans, screenshots, Playbooks, and other Trading Companion data are never sent to that Worker. Watchlist status is entered manually and is not live market data. Advanced Tool inputs are calculated locally and are not saved. The Currency Converter requests only the selected fiat currency pair from Frankfurter; it does not send the entered amount. The Decision Assistant uses the local Rulebook engine without an external AI API. CSV and PDF-ready reports are generated locally from Journal data. Trading Companion does not place orders.

@@ -525,6 +525,10 @@ Compile status:
   TradingView alert and only trigger on realtime confirmed candles.
 - Trading Companion can validate and import copied Alert JSON into its local
   Indicator Alert Inbox.
-- Alert delivery and automatic webhook integration have not yet been validated.
+- The production Worker and Trading Companion Sync path are validated with a
+  contract-valid synthetic payload, including WAIT and delete synchronization.
+- Realtime TradingView delivery remains pending because the current alert
+  condition list did not expose `Any alert() function call` during the
+  production connection pass.
 - Premium/discount and displacement are not yet included in HTF confidence.
 - Compilation and rendering are confirmed, but manual comparison and heuristic calibration are still required before release readiness.

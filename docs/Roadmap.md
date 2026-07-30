@@ -457,7 +457,7 @@ Important rule:
 
 Goal: connect Trading OS with TradingView in ways that are realistic for a web app.
 
-Status: In progress.
+Status: Production Worker connected; live TradingView alert pending.
 
 First milestone:
 
@@ -478,8 +478,15 @@ First milestone:
 - [x] Keep TradingView Webhook and browser Sync authentication separate.
 - [x] Add browser connection settings, manual Sync, and optional 60-second Sync.
 - [x] Define 30-day retention and deletion tombstones for cross-device consistency.
-- [ ] Deploy the Worker, configure D1 and production Secrets, and connect a
-  TradingView alert.
+- [x] Deploy the Worker and configure production D1, Secrets, retention, and
+  allowed origin.
+- [x] Connect Trading Companion to the production Worker.
+- [x] Validate production Webhook receipt, browser Sync, remote WAIT, and
+  deletion tombstones with a synthetic contract-valid Alert.
+- [ ] Create a running TradingView alert using
+  `Any alert() function call` and validate realtime delivery. The current
+  TradingView condition list did not expose this option during the production
+  connection pass.
 - [ ] Validate live cross-device synchronization and retention in production.
 - [ ] Validate exported CSV and PDF reports against a larger real-trade sample.
 
@@ -498,8 +505,8 @@ Constraints:
 
 - Direct TradingView data access has platform limitations. Integration should be designed around supported workflows.
 - GitHub Pages remains a static frontend and cannot receive the Webhook itself.
-- Automatic delivery stays disabled until the separate Worker is deployed with
-  production Secrets and an approved origin.
+- The production Worker is active. Automatic TradingView delivery remains
+  inactive until the running TradingView alert is created and verified.
 
 ## Decision Engine
 
@@ -710,7 +717,9 @@ First milestone:
   transitions.
 - [x] Compile, load, smoke-test, and save Pine v0.10.0 privately in TradingView.
 - [ ] Create a temporary running TradingView alert and validate realtime
-  notification delivery.
+  notification delivery. The production receiver and Companion Sync path are
+  validated; TradingView did not expose `Any alert() function call` in the
+  current condition list.
 - [x] Detect the latest 4H and 1H Order Block from a qualified HTF departure.
 - [x] Track Fresh, Mitigated, and Invalid Order Block states.
 - [x] Draw aligned 4H and 1H Order Blocks at actual source time and price.

@@ -1,7 +1,7 @@
 # TradingView Alert Contract
 
 Version: v1
-Status: Authenticated receiver baseline; production deployment pending
+Status: Production receiver active; live TradingView alert pending
 
 ## Purpose
 
@@ -79,6 +79,11 @@ synchronize the same payload from a private Webhook Worker.
 6. WAIT, SKIP, and delete changes are written to the remote Inbox first and
    then reflected locally.
 
+The production Worker and Trading Companion Sync path passed this workflow with
+a contract-valid synthetic Alert on 2026-07-30. Realtime delivery from
+TradingView remains pending until the chart exposes and runs
+`Any alert() function call`.
+
 ## Worker API
 
 - `GET /health`
@@ -107,8 +112,10 @@ Authorization: Bearer <SYNC_API_TOKEN>
 ## Limits
 
 - GitHub Pages cannot receive TradingView webhooks.
-- Automatic delivery is not active until the Worker is deployed and production
-  D1, Secrets, allowed origin, and TradingView alert are configured.
+- The Worker, production D1, Secrets, allowed origin, and Companion connection
+  are active.
+- Automatic TradingView delivery is not active until a running chart alert is
+  configured and verified.
 - Manual JSON transfer remains available and is stored in browser localStorage.
 - Alerts still require a user-created TradingView alert using
   `Any alert() function call`.

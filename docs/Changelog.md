@@ -34,12 +34,26 @@ All notable changes to Trading OS will be documented in this file.
 - Confirmed the Auto Sync and Inbox controls fit desktop and narrow mobile
   layouts without horizontal overflow.
 
-### Pending Deployment
+### Production Deployment
 
-- Create the production D1 database and apply the migration.
-- Configure production Cloudflare Secrets and allowed origin.
-- Deploy the Worker and connect a live TradingView alert.
-- Validate delivery and cross-device synchronization with realtime Alerts.
+- Created the production `trading-companion-alerts` D1 database in APAC and
+  applied migration `0001_indicator_alerts.sql`.
+- Configured separate production Webhook and Sync Secrets without committing
+  either value.
+- Deployed `trading-companion-webhook` to Cloudflare Workers.
+- Connected Trading Companion to the production Worker with Auto Sync enabled.
+- Validated a contract-valid Webhook POST, Inbox Sync, remote WAIT update, and
+  delete tombstone against production.
+- Removed the production smoke-test Alert after validation so the real Inbox
+  remains empty.
+
+### Pending Live Delivery
+
+- Create a running TradingView alert using `Any alert() function call`.
+- Validate delivery from a realtime confirmed TradingView candle. The current
+  TradingView condition list did not expose the dynamic alert option during
+  this deployment pass.
+- Validate cross-device synchronization with a second browser or device.
 
 ## v0.12.0 - 2026-07-28
 
