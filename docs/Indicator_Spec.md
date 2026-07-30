@@ -367,7 +367,9 @@ Input:
 - Average body size from completed chart candles
 - ATR from completed chart candles
 - Body share of the candle range
-- Active HTF, Structure, and valid CISD context
+- Active HTF and Structure context
+- Valid CISD context, except Balanced BOS Continuation may qualify without a
+  separate CISD when the remaining evidence threshold passes
 - Close relative to the latest Structure break level
 - Configurable follow-through window
 
@@ -467,8 +469,10 @@ Process:
 - Set Entry to the midpoint of the Entry FVG.
 - Set Bullish Stop Loss to the latest confirmed execution swing low.
 - Set Bearish Stop Loss to the latest confirmed execution swing high.
-- Set Bullish Target to confirmed Previous Day High liquidity.
-- Set Bearish Target to confirmed Previous Day Low liquidity.
+- In Strict A+, set Bullish Target to confirmed Previous Day High liquidity
+  and Bearish Target to confirmed Previous Day Low liquidity.
+- In Balanced, select the nearest valid forward target from PDH/PDL, the
+  latest confirmed execution swing, or the latest confirmed major swing.
 - Reject inverted Stop or Target geometry.
 - Calculate planned reward-to-risk and require it to meet the configured
   minimum before the setup becomes READY.
@@ -491,15 +495,15 @@ Output:
 Current limitation:
 
 - Entry is a proposed FVG-midpoint plan, not a confirmed broker fill.
-- Stop and Target use one baseline each: latest confirmed execution swing and
-  PDH/PDL liquidity.
+- Stop uses the latest confirmed execution swing. Target uses either the
+  Strict PDH/PDL baseline or the Balanced forward-liquidity selection.
 - Trader emotion, forced-entry checks, position sizing, news risk, and order
   execution remain outside Pine.
 - The plan tracks the latest active Entry FVG only.
 
 ## Module 10 - Score Engine
 
-Implementation status: `Pine v0.13.0-alpha - manual and automated assessment modes`
+Implementation status: `Pine v0.16.2-alpha - manual plus Balanced/Strict automated assessment modes`
 
 Input:
 
@@ -541,12 +545,27 @@ setup reaches READY. Every saved assessment includes the profile name and
 category breakdown so future calibration does not mix records produced by
 different formulas.
 
-Pine v0.9.0 maps the currently automated evidence to these weights. HTF
+Pine maps the currently automated evidence to these weights. HTF
 alignment earns 20, while Primary-only context earns 10. A selected HTF FVG
 earns 5 and a recent interaction with that same zone earns 15. Direction-aligned
 recent PDH/PDL liquidity, Structure, valid CISD, Displacement, and Entry FVG
 then earn their category weights. A valid locked risk plan earns the remaining
 5 points.
+
+Automatic completion profiles:
+
+- `Balanced Reversal`: aligned HTF, recent HTF POI interaction, matching
+  PDH/PDL Sweep, MSS, valid CISD, confirmed Displacement, later Entry FVG
+  retracement, and Risk / RR.
+- `Balanced Continuation`: aligned HTF, BOS, confirmed Displacement, POI
+  interaction or valid CISD, later Entry FVG retracement, at least 65 evidence
+  points before Risk, and Risk / RR.
+- `Strict A+`: every automated checklist category is required.
+
+CHoCH earns 5 of 15 Structure points as a Developing warning. Only BOS or MSS
+can complete an automated setup. The evidence present when an Entry FVG is
+created is locked to that zone so a later retracement does not lose valid
+earlier events merely because their display context expired.
 
 Pine displays a final Grade only when the setup reaches READY. Pending states
 show `--`; NO_TRADE remains explicitly blocked.
@@ -636,7 +655,7 @@ Current limitation:
   alert are configured in production.
 - TradingView 2FA, the protected Worker URL, and live Webhook delivery are
   verified in production.
-- The existing v0.14.1 production alert remains active while v0.15.0 is
+- The existing v0.14.1 production alert remains active while v0.16.2 is
   validated as the private chart version.
 
 ## Current Checklist Mapping

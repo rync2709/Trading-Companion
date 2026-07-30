@@ -150,8 +150,11 @@ The structure confirmation depends on setup type.
 
 | Setup Type | Required Structure |
 | --- | --- |
-| Reversal | MSS or CHOCH toward trade direction |
+| Reversal | Liquidity-backed MSS toward trade direction |
 | Continuation | BOS toward trade direction |
+
+CHoCH is an early warning that structure may be changing. It can move a setup
+to DEVELOPING, but it does not confirm an Entry by itself.
 
 Structure signals away from the POI or outside the setup window should be treated as lower quality.
 
@@ -211,7 +214,7 @@ A high quality reversal should include:
 
 - HTF POI
 - Liquidity sweep or raid
-- MSS or CHOCH
+- MSS after the matching liquidity event
 - CISD
 - Displacement
 - Valid FVG or entry zone
@@ -228,6 +231,10 @@ A continuation setup can be valid when:
 - Price pulls back into a valid LTF POI or FVG.
 - BOS or continuation structure supports the direction.
 - Entry is not taken in the middle of a move without pullback.
+
+Continuation does not require a new PDH/PDL sweep on every setup. A confirmed
+BOS, displacement, valid pullback evidence, Entry FVG retracement, and approved
+risk plan can complete the Balanced path.
 
 ## Rule 12 - Invalidation
 

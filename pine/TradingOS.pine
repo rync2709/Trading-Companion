@@ -8,14 +8,15 @@ indicator(
     max_labels_count = 300
 )
 
-// Trading OS Pine Track v0.15.0-alpha
+// Trading OS Pine Track v0.16.2-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG, latest Order Block and
 // Breaker context, daily liquidity, Internal/Swing BOS/CHoCH/MSS, chart
-// Order Blocks, strict CISD context, execution-chart displacement with
-// follow-through, Entry FVG confirmation, manual and automated assessment
-// modes, a locked Entry/Risk planning baseline, and confirmed-bar event
-// alerts. Full chart context is enabled by default. This indicator remains
-// decision support and does not generate Buy/Sell signals.
+// Order Blocks, setup-aware CISD/displacement context, execution-chart
+// displacement with follow-through, Entry FVG confirmation, manual and
+// Balanced/Strict automated assessment modes, a locked Entry/Risk planning
+// baseline, and confirmed-bar event alerts. Full chart context is enabled by
+// default. This indicator remains decision support and does not generate
+// Buy/Sell signals.
 
 string assessmentModeInput = input.string(
     "Manual",
@@ -75,6 +76,22 @@ bool manualNoTrade = input.bool(
     "Block setup / NO TRADE",
     tooltip = "Overrides the manual checklist and sets the Dashboard status to NO TRADE with a score of 0.",
     group = "Manual Assessment"
+)
+string automaticSetupProfileInput = input.string(
+    "Balanced",
+    "Automatic setup profile",
+    options = ["Balanced", "Strict A+"],
+    tooltip = "Balanced accepts an MSS reversal or BOS continuation and preserves evidence with the Entry FVG. Strict A+ requires every automated checklist category.",
+    group = "Automatic Assessment"
+)
+int balancedMinimumEvidenceScore = input.int(
+    65,
+    "Balanced minimum evidence score",
+    minval = 50,
+    maxval = 95,
+    step = 5,
+    tooltip = "Minimum score before Risk / RR for a Balanced continuation to reach Risk Review. Reversal keeps its stricter MSS, Sweep, POI, and CISD requirements.",
+    group = "Automatic Assessment"
 )
 
 string primaryTimeframe = input.timeframe("240", "Primary HTF", group = "HTF Bias")
@@ -2076,19 +2093,29 @@ bool strongDisplacementExpansion = (
     displacementRangeAtr >= displacementMinimumRangeAtr * 1.25 and
     displacementBodyShare >= math.max(displacementMinimumBodyShare, 0.7)
 )
+bool automaticBalancedProfile = automaticSetupProfileInput == "Balanced"
+bool balancedContinuationStructure = (
+    automaticBalancedProfile and
+    structureEventActive and
+    latestStructureEvent == 1
+)
 bool bullishDisplacementContext = (
     combinedState == 1 and
     structureEventActive and
     latestStructureDirection == 1 and
-    cisdValid and
-    latestCisdDirection == 1
+    (
+        (cisdValid and latestCisdDirection == 1) or
+        balancedContinuationStructure
+    )
 )
 bool bearishDisplacementContext = (
     combinedState == -1 and
     structureEventActive and
     latestStructureDirection == -1 and
-    cisdValid and
-    latestCisdDirection == -1
+    (
+        (cisdValid and latestCisdDirection == -1) or
+        balancedContinuationStructure
+    )
 )
 
 [displacementEventPulse, latestDisplacementDirection, latestDisplacementQuality, latestDisplacementEventBar, latestDisplacementExpansionBar, latestDisplacementHigh, latestDisplacementLow, latestDisplacementStructureLevel, latestDisplacementBodyMultiple, latestDisplacementRangeAtr, latestDisplacementBodyShare, displacementCandidateDirection, displacementCandidateBar, displacementCandidateHigh, displacementCandidateLow] = f_displacement_state(
@@ -2153,13 +2180,18 @@ bool entryFvgExists = (
     not na(entryFvgBottom)
 )
 bool entryFvgActive = entryFvgExists and f_fvg_active(entryFvgStatus)
-bool priceInsideEntryFvg = (
+bool entryFvgRetraceEligible = (
     entryFvgActive and
+    not na(entryFvgCreatedBar) and
+    bar_index > entryFvgCreatedBar
+)
+bool priceInsideEntryFvg = (
+    entryFvgRetraceEligible and
     close <= entryFvgTop and
     close >= entryFvgBottom
 )
 bool priceTouchesEntryFvg = (
-    entryFvgActive and
+    entryFvgRetraceEligible and
     high >= entryFvgBottom and
     low <= entryFvgTop
 )
@@ -2187,11 +2219,57 @@ if entryFvgCreatedPulse != 0
         latestExecutionSwingLow :
         latestExecutionSwingHigh
     )
-    plannedTarget := (
-        entryFvgDirection == 1 ?
-        previousDayHigh :
-        previousDayLow
-    )
+    if automaticBalancedProfile
+        float nearestTarget = na
+        if entryFvgDirection == 1
+            if not na(previousDayHigh) and previousDayHigh > plannedEntry
+                nearestTarget := previousDayHigh
+            if (
+                not na(latestExecutionSwingHigh) and
+                latestExecutionSwingHigh > plannedEntry and
+                (
+                    na(nearestTarget) or
+                    latestExecutionSwingHigh < nearestTarget
+                )
+            )
+                nearestTarget := latestExecutionSwingHigh
+            if (
+                not na(latestMajorSwingHigh) and
+                latestMajorSwingHigh > plannedEntry and
+                (
+                    na(nearestTarget) or
+                    latestMajorSwingHigh < nearestTarget
+                )
+            )
+                nearestTarget := latestMajorSwingHigh
+        else
+            if not na(previousDayLow) and previousDayLow < plannedEntry
+                nearestTarget := previousDayLow
+            if (
+                not na(latestExecutionSwingLow) and
+                latestExecutionSwingLow < plannedEntry and
+                (
+                    na(nearestTarget) or
+                    latestExecutionSwingLow > nearestTarget
+                )
+            )
+                nearestTarget := latestExecutionSwingLow
+            if (
+                not na(latestMajorSwingLow) and
+                latestMajorSwingLow < plannedEntry and
+                (
+                    na(nearestTarget) or
+                    latestMajorSwingLow > nearestTarget
+                )
+            )
+                nearestTarget := latestMajorSwingLow
+        plannedTarget := nearestTarget
+    else
+        plannedTarget := (
+            entryFvgDirection == 1 ?
+            previousDayHigh :
+            previousDayLow
+        )
 
 bool riskPlanMatchesEntryFvg = (
     entryFvgExists and
@@ -2281,6 +2359,105 @@ bool entryFvgAligned = (
     combinedState != 0 and
     entryFvgDirection == combinedState
 )
+
+// Preserve the evidence that created each Entry FVG. A later retracement can
+// then complete the same setup even after the earlier event display windows
+// expire. A new Entry FVG replaces the prior snapshot.
+var int lockedEvidenceFvgCreatedBar = na
+var int lockedEvidenceDirection = 0
+var bool lockedPoiActive = false
+var bool lockedPoiInteracted = false
+var bool lockedLiquidityAligned = false
+var bool lockedStructureAligned = false
+var int lockedStructureEvent = 0
+var bool lockedCisdAligned = false
+var bool lockedDisplacementValid = false
+
+if entryFvgCreatedPulse != 0
+    lockedEvidenceFvgCreatedBar := entryFvgCreatedBar
+    lockedEvidenceDirection := entryFvgDirection
+    lockedPoiActive := poiActive
+    lockedPoiInteracted := poiRecentlyInteracted
+    lockedLiquidityAligned := liquidityAligned
+    lockedStructureAligned := structureAligned
+    lockedStructureEvent := latestStructureEvent
+    lockedCisdAligned := cisdValid and cisdAligned
+    lockedDisplacementValid := displacementValid
+
+bool lockedEvidenceConflict = (
+    not na(lockedEvidenceFvgCreatedBar) and
+    lockedEvidenceDirection != 0 and
+    (
+        (
+            aligned and
+            combinedState == -lockedEvidenceDirection
+        ) or
+        (
+            structureEventActive and
+            latestStructureDirection == -lockedEvidenceDirection
+        ) or
+        (
+            cisdEventActive and
+            latestCisdDirection == -lockedEvidenceDirection
+        ) or
+        (
+            displacementEventActive and
+            latestDisplacementDirection == -lockedEvidenceDirection
+        )
+    )
+)
+if lockedEvidenceConflict
+    lockedEvidenceFvgCreatedBar := na
+    lockedEvidenceDirection := 0
+    lockedPoiActive := false
+    lockedPoiInteracted := false
+    lockedLiquidityAligned := false
+    lockedStructureAligned := false
+    lockedStructureEvent := 0
+    lockedCisdAligned := false
+    lockedDisplacementValid := false
+
+bool lockedEvidenceActive = (
+    entryFvgActive and
+    not na(lockedEvidenceFvgCreatedBar) and
+    lockedEvidenceFvgCreatedBar == entryFvgCreatedBar and
+    lockedEvidenceDirection == entryFvgDirection
+)
+// HTF alignment must still be valid at the retracement; it is not inherited
+// from the creation snapshot.
+bool effectiveHtfAligned = aligned
+bool effectivePoiActive = lockedEvidenceActive ? lockedPoiActive : poiActive
+bool effectivePoiInteracted = (
+    lockedEvidenceActive ?
+    lockedPoiInteracted :
+    poiRecentlyInteracted
+)
+bool effectiveLiquidityAligned = (
+    lockedEvidenceActive ?
+    lockedLiquidityAligned :
+    liquidityAligned
+)
+bool effectiveStructureAligned = (
+    lockedEvidenceActive ?
+    lockedStructureAligned :
+    structureAligned
+)
+int effectiveStructureEvent = (
+    lockedEvidenceActive ?
+    lockedStructureEvent :
+    latestStructureEvent
+)
+bool effectiveCisdAligned = (
+    lockedEvidenceActive ?
+    lockedCisdAligned :
+    cisdValid and cisdAligned
+)
+bool effectiveDisplacementValid = (
+    lockedEvidenceActive ?
+    lockedDisplacementValid :
+    displacementValid
+)
+
 bool structureConflict = (
     structureEventActive and
     combinedState != 0 and
@@ -2312,12 +2489,16 @@ bool contextBlocked = (
 )
 
 // score-v1 automation mapping.
-int htfScore = aligned ? 20 : primaryOnly ? 10 : 0
-int poiScore = poiRecentlyInteracted ? 15 : poiActive ? 5 : 0
-int liquidityScore = liquidityAligned ? 15 : 0
-int structureScore = structureAligned ? 15 : 0
-int cisdScore = cisdValid and cisdAligned ? 15 : 0
-int displacementScore = displacementValid ? 10 : 0
+int htfScore = effectiveHtfAligned ? 20 : primaryOnly ? 10 : 0
+int poiScore = effectivePoiInteracted ? 15 : effectivePoiActive ? 5 : 0
+int liquidityScore = effectiveLiquidityAligned ? 15 : 0
+int structureScore = (
+    effectiveStructureAligned ?
+    (effectiveStructureEvent == 2 ? 5 : 15) :
+    0
+)
+int cisdScore = effectiveCisdAligned ? 15 : 0
+int displacementScore = effectiveDisplacementValid ? 10 : 0
 int entryFvgScore = (
     entryFvgAligned ?
     3 + (entryFvgStatus == 2 or entryFvgInteractionActive ? 2 : 0) :
@@ -2332,18 +2513,52 @@ int automatedScoreRaw = (
     displacementScore +
     entryFvgScore
 )
+int riskScore = riskPlanValid ? 5 : 0
+int setupScoreRaw = automatedScoreRaw + riskScore
+bool confirmedStructureForEntry = (
+    effectiveStructureEvent == 1 or
+    effectiveStructureEvent == 3
+)
+bool strictAutomatedSetupComplete = (
+    effectiveHtfAligned and
+    effectivePoiInteracted and
+    effectiveLiquidityAligned and
+    effectiveStructureAligned and
+    confirmedStructureForEntry and
+    effectiveCisdAligned and
+    effectiveDisplacementValid and
+    entryFvgAligned and
+    entryFvgInteractionActive
+)
+bool balancedReversalComplete = (
+    effectiveHtfAligned and
+    effectivePoiInteracted and
+    effectiveLiquidityAligned and
+    effectiveStructureAligned and
+    effectiveStructureEvent == 3 and
+    effectiveCisdAligned and
+    effectiveDisplacementValid and
+    entryFvgAligned and
+    entryFvgInteractionActive
+)
+bool balancedContinuationComplete = (
+    effectiveHtfAligned and
+    effectiveStructureAligned and
+    effectiveStructureEvent == 1 and
+    effectiveDisplacementValid and
+    entryFvgAligned and
+    entryFvgInteractionActive and
+    (effectivePoiInteracted or effectiveCisdAligned) and
+    automatedScoreRaw >= balancedMinimumEvidenceScore
+)
 bool automatedSetupComplete = (
     not contextBlocked and
     barstate.isconfirmed and
-    aligned and
-    poiRecentlyInteracted and
-    liquidityAligned and
-    structureAligned and
-    cisdValid and
-    cisdAligned and
-    displacementValid and
-    entryFvgAligned and
-    entryFvgInteractionActive
+    (
+        automaticBalancedProfile ?
+        (balancedReversalComplete or balancedContinuationComplete) :
+        strictAutomatedSetupComplete
+    )
 )
 bool riskBlocked = (
     automatedSetupComplete and
@@ -2352,8 +2567,6 @@ bool riskBlocked = (
 )
 bool setupBlocked = contextBlocked or riskBlocked
 int automatedScore = setupBlocked ? 0 : automatedScoreRaw
-int riskScore = riskPlanValid ? 5 : 0
-int setupScoreRaw = automatedScoreRaw + riskScore
 int setupScore = setupBlocked ? 0 : setupScoreRaw
 bool entryReady = automatedSetupComplete and riskPlanValid
 int setupStateCode = (
@@ -2372,13 +2585,42 @@ string setupState = (
 )
 int setupNextStepCode = (
     setupBlocked ? -1 :
-    combinedState == 0 ? 1 :
-    not poiActive ? 2 :
-    not poiRecentlyInteracted ? 3 :
-    not liquidityAligned ? 4 :
-    not structureAligned ? 5 :
-    not (cisdValid and cisdAligned) ? 6 :
-    not displacementValid ? 7 :
+    not effectiveHtfAligned ? 1 :
+    not effectiveStructureAligned or effectiveStructureEvent == 2 ? 5 :
+    (
+        (
+            not automaticBalancedProfile or
+            effectiveStructureEvent == 3
+        ) and
+        not effectivePoiActive
+    ) ? 2 :
+    (
+        (
+            not automaticBalancedProfile or
+            effectiveStructureEvent == 3
+        ) and
+        not effectivePoiInteracted
+    ) ? 3 :
+    (
+        (
+            not automaticBalancedProfile or
+            effectiveStructureEvent == 3
+        ) and
+        not effectiveLiquidityAligned
+    ) ? 4 :
+    (
+        (
+            not automaticBalancedProfile or
+            effectiveStructureEvent == 3
+        ) and
+        not effectiveCisdAligned
+    ) ? 6 :
+    (
+        automaticBalancedProfile and
+        effectiveStructureEvent == 1 and
+        not (effectivePoiInteracted or effectiveCisdAligned)
+    ) ? 3 :
+    not effectiveDisplacementValid ? 7 :
     not entryFvgAligned ? 8 :
     not entryFvgInteractionActive ? 9 :
     not riskPlanValid ? 10 :
@@ -2502,17 +2744,27 @@ bool dashboardContextActive = (
 string dashboardPoiValue = (
     manualAssessmentEnabled ?
     (manualPoiConfirmed ? "PASS" : "WAIT") :
-    (poiActive ? poiTimeframe + " " + f_state_short(poiDirection) + " FVG" : "NONE")
+    (
+        lockedEvidenceActive and effectivePoiInteracted ?
+        "PASS · LOCKED" :
+        poiActive ?
+        poiTimeframe + " " + f_state_short(poiDirection) + " FVG" :
+        "NONE"
+    )
 )
 color dashboardPoiColor = (
     manualAssessmentEnabled ?
     (manualPoiConfirmed ? f_state_color(manualNarrativeState) : neutralColor) :
-    (poiInteractionActive ? f_state_color(poiDirection) : neutralColor)
+    (
+        effectivePoiInteracted ?
+        f_state_color(lockedEvidenceActive ? lockedEvidenceDirection : poiDirection) :
+        neutralColor
+    )
 )
 bool dashboardPoiActive = (
     manualAssessmentEnabled ?
     manualPoiConfirmed :
-    poiInteractionActive
+    effectivePoiInteracted
 )
 string dashboardStatusLabel = manualAssessmentEnabled ? "Manual" : "Setup"
 string dashboardStatusValue = (
@@ -2534,47 +2786,71 @@ color dashboardStatusColor = (
 string dashboardStructureValue = (
     manualAssessmentEnabled ?
     (manualStructureConfirmed ? "PASS" : "WAIT") :
-    structureState
+    (
+        lockedEvidenceActive and effectiveStructureAligned ?
+        f_structure_event_text(effectiveStructureEvent) + " · LOCKED" :
+        structureState
+    )
 )
 color dashboardStructureColor = (
     manualAssessmentEnabled ?
     (manualStructureConfirmed ? f_state_color(manualNarrativeState) : neutralColor) :
-    structureStateColor
+    (
+        effectiveStructureAligned ?
+        f_state_color(lockedEvidenceActive ? lockedEvidenceDirection : latestStructureDirection) :
+        structureStateColor
+    )
 )
 bool dashboardStructureActive = (
     manualAssessmentEnabled ?
     manualStructureConfirmed :
-    structureEventActive
+    effectiveStructureAligned
 )
 string dashboardCisdValue = (
     manualAssessmentEnabled ?
     (manualCisdConfirmed ? "PASS" : "WAIT") :
-    cisdState
+    (
+        lockedEvidenceActive and effectiveCisdAligned ?
+        "PASS · LOCKED" :
+        cisdState
+    )
 )
 color dashboardCisdColor = (
     manualAssessmentEnabled ?
     (manualCisdConfirmed ? f_state_color(manualNarrativeState) : neutralColor) :
-    cisdStateColor
+    (
+        effectiveCisdAligned ?
+        f_state_color(lockedEvidenceActive ? lockedEvidenceDirection : latestCisdDirection) :
+        cisdStateColor
+    )
 )
 bool dashboardCisdActive = (
     manualAssessmentEnabled ?
     manualCisdConfirmed :
-    cisdEventActive
+    effectiveCisdAligned
 )
 string dashboardDisplacementValue = (
     manualAssessmentEnabled ?
     (manualDisplacementConfirmed ? "PASS" : "WAIT") :
-    displacementState
+    (
+        lockedEvidenceActive and effectiveDisplacementValid ?
+        "PASS · LOCKED" :
+        displacementState
+    )
 )
 color dashboardDisplacementColor = (
     manualAssessmentEnabled ?
     (manualDisplacementConfirmed ? f_state_color(manualNarrativeState) : neutralColor) :
-    displacementStateColor
+    (
+        effectiveDisplacementValid ?
+        f_state_color(lockedEvidenceActive ? lockedEvidenceDirection : latestDisplacementDirection) :
+        displacementStateColor
+    )
 )
 bool dashboardDisplacementActive = (
     manualAssessmentEnabled ?
     manualDisplacementConfirmed :
-    displacementCandidateActive or displacementEventActive
+    effectiveDisplacementValid or displacementCandidateActive
 )
 
 var int latestPoiAlertStart = na
@@ -2633,31 +2909,35 @@ string alertPayloadState = (
 int alertPayloadScore = manualAssessmentEnabled ? manualScore : setupScore
 string alertPayloadGrade = manualAssessmentEnabled ? manualGrade : finalGrade
 bool alertPayloadBlocked = dashboardStateCode == -1
-bool alertPayloadHtf = manualAssessmentEnabled ? manualHtfConfirmed : aligned
+bool alertPayloadHtf = (
+    manualAssessmentEnabled ?
+    manualHtfConfirmed :
+    effectiveHtfAligned
+)
 bool alertPayloadPoi = (
     manualAssessmentEnabled ?
     manualPoiConfirmed :
-    poiRecentlyInteracted
+    effectivePoiInteracted
 )
 bool alertPayloadLiquidity = (
     manualAssessmentEnabled ?
     manualLiquidityConfirmed :
-    liquidityAligned
+    effectiveLiquidityAligned
 )
 bool alertPayloadStructure = (
     manualAssessmentEnabled ?
     manualStructureConfirmed :
-    structureAligned
+    effectiveStructureAligned and confirmedStructureForEntry
 )
 bool alertPayloadCisd = (
     manualAssessmentEnabled ?
     manualCisdConfirmed :
-    cisdValid and cisdAligned
+    effectiveCisdAligned
 )
 bool alertPayloadDisplacement = (
     manualAssessmentEnabled ?
     manualDisplacementConfirmed :
-    displacementValid
+    effectiveDisplacementValid
 )
 bool alertPayloadEntryFvg = (
     manualAssessmentEnabled ?
@@ -2871,7 +3151,7 @@ if enableAlerts and barstate.isconfirmed
             "\"schema\":\"trading-companion.alert.v1\"," +
             "\"source\":\"tradingview\"," +
             "\"indicator\":\"trading-os\"," +
-            "\"indicatorVersion\":\"0.15.0\"," +
+            "\"indicatorVersion\":\"0.16.2\"," +
             "\"event\":\"" + barAlertEvents + "\"," +
             "\"symbol\":\"" + syminfo.tickerid + "\"," +
             "\"ticker\":\"" + syminfo.ticker + "\"," +
@@ -2910,7 +3190,7 @@ if enableAlerts and barstate.isconfirmed
 alertcondition(
     tradingCompanionAlertPulse,
     title = "Trading Companion Sync",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.15.0\",\"event\":\"TRADING OS UPDATE\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.16.2\",\"event\":\"TRADING OS UPDATE\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 string liquidityState = (
@@ -2928,17 +3208,25 @@ color liquidityStateColor = (
 string dashboardLiquidityValue = (
     manualAssessmentEnabled ?
     (manualLiquidityConfirmed ? "PASS" : "WAIT") :
-    liquidityState
+    (
+        lockedEvidenceActive and effectiveLiquidityAligned ?
+        "PASS · LOCKED" :
+        liquidityState
+    )
 )
 color dashboardLiquidityColor = (
     manualAssessmentEnabled ?
     (manualLiquidityConfirmed ? f_state_color(manualNarrativeState) : neutralColor) :
-    liquidityStateColor
+    (
+        effectiveLiquidityAligned ?
+        f_state_color(lockedEvidenceActive ? lockedEvidenceDirection : combinedState) :
+        liquidityStateColor
+    )
 )
 bool dashboardLiquidityActive = (
     manualAssessmentEnabled ?
     manualLiquidityConfirmed :
-    pdhSweptToday or pdlSweptToday
+    effectiveLiquidityAligned
 )
 
 color backgroundColor = (
@@ -4102,7 +4390,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.15.0",
+        "TRADING OS · HTF v0.16.2",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,

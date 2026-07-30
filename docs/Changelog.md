@@ -2,6 +2,64 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.16.2-alpha - 2026-07-30
+
+### Fixed
+
+- Permanently invalidate locked Entry FVG evidence when aligned HTF,
+  Structure, CISD, or Displacement confirms the opposite direction.
+
+### Validated
+
+- Compiled Pine v0.16.2 successfully in TradingView.
+- Saved the private script as `Trading OS HTF Context v0.16.2` without
+  publishing.
+
+## Pine v0.16.1-alpha - 2026-07-30
+
+### Fixed
+
+- Require current 4H/1H alignment again when price retraces into the locked
+  Entry FVG; an earlier Bias snapshot cannot make a stale setup READY.
+- Release locked setup evidence when the Entry FVG fills.
+
+### Validated
+
+- Compiled Pine v0.16.1 successfully in TradingView.
+- Saved the private script as `Trading OS HTF Context v0.16.1` without
+  publishing.
+
+## Pine v0.16.0-alpha - 2026-07-30
+
+### Added
+
+- Added `Balanced` and `Strict A+` Automatic setup profiles.
+- Added a Balanced continuation path using aligned HTF context, BOS,
+  Displacement, POI or CISD evidence, Entry FVG retracement, and Risk / RR.
+- Added an MSS reversal path that still requires the matching liquidity sweep,
+  HTF POI interaction, CISD, Displacement, Entry FVG retracement, and Risk / RR.
+- Added Entry FVG evidence locking so earlier setup events remain auditable
+  until the zone retraces, fills, or conflicts.
+- Added Balanced target selection from valid forward PDH/PDL or confirmed
+  execution/swing liquidity.
+
+### Changed
+
+- Changed CHoCH to a Developing signal worth partial Structure score; CHoCH
+  alone cannot reach READY.
+- Stopped counting the Entry FVG creation candle as its own retracement.
+- Kept `Strict A+` available for the original all-category confirmation chain.
+
+### Validated
+
+- Compiled Pine v0.16.0 successfully in TradingView.
+- Saved the private script as `Trading OS HTF Context v0.16.0` without
+  publishing.
+- Confirmed no compile or runtime errors on XAUUSD at 5M, 15M, and 1H.
+- Set the visible chart instance to `Automatic` with the `Balanced` profile.
+- Removed the superseded v0.15.0 chart instance, preserved the hidden v0.14.1
+  production-alert instance, and saved the TradingView layout.
+
 ## Pine v0.15.0-alpha - 2026-07-30
 
 ### Added

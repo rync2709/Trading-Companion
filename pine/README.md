@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.15.0-alpha
+Version: v0.16.2-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -22,6 +22,8 @@ The Pine track automates selected Trading OS context checks without replacing tr
 Defaults:
 
 - Dashboard assessment mode: Manual
+- Automatic setup profile: Balanced
+- Balanced minimum evidence score before Risk / RR: 65
 - Manual Narrative: Neutral
 - Manual checklist: all eight items unchecked
 - Primary HTF: 4H
@@ -338,9 +340,20 @@ directional Narrative, and Risk / RR are required for `READY`. The explicit
 `Block setup / NO TRADE` switch overrides the checklist and returns a score of
 zero.
 
-Automatic mode preserves the existing score-v1 mapping and remains available
-for side-by-side comparison. In automatic mode, a final Grade appears only
-after the setup reaches READY.
+Automatic mode keeps the score-v1 category weights and offers two profiles:
+
+- `Balanced`: requires liquidity-backed MSS for Reversal, or BOS for
+  Continuation. Continuation does not require a new PDH/PDL sweep on every
+  setup, but it still requires Displacement, POI or CISD evidence, Entry FVG
+  retracement, minimum evidence score, and Risk / RR.
+- `Strict A+`: preserves the all-category automated confirmation chain.
+
+CHoCH is a Developing event with partial Structure score and cannot complete
+either profile. Evidence present when an Entry FVG is created remains locked
+to that zone until it fills or conflicts, allowing a later retracement to
+complete the same setup.
+
+In automatic mode, a final Grade appears only after the setup reaches READY.
 
 Chart drawings, automatic event calculations, Data Window outputs, and Alerts
 remain unchanged. Manual Dashboard selections do not send orders or create a
@@ -520,6 +533,28 @@ Compile status:
 - Confirmed no compile or runtime errors on XAUUSD at 5M, 15M, and 1H.
 - Removed the duplicate development instance, kept v0.15.0 visible, hid the
   old v0.14.1 chart instance, and preserved its running production alert.
+- Pine v0.16.0 added Balanced and Strict A+ profiles, separate MSS Reversal
+  and BOS Continuation completion paths, partial CHoCH scoring, and Entry FVG
+  evidence locking.
+- Pine v0.16.0 compiled successfully and was saved privately as
+  `Trading OS HTF Context v0.16.0` without publishing.
+- Confirmed no compile or runtime errors on XAUUSD at 5M, 15M, and 1H.
+- Kept v0.16.0 visible in Automatic Balanced mode, removed the superseded
+  v0.15.0 chart instance, and preserved the hidden v0.14.1 production-alert
+  instance.
+- Pine v0.16.1 requires current HTF alignment at Entry FVG retracement and
+  releases locked evidence when the Entry FVG fills.
+- Pine v0.16.1 compiled successfully and was saved privately as
+  `Trading OS HTF Context v0.16.1` without publishing.
+- Kept v0.16.1 visible in Automatic Balanced mode, removed the v0.16.0 chart
+  instance, and preserved the hidden v0.14.1 production-alert instance.
+- Pine v0.16.2 permanently invalidates the locked Entry FVG evidence when
+  aligned HTF, Structure, CISD, or Displacement confirms the opposite
+  direction.
+- Pine v0.16.2 compiled successfully and was saved privately as
+  `Trading OS HTF Context v0.16.2` without publishing.
+- Kept v0.16.2 visible in Automatic Balanced mode, removed the v0.16.1 chart
+  instance, and preserved the hidden v0.14.1 production-alert instance.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.
@@ -564,15 +599,19 @@ Compile status:
 - No mitigation block or liquidity POI.
 - Liquidity currently supports PDH and PDL only.
 - No Asia High/Low, Equal High/Low, or Internal/External Liquidity.
-- Structure is a baseline without automated setup type, POI proximity, or a complete setup window.
+- Structure now distinguishes MSS Reversal, BOS Continuation, and CHoCH Watch
+  paths for automated completion, but setup classification remains a
+  mechanical baseline that requires manual validation.
 - Swing Structure and chart Order Blocks are visual context only and do not
   enter Dashboard scoring or Alerts.
-- CISD and Displacement remain separate conservative baselines without a complete setup-window state machine.
+- Entry FVG evidence locking preserves the qualifying setup snapshot, but it
+  remains a latest-zone baseline rather than a multi-setup state machine.
 - Displacement has not been calibrated against a manual sample.
 - Entry FVG tracks the latest confirmed zone only and has not been calibrated against a manual sample.
 - No Entry FVG invalidation beyond Filled status or complete setup-window validation.
-- Entry, Stop, and Target use one mechanical baseline each and have not been
-  calibrated against manual plans.
+- Entry and Stop use one mechanical baseline each. Balanced Target uses the
+  nearest valid forward PDH/PDL or confirmed execution/swing liquidity; Strict
+  keeps PDH/PDL. Neither path has been calibrated against manual plans.
 - The final Grade covers automated evidence and planned RR only; it does not
   include emotion, news, spread, slippage, or position-size checks.
 - No order execution.

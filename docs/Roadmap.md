@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.13.0 / Pine v0.15.0-alpha
+Version: v0.13.0 / Pine v0.16.2-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -762,6 +762,22 @@ First milestone:
 - [x] Compile Pine v0.15.0 on 5M, 15M, and 1H without runtime errors.
 - [x] Save Pine v0.15.0 privately without publishing and preserve the existing
   v0.14.1 production alert.
+- [x] Add Balanced and Strict A+ Automatic setup profiles.
+- [x] Require MSS for Reversal, BOS for Continuation, and keep CHoCH as
+  Developing only.
+- [x] Preserve qualifying evidence with its Entry FVG until retracement,
+  fill, or conflict.
+- [x] Compile Pine v0.16.0 on 5M, 15M, and 1H without runtime errors.
+- [x] Save Pine v0.16.0 privately, use Automatic Balanced on the visible chart,
+  and preserve the existing v0.14.1 production alert.
+- [x] Require current HTF alignment at Entry FVG retracement and release locked
+  evidence after fill in Pine v0.16.1.
+- [x] Compile and save Pine v0.16.1 privately without migrating the production
+  alert.
+- [x] Permanently invalidate locked evidence when aligned HTF, Structure,
+  CISD, or Displacement confirms the opposite direction in Pine v0.16.2.
+- [x] Compile and save Pine v0.16.2 privately without migrating the production
+  alert.
 - [ ] Compare Order Block source, mitigation, and invalidation against manual
   4H/1H markup.
 - [ ] Compare Breaker activation, mitigation, and invalidation against manual
@@ -854,4 +870,7 @@ Expected outputs:
 | Pine v0.14.0-alpha | Versioned Trading Companion Alert JSON payload |
 | Pine v0.14.1-alpha | Compact fallback trigger and running private TradingView alert |
 | Pine v0.15.0-alpha | Internal/Swing Structure and multi-zone chart Order Blocks |
+| Pine v0.16.0-alpha | Balanced/Strict setup profiles and Entry FVG evidence locking |
+| Pine v0.16.1-alpha | Current-HTF and filled-FVG evidence-lock safeguards |
+| Pine v0.16.2-alpha | Opposite-direction evidence-lock invalidation |
 | v1.0.0 | Trading OS MVP |

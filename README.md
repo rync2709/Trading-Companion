@@ -12,8 +12,9 @@ Trading Companion now combines the guided decision workflow, Trade Journal, perf
 - Phase: Validation Sprint after Phase 11
 - Validation target: 20 real-use outcomes with at least 80% R and review coverage
 - Version: v0.13.0
-- Pine indicator: v0.15.0-alpha - private Internal/Swing Structure and chart
-  Order Block visual layer; the existing v0.14.1 production alert remains active
+- Pine indicator: v0.16.2-alpha - private Balanced/Strict setup engine with
+  Entry FVG evidence locking; the existing v0.14.1 production alert remains
+  active
 - Live app: https://rync2709.github.io/Trading-Companion/
 
 ## Phase 1 Milestone
@@ -164,7 +165,8 @@ The first Phase 10 milestone includes:
 - Clear boundary: no live prices, indicators, or order placement
 
 The Worker is deployed and Trading Companion is connected to its production
-Inbox. Pine v0.15.0 is saved privately and active on the chart. The existing
+Inbox. Pine v0.16.2 is saved privately and active on the chart in Automatic
+Balanced mode. The existing
 v0.14.1 `Any alert() function call` alert remains active in TradingView with
 app and protected Webhook notifications, so the visual upgrade does not
 interrupt production delivery. A live TradingView price alert successfully
