@@ -1,7 +1,7 @@
 # TradingView Alert Contract
 
 Version: v1
-Status: Production receiver active; live TradingView alert pending
+Status: Production receiver and TradingView alert active; Webhook pending 2FA
 
 ## Purpose
 
@@ -17,7 +17,7 @@ synchronize the same payload from a private Webhook Worker.
   "schema": "trading-companion.alert.v1",
   "source": "tradingview",
   "indicator": "trading-os",
-  "indicatorVersion": "0.14.0",
+  "indicatorVersion": "0.14.1",
   "event": "ENTRY FVG RETRACE BULL",
   "symbol": "FOREXCOM:XAUUSD",
   "ticker": "XAUUSD",
@@ -80,9 +80,19 @@ synchronize the same payload from a private Webhook Worker.
    then reflected locally.
 
 The production Worker and Trading Companion Sync path passed this workflow with
-a contract-valid synthetic Alert on 2026-07-30. Realtime delivery from
-TradingView remains pending until the chart exposes and runs
-`Any alert() function call`.
+a contract-valid synthetic Alert on 2026-07-30. Pine v0.14.1 compiled and a
+running `Any alert() function call` alert was created the same day. Realtime
+Webhook delivery remains pending until 2FA is enabled on the TradingView
+account and the protected Worker URL is added to that alert.
+
+## Compact Fallback
+
+Pine v0.14.1 also exposes a named `Trading Companion Sync` condition. Its
+constant JSON message includes `snapshotCode`, one integer containing mode,
+Narrative, State, Score, Grade, blocked state, and all eight checklist values.
+The shared contract decoder reconstructs the normal payload before validation.
+The dynamic `alert()` payload remains the preferred condition because it also
+includes the detailed event list and available Risk Plan.
 
 ## Worker API
 
@@ -114,11 +124,12 @@ Authorization: Bearer <SYNC_API_TOKEN>
 - GitHub Pages cannot receive TradingView webhooks.
 - The Worker, production D1, Secrets, allowed origin, and Companion connection
   are active.
-- Automatic TradingView delivery is not active until a running chart alert is
-  configured and verified.
+- The running chart alert is active with TradingView app notification.
+- Automatic Worker delivery is not active until TradingView 2FA is enabled and
+  the protected Webhook URL is attached and verified.
 - Manual JSON transfer remains available and is stored in browser localStorage.
-- Alerts still require a user-created TradingView alert using
-  `Any alert() function call`.
+- Alerts use the private user-created
+  `Any alert() function call` TradingView alert.
 - No payload places an order or bypasses New Trade risk validation.
 - Review Entry currently supports XAUUSD, BTCUSD, ETHUSD, NAS100, and EURUSD.
   Other symbols remain in the Inbox for WAIT or SKIP instead of being mapped

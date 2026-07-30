@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.13.0 / Pine v0.14.0-alpha
+Version: v0.13.0 / Pine v0.14.1-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -457,7 +457,8 @@ Important rule:
 
 Goal: connect Trading OS with TradingView in ways that are realistic for a web app.
 
-Status: Production Worker connected; live TradingView alert pending.
+Status: Production Worker connected; TradingView alert active, Webhook pending
+2FA.
 
 First milestone:
 
@@ -483,10 +484,10 @@ First milestone:
 - [x] Connect Trading Companion to the production Worker.
 - [x] Validate production Webhook receipt, browser Sync, remote WAIT, and
   deletion tombstones with a synthetic contract-valid Alert.
-- [ ] Create a running TradingView alert using
-  `Any alert() function call` and validate realtime delivery. The current
-  TradingView condition list did not expose this option during the production
-  connection pass.
+- [x] Expose `Any alert() function call`, compile Pine v0.14.1, save it
+  privately, and create a running TradingView alert.
+- [ ] Enable TradingView 2FA, attach the protected Worker URL to the running
+  alert, and validate realtime delivery.
 - [ ] Validate live cross-device synchronization and retention in production.
 - [ ] Validate exported CSV and PDF reports against a larger real-trade sample.
 
@@ -716,10 +717,11 @@ First milestone:
 - [x] Restrict Alert evaluation to confirmed chart candles and state
   transitions.
 - [x] Compile, load, smoke-test, and save Pine v0.10.0 privately in TradingView.
-- [ ] Create a temporary running TradingView alert and validate realtime
-  notification delivery. The production receiver and Companion Sync path are
-  validated; TradingView did not expose `Any alert() function call` in the
-  current condition list.
+- [x] Create a running TradingView alert using
+  `Any alert() function call` with app notification enabled.
+- [ ] Enable TradingView 2FA, add the Webhook URL, and validate delivery from
+  a realtime confirmed candle. The production receiver and Companion Sync
+  path are already validated.
 - [x] Detect the latest 4H and 1H Order Block from a qualified HTF departure.
 - [x] Track Fresh, Mitigated, and Invalid Order Block states.
 - [x] Draw aligned 4H and 1H Order Blocks at actual source time and price.
@@ -749,6 +751,10 @@ First milestone:
 - [x] Include Manual or Automatic Narrative, State, Score, Grade, Checklist,
   Risk Plan, Symbol, Timeframe, and event time.
 - [x] Compile, smoke-test, and save Pine v0.14.0 privately in TradingView.
+- [x] Add the named `Trading Companion Sync` fallback condition and compact
+  Dashboard snapshot payload.
+- [x] Compile and save Pine v0.14.1 privately without publishing.
+- [x] Confirm `Any alert() function call` appears and create the running alert.
 - [ ] Compare Order Block source, mitigation, and invalidation against manual
   4H/1H markup.
 - [ ] Compare Breaker activation, mitigation, and invalidation against manual
@@ -839,4 +845,5 @@ Expected outputs:
 | Pine v0.12.0-alpha | Completed-close 4H/1H Breaker chart context |
 | Pine v0.13.0-alpha | Manual Narrative, weighted checklist Score, Grade, and Setup Status |
 | Pine v0.14.0-alpha | Versioned Trading Companion Alert JSON payload |
+| Pine v0.14.1-alpha | Compact fallback trigger and running private TradingView alert |
 | v1.0.0 | Trading OS MVP |

@@ -206,7 +206,7 @@ test("health and CORS preflight do not expose secrets", async () => {
     { store }
   ));
   assert.equal(health.status, 200);
-  assert.equal(health.body.version, "0.1.0");
+  assert.equal(health.body.version, "0.1.1");
   assert.equal(health.body.ready, true);
   assert.equal(JSON.stringify(health.body).includes("token"), false);
 

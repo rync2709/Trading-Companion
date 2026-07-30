@@ -67,6 +67,48 @@ export function alertString(value, maxLength) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
+export function decodeAlertSnapshotCode(value) {
+  const code = Number(value);
+  if (!Number.isSafeInteger(code) || code < 0 || code > 33554431) {
+    throw new Error("Trading Companion snapshot code ไม่ถูกต้อง");
+  }
+
+  const modeCode = code % 2;
+  const narrativeCode = Math.floor(code / 2) % 4;
+  const stateCode = Math.floor(code / 8) % 8;
+  const score = Math.floor(code / 64) % 128;
+  const gradeCode = Math.floor(code / 8192) % 8;
+  const blocked = Math.floor(code / 65536) % 2 === 1;
+  const checklistCode = Math.floor(code / 131072) % 256;
+  const narratives = ["neutral", "bullish", "bearish"];
+  const states = ["no-trade", "waiting", "developing", "risk-review", "ready"];
+  const grades = ["--", "D", "C", "B", "A", "A+", "NO TRADE"];
+
+  if (
+    !narratives[narrativeCode] ||
+    !states[stateCode] ||
+    !grades[gradeCode] ||
+    score > 100
+  ) {
+    throw new Error("Trading Companion snapshot code ใช้ค่าที่ไม่รองรับ");
+  }
+
+  const checklist = {};
+  ALERT_CHECKLIST.forEach(function ([key], index) {
+    checklist[key] = (checklistCode & (1 << index)) !== 0;
+  });
+
+  return {
+    mode: modeCode === 1 ? "manual" : "automatic",
+    narrative: narratives[narrativeCode],
+    state: states[stateCode],
+    score,
+    grade: grades[gradeCode],
+    blocked,
+    checklist
+  };
+}
+
 export function parseIndicatorAlert(value) {
   let source = value;
   if (typeof value === "string") {
@@ -84,6 +126,12 @@ export function parseIndicatorAlert(value) {
   }
   if (source.source !== "tradingview" || source.indicator !== "trading-os") {
     throw new Error("ข้อมูลนี้ไม่ได้มาจาก Trading OS บน TradingView");
+  }
+  if (source.snapshotCode !== undefined && source.snapshotCode !== null) {
+    source = {
+      ...source,
+      ...decodeAlertSnapshotCode(source.snapshotCode)
+    };
   }
 
   const mode = alertString(source.mode, 20).toLowerCase();
@@ -128,7 +176,13 @@ export function parseIndicatorAlert(value) {
     }
   }
 
-  const time = Number(source.time);
+  let time = Number(source.time);
+  if (
+    (!Number.isSafeInteger(time) || time <= 0) &&
+    typeof source.time === "string"
+  ) {
+    time = Date.parse(source.time);
+  }
   const occurredDate = new Date(time);
   if (
     !Number.isSafeInteger(time) ||

@@ -568,7 +568,7 @@ Current limitation:
 
 ## Module 11 - Alert System
 
-Implementation status: `Pine v0.14.0-alpha - confirmed-bar Alert System with Trading Companion JSON contract`
+Implementation status: `Pine v0.14.1-alpha - confirmed-bar Alert System with Trading Companion JSON contract`
 
 Input:
 
@@ -594,6 +594,9 @@ Process:
   mode, Narrative, Setup State, Score, Grade, blocked state, eight checklist
   values, available risk plan, and close price.
 - Call `alert()` once per confirmed bar at most.
+- Expose a named `Trading Companion Sync` fallback condition with one compact
+  snapshot code for TradingView clients that do not register the dynamic
+  `alert()` option.
 
 Output:
 
@@ -601,6 +604,8 @@ Output:
 - alert_event_list: human-readable aggregated event description
 - alert_message: valid `trading-companion.alert.v1` JSON
 - alert_frequency: once per bar close
+- fallback_snapshot: one integer encoding mode, Narrative, State, Score, Grade,
+  blocked state, and all eight checklist values
 
 Current limitation:
 
@@ -611,9 +616,10 @@ Current limitation:
   notifications.
 - Trading Companion supports validated manual JSON import and an optional
   authenticated remote Inbox.
-- The Cloudflare Worker and D1 source are deployment-ready but automatic
-  delivery remains inactive until the Worker, Secrets, database, and
-  TradingView alert are configured in production.
+- The Cloudflare Worker, D1, Secrets, Companion Sync, and running TradingView
+  alert are configured in production.
+- TradingView Webhook delivery remains inactive until 2FA is enabled and the
+  protected Worker URL is added to the running alert.
 
 ## Current Checklist Mapping
 

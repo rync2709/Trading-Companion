@@ -2,6 +2,43 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.14.1-alpha / Worker v0.1.1 - 2026-07-30
+
+### Added
+
+- Added a named `Trading Companion Sync` fallback condition while keeping the
+  full dynamic `alert()` JSON path.
+- Added one compact Pine snapshot code containing Manual/Automatic mode,
+  Narrative, Setup State, Score, Grade, blocked state, and all eight checklist
+  values.
+- Added shared snapshot decoding and ISO TradingView time parsing in the
+  Worker contract.
+- Added three contract tests for compact snapshot decoding and validation.
+
+### Kept
+
+- Kept the compact Dashboard at `Small` size.
+- Kept all chart drawings, analysis rules, and dynamic Alert event gates
+  unchanged.
+- Kept the Pine script private and unpublished.
+
+### Validated
+
+- Passed all 12 Worker and contract tests.
+- Deployed Worker v0.1.1 and confirmed a compact production snapshot decoded
+  to Manual mode and Score 90 before deleting the smoke-test record.
+- Kept Pine output usage within TradingView's 64-output limit.
+- Compiled Pine v0.14.1 successfully in TradingView.
+- Saved the private script as `Trading OS HTF Context v0.14.1`.
+- Confirmed `Any alert() function call` appears and created a running XAUUSD
+  15M alert with app notifications enabled.
+
+### Pending Webhook
+
+- TradingView Webhook remains disabled until 2FA is enabled on the account.
+- After 2FA, add the protected Worker URL to the existing alert and validate a
+  realtime confirmed-candle delivery.
+
 ## v0.13.0 - 2026-07-30
 
 ### Added
@@ -47,12 +84,12 @@ All notable changes to Trading OS will be documented in this file.
 - Removed the production smoke-test Alert after validation so the real Inbox
   remains empty.
 
-### Pending Live Delivery
+### Live Delivery Follow-up
 
-- Create a running TradingView alert using `Any alert() function call`.
-- Validate delivery from a realtime confirmed TradingView candle. The current
-  TradingView condition list did not expose the dynamic alert option during
-  this deployment pass.
+- Pine v0.14.1 later exposed and started the running
+  `Any alert() function call` alert.
+- Realtime Worker delivery still requires TradingView 2FA before the protected
+  Webhook URL can be attached.
 - Validate cross-device synchronization with a second browser or device.
 
 ## v0.12.0 - 2026-07-28

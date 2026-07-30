@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.14.0-alpha
+Version: v0.14.1-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -338,7 +338,11 @@ all eight checklist values, available Entry/Stop/Target/RR, and close price.
 Manual mode exports the selected Manual Assessment; Automatic mode exports the
 confirmed indicator state.
 
-The Pine script exposes one `alert()` call with once-per-bar-close frequency.
+The Pine script exposes one `alert()` call with once-per-bar-close frequency
+and one named `Trading Companion Sync` fallback condition. The dynamic
+`alert()` condition remains preferred because it includes the full event list
+and available Risk Plan. The fallback sends a compact Dashboard snapshot that
+the Worker decodes into the same contract.
 It does not create or start a TradingView alert automatically. To receive
 notifications:
 
@@ -469,6 +473,15 @@ Compile status:
   saved the layout.
 - Saved the private TradingView script as
   `Trading OS HTF Context v0.14.0` without publishing.
+- Pine v0.14.1 added the named `Trading Companion Sync` fallback condition and
+  compact Dashboard snapshot without changing chart drawings or Dashboard
+  size.
+- Pine v0.14.1 compiled successfully, was saved privately as
+  `Trading OS HTF Context v0.14.1`, and was not published.
+- Confirmed `Any alert() function call` appears in the TradingView condition
+  list and created a running XAUUSD 15M alert with app notifications enabled.
+- Webhook delivery remains pending because TradingView requires account 2FA
+  before the Webhook URL option can be enabled.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.
@@ -527,8 +540,8 @@ Compile status:
   Indicator Alert Inbox.
 - The production Worker and Trading Companion Sync path are validated with a
   contract-valid synthetic payload, including WAIT and delete synchronization.
-- Realtime TradingView delivery remains pending because the current alert
-  condition list did not expose `Any alert() function call` during the
-  production connection pass.
+- A running TradingView alert is active. Realtime Worker delivery remains
+  pending until TradingView 2FA is enabled and the protected Webhook URL is
+  attached to the alert.
 - Premium/discount and displacement are not yet included in HTF confidence.
 - Compilation and rendering are confirmed, but manual comparison and heuristic calibration are still required before release readiness.

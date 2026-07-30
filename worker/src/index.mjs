@@ -5,7 +5,7 @@ import {
   parseIndicatorAlert
 } from "../../shared/alert-contract.mjs";
 
-const WORKER_VERSION = "0.1.0";
+const WORKER_VERSION = "0.1.1";
 const DEFAULT_RETENTION_DAYS = 30;
 const MAX_RETENTION_DAYS = 365;
 const MAX_BODY_BYTES = 32768;
