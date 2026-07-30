@@ -1,4 +1,4 @@
-const CACHE = 'trading-companion-v0.12.0';
+const CACHE = 'trading-companion-v0.13.0';
 const ASSETS = [
   './',
   './index.html',
@@ -36,6 +36,7 @@ const ASSETS = [
   './css/tools.css?v=0.8.1',
   './css/integration.css?v=0.10.0',
   './css/integration.css?v=0.12.0',
+  './css/integration.css?v=0.13.0',
   './css/report.css?v=0.10.0',
   './css/playbooks.css?v=0.11.0',
   './css/validation.css?v=0.11.1',
@@ -49,6 +50,7 @@ const ASSETS = [
   './js/storage.js?v=0.11.0',
   './js/storage.js?v=0.11.1',
   './js/storage.js?v=0.12.0',
+  './js/storage.js?v=0.13.0',
   './js/media.js',
   './js/logic.js',
   './js/logic.js?v=0.9.0',
@@ -64,6 +66,9 @@ const ASSETS = [
   './js/tools.js?v=0.8.1',
   './js/integration.js?v=0.10.0',
   './js/integration.js?v=0.12.0',
+  './js/integration.js?v=0.13.0',
+  './js/integration-api.mjs',
+  './shared/alert-contract.mjs',
   './js/report.js?v=0.10.0',
   './js/playbooks.js?v=0.11.0',
   './js/validation.js?v=0.11.1'

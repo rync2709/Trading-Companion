@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.12.0 / Pine v0.14.0-alpha
+Version: v0.13.0 / Pine v0.14.0-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -474,8 +474,13 @@ First milestone:
 - [x] Add WAIT, SKIP, Review Entry, and delete actions.
 - [x] Map compatible Indicator evidence into a New Trade Draft.
 - [x] Recalculate the detailed web score before allowing ENTRY.
-- [ ] Add an authenticated Webhook receiver for automatic delivery.
-- [ ] Define cross-device Inbox synchronization and retention.
+- [x] Add a deployment-ready authenticated Webhook receiver and D1 Inbox source.
+- [x] Keep TradingView Webhook and browser Sync authentication separate.
+- [x] Add browser connection settings, manual Sync, and optional 60-second Sync.
+- [x] Define 30-day retention and deletion tombstones for cross-device consistency.
+- [ ] Deploy the Worker, configure D1 and production Secrets, and connect a
+  TradingView alert.
+- [ ] Validate live cross-device synchronization and retention in production.
 - [ ] Validate exported CSV and PDF reports against a larger real-trade sample.
 
 Supported scope:
@@ -483,14 +488,18 @@ Supported scope:
 - Import screenshots
 - Import validated Trading OS Alert JSON
 - Triage Indicator Alerts locally
+- Receive and synchronize Alerts through an optional private Worker
 - Open chart links
 - Attach trade ideas
 - Export journal as PDF
 - Export journal as CSV
 
-Constraint:
+Constraints:
 
 - Direct TradingView data access has platform limitations. Integration should be designed around supported workflows.
+- GitHub Pages remains a static frontend and cannot receive the Webhook itself.
+- Automatic delivery stays disabled until the separate Worker is deployed with
+  production Secrets and an approved origin.
 
 ## Decision Engine
 
@@ -794,6 +803,7 @@ Expected outputs:
 | v0.11.0 | Personal Playbook Library |
 | v0.11.1 | Real-use Validation Center and v1.0 readiness |
 | v0.12.0 | Local Indicator Alert Inbox and TradingView JSON bridge |
+| v0.13.0 | Authenticated webhook Worker and cross-device Inbox sync source |
 | Pine v0.1.0-alpha | Confirmed 4H/1H HTF Bias baseline |
 | Pine v0.2.0-alpha | Bias-aligned 4H/1H FVG candidate baseline |
 | Pine v0.2.1-alpha | TradingView compile compatibility and multi-timeframe render smoke test |

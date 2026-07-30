@@ -56,6 +56,14 @@
   text-transform: uppercase;
 }
 
+.integration-panel-header > span[data-state="saved"] {
+  color: var(--green);
+}
+
+.integration-panel-header > span[data-state="error"] {
+  color: var(--red);
+}
+
 .integration-panel-body {
   padding: 18px;
 }
@@ -104,6 +112,52 @@
 .integration-field input:focus,
 .integration-field select:focus {
   border-color: var(--cyan);
+}
+
+.sync-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.sync-toggle {
+  width: fit-content;
+  margin-top: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.sync-toggle input {
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  accent-color: var(--green);
+  flex: 0 0 auto;
+}
+
+.sync-toggle span,
+.sync-toggle strong,
+.sync-toggle small {
+  display: block;
+}
+
+.sync-toggle strong {
+  margin-bottom: 2px;
+  font-size: 12px;
+}
+
+.sync-toggle small,
+.integration-status small {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.integration-status small {
+  display: block;
+  margin-top: 3px;
 }
 
 .chart-url-row {
@@ -329,6 +383,11 @@
   font-weight: 750;
 }
 
+.indicator-alert-source {
+  color: var(--cyan);
+  font-weight: 750;
+}
+
 .indicator-alert[data-state="ready"] .indicator-alert-result {
   color: var(--green);
 }
@@ -462,6 +521,10 @@
   }
 
   .integration-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .sync-fields {
     grid-template-columns: 1fr;
   }
 

@@ -1,3 +1,16 @@
+import {
+  ALERT_EXAMPLE,
+  ALERT_NARRATIVES,
+  ALERT_SCHEMA,
+  optionalNumber,
+  parseIndicatorAlert
+} from "../shared/alert-contract.mjs";
+import {
+  createInboxClient,
+  normalizeBaseUrl,
+  validateSyncToken
+} from "./integration-api.mjs";
+
 (function () {
   "use strict";
 
@@ -13,168 +26,12 @@
     NAS100: "OANDA:NAS100USD",
     EURUSD: "OANDA:EURUSD"
   };
-  const ALERT_SCHEMA = "trading-companion.alert.v1";
-  const ALERT_STATES = ["no-trade", "waiting", "developing", "risk-review", "ready"];
-  const ALERT_NARRATIVES = ["bullish", "bearish", "neutral"];
-  const ALERT_MODES = ["manual", "automatic"];
-  const ALERT_GRADES = ["A+", "A", "B", "C", "D", "--", "NO TRADE"];
-  const ALERT_CHECKLIST = [
-    ["htf", 20],
-    ["poi", 15],
-    ["liquidity", 15],
-    ["structure", 15],
-    ["cisd", 15],
-    ["displacement", 10],
-    ["entryFvg", 5],
-    ["risk", 5]
-  ];
-  const ALERT_EXAMPLE = {
-    schema: ALERT_SCHEMA,
-    source: "tradingview",
-    indicator: "trading-os",
-    indicatorVersion: "0.14.0",
-    event: "ENTRY FVG RETRACE BULL",
-    symbol: "FOREXCOM:XAUUSD",
-    ticker: "XAUUSD",
-    timeframe: "15",
-    time: 1785240000000,
-    mode: "manual",
-    narrative: "bullish",
-    state: "developing",
-    score: 90,
-    grade: "A+",
-    blocked: false,
-    checklist: {
-      htf: true,
-      poi: true,
-      liquidity: true,
-      structure: true,
-      cisd: true,
-      displacement: true,
-      entryFvg: false,
-      risk: false
-    },
-    risk: {
-      entry: null,
-      stop: null,
-      target: null,
-      rr: null
-    },
-    close: 4025.5
-  };
-
   function getTradeDate(trade) {
     const value = trade && trade.lifecycle && trade.lifecycle.openedAt ||
       trade && trade.savedAt ||
       trade && trade.createdAt;
     const timestamp = Date.parse(value || "");
     return Number.isFinite(timestamp) ? timestamp : null;
-  }
-
-  function optionalNumber(value) {
-    if (value === null || value === undefined || value === "") return null;
-    const number = Number(value);
-    return Number.isFinite(number) ? number : null;
-  }
-
-  function alertString(value, maxLength) {
-    return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
-  }
-
-  function parseIndicatorAlert(value) {
-    let source = value;
-    if (typeof value === "string") {
-      try {
-        source = JSON.parse(value);
-      } catch (error) {
-        throw new Error("JSON ไม่ถูกต้อง ตรวจว่าคัดลอกข้อความ Alert มาครบ");
-      }
-    }
-    if (!source || typeof source !== "object" || Array.isArray(source)) {
-      throw new Error("ข้อมูล Alert ต้องเป็น JSON object");
-    }
-    if (source.schema !== ALERT_SCHEMA) {
-      throw new Error(`รองรับเฉพาะ schema ${ALERT_SCHEMA}`);
-    }
-    if (source.source !== "tradingview" || source.indicator !== "trading-os") {
-      throw new Error("ข้อมูลนี้ไม่ได้มาจาก Trading OS บน TradingView");
-    }
-
-    const mode = alertString(source.mode, 20).toLowerCase();
-    const narrative = alertString(source.narrative, 20).toLowerCase();
-    const state = alertString(source.state, 30).toLowerCase();
-    const grade = alertString(source.grade, 12).toUpperCase();
-    const score = Number(source.score);
-    const symbol = alertString(source.symbol, 80).toUpperCase();
-    const ticker = alertString(source.ticker, 40).toUpperCase();
-    const timeframe = alertString(source.timeframe, 12);
-    const checklistSource = source.checklist && typeof source.checklist === "object" ?
-      source.checklist : {};
-    const riskSource = source.risk && typeof source.risk === "object" ?
-      source.risk : {};
-    const checklist = {};
-
-    if (!ALERT_MODES.includes(mode)) throw new Error("Assessment mode ไม่ถูกต้อง");
-    if (!ALERT_NARRATIVES.includes(narrative)) throw new Error("Narrative ไม่ถูกต้อง");
-    if (!ALERT_STATES.includes(state)) throw new Error("Setup State ไม่ถูกต้อง");
-    if (!ALERT_GRADES.includes(grade)) throw new Error("Grade ไม่ถูกต้อง");
-    if (!Number.isFinite(score) || score < 0 || score > 100) {
-      throw new Error("Score ต้องอยู่ระหว่าง 0 ถึง 100");
-    }
-    if (!symbol || !ticker || !timeframe) {
-      throw new Error("Alert ต้องมี Symbol, Ticker และ Timeframe");
-    }
-
-    ALERT_CHECKLIST.forEach(function ([key]) {
-      if (typeof checklistSource[key] !== "boolean") {
-        throw new Error(`Checklist ${key} ต้องเป็น true หรือ false`);
-      }
-      checklist[key] = checklistSource[key];
-    });
-
-    const blocked = source.blocked === true;
-    const normalizedScore = Math.round(score);
-    if (mode === "manual") {
-      const expectedScore = blocked ? 0 : ALERT_CHECKLIST.reduce(function (total, item) {
-        return total + (checklist[item[0]] ? item[1] : 0);
-      }, 0);
-      if (expectedScore !== normalizedScore) {
-        throw new Error(`Manual Score ไม่ตรงกับ Checklist: ควรเป็น ${expectedScore}`);
-      }
-    }
-
-    const time = Number(source.time);
-    if (!Number.isFinite(time) || time <= 0) {
-      throw new Error("Alert time ไม่ถูกต้อง");
-    }
-    const occurredAt = new Date(time).toISOString();
-    const normalized = {
-      schema: ALERT_SCHEMA,
-      source: "tradingview",
-      indicator: "trading-os",
-      indicatorVersion: alertString(source.indicatorVersion, 30),
-      event: alertString(source.event, 400) || "TRADING OS SNAPSHOT",
-      symbol,
-      ticker,
-      timeframe,
-      time,
-      occurredAt,
-      mode,
-      narrative,
-      state,
-      score: normalizedScore,
-      grade,
-      blocked,
-      checklist,
-      risk: {
-        entry: optionalNumber(riskSource.entry),
-        stop: optionalNumber(riskSource.stop),
-        target: optionalNumber(riskSource.target),
-        rr: optionalNumber(riskSource.rr)
-      },
-      close: optionalNumber(source.close)
-    };
-    return normalized;
   }
 
   function instrumentFromAlert(alert) {
@@ -462,8 +319,20 @@
       alertCount: document.getElementById("tvAlertCount"),
       alertNew: document.getElementById("tvAlertNew"),
       alertList: document.getElementById("tvAlertList"),
-      alertEmpty: document.getElementById("tvAlertEmpty")
+      alertEmpty: document.getElementById("tvAlertEmpty"),
+      syncEndpoint: document.getElementById("tvSyncEndpoint"),
+      syncToken: document.getElementById("tvSyncToken"),
+      autoSync: document.getElementById("tvAutoSync"),
+      saveSync: document.getElementById("tvSaveSync"),
+      testSync: document.getElementById("tvTestSync"),
+      runSync: document.getElementById("tvRunSync"),
+      clearSync: document.getElementById("tvClearSync"),
+      syncState: document.getElementById("tvSyncState"),
+      syncBadge: document.getElementById("tvSyncBadge"),
+      lastSync: document.getElementById("tvLastSync")
     };
+    let syncBusy = false;
+    let autoSyncTimer = null;
 
     function chartUrl() {
       return buildTradingViewUrl(elements.symbol.value, elements.timeframe.value);
@@ -498,6 +367,112 @@
       elements.empty.hidden = summary.total !== 0;
     }
 
+    function formatSyncTime(value) {
+      const date = new Date(value || "");
+      if (Number.isNaN(date.getTime())) return "--";
+      return new Intl.DateTimeFormat("th-TH", {
+        dateStyle: "medium",
+        timeStyle: "short",
+        timeZone: "Asia/Bangkok"
+      }).format(date);
+    }
+
+    function setSyncStatus(message, state) {
+      elements.syncState.textContent = message;
+      elements.syncState.dataset.state = state || "idle";
+      elements.syncBadge.textContent = state === "saved" ? "Connected" :
+        state === "error" ? "Connection error" : "Not connected";
+      elements.syncBadge.dataset.state = state || "idle";
+    }
+
+    function setSyncBusy(value) {
+      syncBusy = value;
+      [
+        elements.saveSync,
+        elements.testSync,
+        elements.runSync,
+        elements.clearSync
+      ].forEach(function (button) {
+        button.disabled = value;
+      });
+    }
+
+    function settingsFromInputs() {
+      return {
+        baseUrl: normalizeBaseUrl(elements.syncEndpoint.value),
+        syncToken: validateSyncToken(elements.syncToken.value),
+        autoSync: elements.autoSync.checked
+      };
+    }
+
+    function renderSyncSettings(settings) {
+      elements.syncEndpoint.value = settings.baseUrl || "";
+      elements.syncToken.value = settings.syncToken || "";
+      elements.autoSync.checked = settings.autoSync === true;
+      elements.lastSync.textContent =
+        `Last sync: ${formatSyncTime(settings.lastSyncedAt)}`;
+      if (settings.baseUrl && settings.syncToken) {
+        setSyncStatus(
+          settings.retentionDays ?
+            `พร้อมใช้งาน · เก็บ ${settings.retentionDays} วัน` :
+            "บันทึกการเชื่อมต่อแล้ว",
+          "saved"
+        );
+      } else {
+        setSyncStatus("ยังไม่ได้ตั้งค่า", "idle");
+      }
+    }
+
+    function clientFromSettings(settings) {
+      return createInboxClient({
+        baseUrl: settings.baseUrl,
+        token: settings.syncToken
+      });
+    }
+
+    async function syncRemoteInbox(settings, options) {
+      if (syncBusy) return null;
+      const source = settings || storage.loadIntegrationSettings();
+      const silent = options && options.silent === true;
+      setSyncBusy(true);
+      if (!silent) setSyncStatus("กำลัง Sync...", "idle");
+      try {
+        const result = await clientFromSettings(source).list({ limit: 100 });
+        const merged = storage.mergeRemoteIndicatorAlerts(result.alerts);
+        const saved = storage.saveIntegrationSettings({
+          ...source,
+          lastSyncedAt: new Date().toISOString(),
+          retentionDays: result.retentionDays
+        });
+        renderAlertInbox();
+        renderSyncSettings(saved);
+        setSyncStatus(
+          `Sync แล้ว ${merged.imported} รายการ${merged.deleted ? ` · ลบ ${merged.deleted}` : ""}`,
+          "saved"
+        );
+        return result;
+      } catch (error) {
+        setSyncStatus(error.message || "Sync ไม่สำเร็จ", "error");
+        if (!silent) throw error;
+        return null;
+      } finally {
+        setSyncBusy(false);
+      }
+    }
+
+    function restartAutoSync(settings) {
+      if (autoSyncTimer) {
+        window.clearInterval(autoSyncTimer);
+        autoSyncTimer = null;
+      }
+      if (!settings.autoSync || !settings.baseUrl || !settings.syncToken) return;
+      autoSyncTimer = window.setInterval(function () {
+        if (document.visibilityState === "visible") {
+          syncRemoteInbox(null, { silent: true });
+        }
+      }, 60000);
+    }
+
     function renderAlertInbox() {
       const alerts = storage.loadIndicatorAlerts();
       const active = alerts.filter(function (item) {
@@ -520,6 +495,7 @@
         title.textContent = alert.event;
         const meta = document.createElement("span");
         meta.textContent = [
+          alert.remoteId ? "REMOTE" : "LOCAL",
           alert.ticker,
           timeframeLabel(alert.timeframe),
           alert.narrative.toUpperCase(),
@@ -589,6 +565,65 @@
       }
     });
 
+    elements.saveSync.addEventListener("click", function () {
+      try {
+        const current = storage.loadIntegrationSettings();
+        const next = storage.saveIntegrationSettings({
+          ...current,
+          ...settingsFromInputs()
+        });
+        renderSyncSettings(next);
+        restartAutoSync(next);
+      } catch (error) {
+        setSyncStatus(error.message || "บันทึกการเชื่อมต่อไม่สำเร็จ", "error");
+      }
+    });
+
+    elements.testSync.addEventListener("click", async function () {
+      if (syncBusy) return;
+      setSyncBusy(true);
+      setSyncStatus("กำลังทดสอบ...", "idle");
+      try {
+        const source = settingsFromInputs();
+        const result = await clientFromSettings(source).test();
+        setSyncStatus(
+          `เชื่อมต่อสำเร็จ · Worker ${result.version || "--"} · เก็บ ${result.retentionDays || "--"} วัน`,
+          "saved"
+        );
+      } catch (error) {
+        setSyncStatus(error.message || "เชื่อมต่อไม่สำเร็จ", "error");
+      } finally {
+        setSyncBusy(false);
+      }
+    });
+
+    elements.runSync.addEventListener("click", async function () {
+      try {
+        const current = storage.loadIntegrationSettings();
+        const source = settingsFromInputs();
+        const saved = storage.saveIntegrationSettings({
+          ...current,
+          ...source
+        });
+        restartAutoSync(saved);
+        await syncRemoteInbox(saved);
+      } catch (error) {
+        setSyncStatus(error.message || "Sync ไม่สำเร็จ", "error");
+      }
+    });
+
+    elements.clearSync.addEventListener("click", function () {
+      if (
+        (elements.syncEndpoint.value || elements.syncToken.value) &&
+        !window.confirm("ยกเลิกการเชื่อมต่อและลบ Sync Token จากเครื่องนี้หรือไม่?")
+      ) {
+        return;
+      }
+      const next = storage.clearIntegrationSettings();
+      restartAutoSync(next);
+      renderSyncSettings(next);
+    });
+
     elements.alertExample.addEventListener("click", function () {
       elements.alertPayload.value = JSON.stringify(ALERT_EXAMPLE, null, 2);
       elements.alertState.textContent = "ใส่ข้อมูลตัวอย่างแล้ว";
@@ -611,7 +646,7 @@
       }
     });
 
-    elements.alertList.addEventListener("click", function (event) {
+    elements.alertList.addEventListener("click", async function (event) {
       const button = event.target.closest("[data-alert-action]");
       if (!button) return;
       const id = button.dataset.alertId;
@@ -623,12 +658,44 @@
 
       if (action === "delete") {
         if (!window.confirm("ลบ Indicator Alert นี้หรือไม่?")) return;
-        storage.deleteIndicatorAlert(id);
+        try {
+          button.disabled = true;
+          if (alert.remoteId) {
+            const remote = await clientFromSettings(
+              storage.loadIntegrationSettings()
+            ).delete(alert.remoteId);
+            storage.mergeRemoteIndicatorAlerts([remote]);
+          } else {
+            storage.deleteIndicatorAlert(id);
+          }
+        } catch (error) {
+          elements.alertState.textContent =
+            error.message || "ลบ Remote Alert ไม่สำเร็จ";
+          elements.alertState.dataset.state = "error";
+          button.disabled = false;
+          return;
+        }
         renderAlertInbox();
         return;
       }
       if (action === "wait" || action === "skip") {
-        storage.updateIndicatorAlertDecision(id, action);
+        try {
+          button.disabled = true;
+          if (alert.remoteId) {
+            const remote = await clientFromSettings(
+              storage.loadIntegrationSettings()
+            ).updateDecision(alert.remoteId, action);
+            storage.mergeRemoteIndicatorAlerts([remote]);
+          } else {
+            storage.updateIndicatorAlertDecision(id, action);
+          }
+        } catch (error) {
+          elements.alertState.textContent =
+            error.message || "อัปเดต Remote Alert ไม่สำเร็จ";
+          elements.alertState.dataset.state = "error";
+          button.disabled = false;
+          return;
+        }
         elements.alertState.textContent =
           action === "wait" ? "เก็บ Alert ไว้รอติดตามแล้ว" : "บันทึก Alert เป็น SKIP แล้ว";
         elements.alertState.dataset.state = "saved";
@@ -649,16 +716,54 @@
         ) {
           return;
         }
-        storage.saveDraft(buildDraftFromAlert(alert, storage));
-        storage.updateIndicatorAlertDecision(id, "review");
+        try {
+          button.disabled = true;
+          if (alert.remoteId) {
+            const remote = await clientFromSettings(
+              storage.loadIntegrationSettings()
+            ).updateDecision(alert.remoteId, "review");
+            storage.mergeRemoteIndicatorAlerts([remote]);
+          } else {
+            storage.updateIndicatorAlertDecision(id, "review");
+          }
+          storage.saveDraft(buildDraftFromAlert(alert, storage));
+        } catch (error) {
+          elements.alertState.textContent =
+            error.message || "ส่ง Remote Alert ไปตรวจ Entry ไม่สำเร็จ";
+          elements.alertState.dataset.state = "error";
+          button.disabled = false;
+          return;
+        }
         window.location.href = "trade.html";
       }
     });
 
+    document.addEventListener("visibilitychange", function () {
+      const settings = storage.loadIntegrationSettings();
+      if (
+        document.visibilityState === "visible" &&
+        settings.autoSync &&
+        settings.baseUrl &&
+        settings.syncToken
+      ) {
+        syncRemoteInbox(settings, { silent: true });
+      }
+    });
+
+    const savedSettings = storage.loadIntegrationSettings();
     elements.symbol.value = SYMBOLS[elements.instrument.value];
+    renderSyncSettings(savedSettings);
+    restartAutoSync(savedSettings);
     renderChartUrl();
     renderExport();
     renderAlertInbox();
+    if (
+      savedSettings.autoSync &&
+      savedSettings.baseUrl &&
+      savedSettings.syncToken
+    ) {
+      syncRemoteInbox(savedSettings, { silent: true });
+    }
   }
 
   window.TradingIntegration = {
@@ -673,6 +778,9 @@
     ALERT_SCHEMA,
     ALERT_EXAMPLE,
     parseIndicatorAlert,
+    normalizeBaseUrl,
+    validateSyncToken,
+    createInboxClient,
     instrumentFromAlert,
     buildDraftFromAlert,
     timeframeLabel

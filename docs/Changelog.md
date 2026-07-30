@@ -2,6 +2,45 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## v0.13.0 - 2026-07-30
+
+### Added
+
+- Added a deployment-ready Cloudflare Worker and D1 migration for TradingView
+  Webhook delivery and cross-device Indicator Alert Inbox synchronization.
+- Added separate Webhook and Sync authentication tokens, allowed-origin
+  validation, a 32 KB payload limit, and SHA-256 duplicate protection.
+- Added remote WAIT, SKIP, and delete synchronization with deletion tombstones.
+- Added a 30-day default remote retention policy.
+- Added Automatic Inbox Sync settings to TradingView Hub with connection test,
+  manual Sync, optional 60-second Sync, and disconnect controls.
+- Added a shared Alert contract used by the browser and Worker.
+- Added Worker, client, and local/remote merge tests.
+
+### Kept
+
+- Kept GitHub Pages as the static Trading Companion frontend.
+- Kept manual Alert JSON import available without a backend.
+- Kept Journal, plans, screenshots, Playbooks, and all non-Alert data local.
+- Kept order placement outside Trading Companion.
+
+### Validated
+
+- Passed nine Worker, API client, authentication, deduplication, decision,
+  deletion, and synchronization tests.
+- Confirmed the Integration page loads without console errors.
+- Confirmed manual Alert JSON import still succeeds after the module split.
+- Confirmed non-HTTPS remote URLs are rejected before connection.
+- Confirmed the Auto Sync and Inbox controls fit desktop and narrow mobile
+  layouts without horizontal overflow.
+
+### Pending Deployment
+
+- Create the production D1 database and apply the migration.
+- Configure production Cloudflare Secrets and allowed origin.
+- Deploy the Worker and connect a live TradingView alert.
+- Validate delivery and cross-device synchronization with realtime Alerts.
+
 ## v0.12.0 - 2026-07-28
 
 ### Added

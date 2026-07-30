@@ -1,6 +1,6 @@
 # Trading OS Indicator Specification
 
-Version: v0.3.7
+Version: v0.3.8
 Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, Risk / Entry, Manual/Automatic Score, Alert JSON, HTF Order Block, and Breaker baselines
 
 ## Purpose
@@ -561,8 +561,8 @@ Current limitation:
 - Pine Dashboard tables are not interactive; manual values are changed in the
   indicator's Settings panel.
 - Manual selections affect Dashboard presentation only.
-- Data Window score fields and confirmed-bar Alerts continue to use Automatic
-  mode until a versioned Trading Companion integration contract is implemented.
+- Data Window score fields and confirmed-bar Alerts use the selected Manual or
+  Automatic assessment values defined by the versioned integration contract.
 - Manual Assessment does not place orders or send data directly to GitHub
   Pages.
 
@@ -609,9 +609,11 @@ Current limitation:
   `Any alert() function call`.
 - Alert execution is realtime only; historical bars do not deliver
   notifications.
-- Trading Companion supports validated manual JSON import into its local Alert
-  Inbox.
-- No webhook receiver or automatic delivery exists yet.
+- Trading Companion supports validated manual JSON import and an optional
+  authenticated remote Inbox.
+- The Cloudflare Worker and D1 source are deployment-ready but automatic
+  delivery remains inactive until the Worker, Secrets, database, and
+  TradingView alert are configured in production.
 
 ## Current Checklist Mapping
 

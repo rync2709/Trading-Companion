@@ -1,14 +1,14 @@
 # TradingView Alert Contract
 
 Version: v1
-Status: Local import baseline
+Status: Authenticated receiver baseline; production deployment pending
 
 ## Purpose
 
 `trading-companion.alert.v1` is the data contract between the Trading OS Pine
 indicator and Trading Companion. Pine creates the JSON payload on a confirmed
-alert event. Trading Companion validates and stores an imported payload in the
-current browser.
+alert event. Trading Companion can validate a manually imported payload or
+synchronize the same payload from a private Webhook Worker.
 
 ## Payload
 
@@ -61,7 +61,7 @@ current browser.
 - Duplicate symbol, timeframe, time, and event combinations update one Inbox
   record instead of creating duplicates.
 
-## Local Workflow
+## Manual Workflow
 
 1. Copy the JSON message from a TradingView alert.
 2. Paste it into Indicator Alert Inbox in TradingView Hub.
@@ -69,15 +69,52 @@ current browser.
 4. Review Entry creates a New Trade Draft from compatible evidence only.
 5. Trading Companion recalculates its own detailed score before ENTRY.
 
+## Automatic Workflow
+
+1. TradingView posts the JSON payload to the private Worker URL.
+2. The Worker validates the Webhook token, payload size, and Alert contract.
+3. A SHA-256 identifier deduplicates matching payloads in D1.
+4. Trading Companion authenticates with a separate Sync token.
+5. Manual or optional 60-second Sync merges remote Alerts into the local Inbox.
+6. WAIT, SKIP, and delete changes are written to the remote Inbox first and
+   then reflected locally.
+
+## Worker API
+
+- `GET /health`
+- `POST /v1/webhooks/tradingview/:webhookToken`
+- `GET /v1/alerts?since=0&limit=50`
+- `PATCH /v1/alerts/:id`
+- `DELETE /v1/alerts/:id`
+
+Browser routes require:
+
+```text
+Authorization: Bearer <SYNC_API_TOKEN>
+```
+
+## Security and Retention
+
+- `TRADINGVIEW_WEBHOOK_TOKEN` and `SYNC_API_TOKEN` must be different random
+  values with at least 32 characters.
+- Browser requests are restricted by `ALLOWED_ORIGINS`.
+- Production secrets must be stored as Cloudflare Secrets and never committed.
+- Remote Alerts expire after 30 days by default.
+- Delete creates a tombstone so other devices remove the matching local Alert
+  during their next Sync.
+- The local browser keeps working without a remote connection.
+
 ## Limits
 
 - GitHub Pages cannot receive TradingView webhooks.
-- The current baseline is a manual JSON transfer stored in browser localStorage.
+- Automatic delivery is not active until the Worker is deployed and production
+  D1, Secrets, allowed origin, and TradingView alert are configured.
+- Manual JSON transfer remains available and is stored in browser localStorage.
 - Alerts still require a user-created TradingView alert using
   `Any alert() function call`.
 - No payload places an order or bypasses New Trade risk validation.
 - Review Entry currently supports XAUUSD, BTCUSD, ETHUSD, NAS100, and EURUSD.
   Other symbols remain in the Inbox for WAIT or SKIP instead of being mapped
   to the wrong instrument.
-- A direct webhook requires an authenticated backend with duplicate handling
-  and an explicit device-sync model.
+- The Worker synchronizes Indicator Alert Inbox records only. Journal, plans,
+  screenshots, Playbooks, and other Trading Companion data remain local.

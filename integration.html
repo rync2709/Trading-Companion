@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css?v=0.8.0">
-  <link rel="stylesheet" href="css/integration.css?v=0.12.0">
+  <link rel="stylesheet" href="css/integration.css?v=0.13.0">
 </head>
 <body>
   <header class="topbar">
@@ -239,6 +239,79 @@
         <header class="integration-panel-header">
           <div class="integration-panel-title">
             <span class="integration-icon">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-shield"></use></svg>
+            </span>
+            <div>
+              <p class="eyebrow">Private webhook connection</p>
+              <h2>Automatic Inbox Sync</h2>
+            </div>
+          </div>
+          <span id="tvSyncBadge" data-state="idle">Not connected</span>
+        </header>
+        <div class="integration-panel-body">
+          <div class="sync-fields">
+            <label class="integration-field">
+              <span>Worker Server URL</span>
+              <input
+                id="tvSyncEndpoint"
+                type="url"
+                inputmode="url"
+                maxlength="500"
+                autocomplete="url"
+                placeholder="https://trading-companion-webhook.workers.dev"
+              >
+            </label>
+            <label class="integration-field">
+              <span>Private Sync Token</span>
+              <input
+                id="tvSyncToken"
+                type="password"
+                maxlength="512"
+                autocomplete="off"
+                placeholder="อย่างน้อย 32 ตัวอักษร"
+              >
+            </label>
+          </div>
+
+          <label class="sync-toggle">
+            <input id="tvAutoSync" type="checkbox">
+            <span>
+              <strong>Auto Sync</strong>
+              <small>ตรวจ Remote Inbox เมื่อเปิดหน้านี้และทุก 60 วินาที</small>
+            </span>
+          </label>
+
+          <div class="integration-actions">
+            <button class="button button-primary" id="tvSaveSync" type="button">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-save"></use></svg>
+              บันทึกการเชื่อมต่อ
+            </button>
+            <button class="button button-quiet" id="tvTestSync" type="button">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-shield"></use></svg>
+              ทดสอบ
+            </button>
+            <button class="button button-quiet" id="tvRunSync" type="button">
+              <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-rotate"></use></svg>
+              Sync ตอนนี้
+            </button>
+            <button class="button button-quiet" id="tvClearSync" type="button">
+              ยกเลิกการเชื่อมต่อ
+            </button>
+            <div class="integration-status">
+              <span>Connection status</span>
+              <strong id="tvSyncState" data-state="idle">ยังไม่ได้ตั้งค่า</strong>
+              <small id="tvLastSync">Last sync: --</small>
+            </div>
+          </div>
+
+          <p class="integration-note">Sync Token จะเก็บเฉพาะในเบราว์เซอร์เครื่องนี้และใช้เรียก Worker ผ่าน HTTPS เท่านั้น ส่วน TradingView Webhook Token เป็นคนละรหัสและไม่ต้องใส่ในหน้านี้</p>
+        </div>
+      </article>
+
+      <article class="panel integration-panel integration-panel-wide">
+        <header class="integration-panel-header">
+          <div class="integration-panel-title">
+            <span class="integration-icon">
               <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-arrow-left-right"></use></svg>
             </span>
             <div>
@@ -246,7 +319,7 @@
               <h2>Indicator Alert Inbox</h2>
             </div>
           </div>
-          <span>Local JSON import</span>
+          <span>Local + remote inbox</span>
         </header>
         <div class="integration-panel-body alert-bridge-layout">
           <section class="alert-import-pane" aria-labelledby="alertImportHeading">
@@ -281,7 +354,7 @@
           <section class="alert-inbox-pane" aria-labelledby="alertInboxHeading">
             <div class="alert-pane-heading">
               <div>
-                <span id="alertInboxHeading">Local inbox</span>
+                <span id="alertInboxHeading">Alert inbox</span>
                 <strong>เลือก WAIT, SKIP หรือ ตรวจ Entry</strong>
               </div>
               <div class="alert-inbox-metrics" aria-label="Indicator Alert summary">
@@ -331,7 +404,7 @@
 
     <aside class="integration-limits">
       <svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#icon-shield"></use></svg>
-      <p>Trading Companion ยังไม่มี Webhook Server และไม่ส่งคำสั่งเทรด การนำเข้า Alert รอบนี้ใช้ JSON ที่ตรวจ schema แล้วและเก็บในเบราว์เซอร์เครื่องนี้เท่านั้น ส่วนการรับอัตโนมัติจะเพิ่มหลังมี Backend ที่ยืนยันสิทธิ์และป้องกันข้อมูลซ้ำได้</p>
+      <p>Trading Companion ไม่ส่งคำสั่งเทรด การรับอัตโนมัติต้องเชื่อม Worker ส่วนตัวที่ตั้ง Webhook Token, Sync Token และ Allowed Origin ครบแล้ว หากยังไม่เชื่อม ระบบนำเข้า JSON แบบเดิมและเก็บข้อมูลในเบราว์เซอร์ได้ตามปกติ</p>
     </aside>
   </main>
 
@@ -402,8 +475,8 @@
     </details>
   </nav>
 
-  <script src="js/storage.js?v=0.12.0"></script>
+  <script src="js/storage.js?v=0.13.0"></script>
   <script src="js/app.js"></script>
-  <script src="js/integration.js?v=0.12.0"></script>
+  <script type="module" src="js/integration.js?v=0.13.0"></script>
 </body>
 </html>

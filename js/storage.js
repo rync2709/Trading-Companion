@@ -9,7 +9,8 @@
     weeklyReviews: "tradingCompanionWeeklyReviewsV1",
     sessionPlans: "tradingCompanionSessionPlansV1",
     watchlist: "tradingCompanionWatchlistV1",
-    indicatorAlerts: "tradingCompanionIndicatorAlertsV1"
+    indicatorAlerts: "tradingCompanionIndicatorAlertsV1",
+    integrationSettings: "tradingCompanionIntegrationSettingsV1"
   };
   const VALIDATION_TARGET = 20;
   const JOURNAL_EMOTIONS = ["calm", "neutral", "fearful", "angry", "overconfident"];
@@ -194,6 +195,37 @@
     );
   }
 
+  function normalizeIntegrationSettings(settings) {
+    const source = settings && typeof settings === "object" ? settings : {};
+    return {
+      baseUrl: typeof source.baseUrl === "string" ?
+        source.baseUrl.trim().slice(0, 500) : "",
+      syncToken: typeof source.syncToken === "string" ?
+        source.syncToken.trim().slice(0, 512) : "",
+      autoSync: source.autoSync === true,
+      lastSyncedAt: typeof source.lastSyncedAt === "string" ?
+        source.lastSyncedAt.slice(0, 40) : null,
+      retentionDays: Number.isInteger(Number(source.retentionDays)) ?
+        Number(source.retentionDays) : null
+    };
+  }
+
+  function loadIntegrationSettings() {
+    const saved = parse(localStorage.getItem(KEYS.integrationSettings), null);
+    return normalizeIntegrationSettings(saved);
+  }
+
+  function saveIntegrationSettings(settings) {
+    const next = normalizeIntegrationSettings(settings);
+    localStorage.setItem(KEYS.integrationSettings, JSON.stringify(next));
+    return next;
+  }
+
+  function clearIntegrationSettings() {
+    localStorage.removeItem(KEYS.integrationSettings);
+    return normalizeIntegrationSettings();
+  }
+
   function normalizeIndicatorAlert(alert) {
     const source = alert && typeof alert === "object" ? alert : {};
     const checklistSource = source.checklist && typeof source.checklist === "object" ?
@@ -258,6 +290,12 @@
       },
       close: Number.isFinite(close) ? close : null,
       decision: allowedDecisions.includes(source.decision) ? source.decision : "new",
+      remoteId: typeof source.remoteId === "string" &&
+        /^[a-f0-9]{64}$/.test(source.remoteId) ? source.remoteId : "",
+      remoteReceivedAt: Number.isSafeInteger(Number(source.remoteReceivedAt)) ?
+        Number(source.remoteReceivedAt) : null,
+      remoteUpdatedAt: Number.isSafeInteger(Number(source.remoteUpdatedAt)) ?
+        Number(source.remoteUpdatedAt) : null,
       importedAt: typeof source.importedAt === "string" ?
         source.importedAt : new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -280,17 +318,33 @@
     return saved.slice(0, 50).map(normalizeIndicatorAlert);
   }
 
-  function saveIndicatorAlert(alert) {
+  function saveIndicatorAlert(alert, options) {
     const incoming = normalizeIndicatorAlert(alert);
     const fingerprint = indicatorAlertFingerprint(incoming);
     const alerts = loadIndicatorAlerts();
     const existing = alerts.find(function (item) {
       return indicatorAlertFingerprint(item) === fingerprint;
     });
+    const preferIncomingDecision = Boolean(
+      options &&
+      options.preferIncomingDecision &&
+      incoming.remoteUpdatedAt &&
+      (
+        !existing ||
+        !existing.remoteUpdatedAt ||
+        incoming.remoteUpdatedAt >= existing.remoteUpdatedAt
+      )
+    );
     const nextAlert = normalizeIndicatorAlert({
       ...incoming,
       id: existing ? existing.id : incoming.id,
-      decision: existing ? existing.decision : incoming.decision,
+      decision: existing && !preferIncomingDecision ?
+        existing.decision : incoming.decision,
+      remoteId: incoming.remoteId || existing && existing.remoteId || "",
+      remoteReceivedAt: incoming.remoteReceivedAt ||
+        existing && existing.remoteReceivedAt || null,
+      remoteUpdatedAt: incoming.remoteUpdatedAt ||
+        existing && existing.remoteUpdatedAt || null,
       importedAt: existing ? existing.importedAt : incoming.importedAt
     });
     const next = [
@@ -301,6 +355,40 @@
     ].slice(0, 50);
     localStorage.setItem(KEYS.indicatorAlerts, JSON.stringify(next));
     return nextAlert;
+  }
+
+  function mergeRemoteIndicatorAlerts(records) {
+    const source = Array.isArray(records) ? records : [];
+    let imported = 0;
+    let deleted = 0;
+
+    source.forEach(function (record) {
+      if (!record || typeof record !== "object") return;
+      const remoteId = typeof record.remoteId === "string" ? record.remoteId : "";
+      if (record.deleted === true) {
+        const alerts = loadIndicatorAlerts();
+        const next = alerts.filter(function (item) {
+          return item.remoteId !== remoteId;
+        });
+        if (next.length !== alerts.length) {
+          localStorage.setItem(KEYS.indicatorAlerts, JSON.stringify(next));
+          deleted += alerts.length - next.length;
+        }
+        return;
+      }
+      saveIndicatorAlert({
+        ...record.payload,
+        decision: record.decision,
+        remoteId,
+        remoteReceivedAt: record.remoteReceivedAt,
+        remoteUpdatedAt: record.remoteUpdatedAt
+      }, {
+        preferIncomingDecision: true
+      });
+      imported += 1;
+    });
+
+    return { imported, deleted };
   }
 
   function updateIndicatorAlertDecision(id, decision) {
@@ -943,9 +1031,14 @@
     loadDraft,
     saveDraft,
     clearDraft,
+    normalizeIntegrationSettings,
+    loadIntegrationSettings,
+    saveIntegrationSettings,
+    clearIntegrationSettings,
     normalizeIndicatorAlert,
     loadIndicatorAlerts,
     saveIndicatorAlert,
+    mergeRemoteIndicatorAlerts,
     updateIndicatorAlertDecision,
     deleteIndicatorAlert,
     normalizeAssistantSession,
