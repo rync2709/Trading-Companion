@@ -1,7 +1,7 @@
 # Trading OS Indicator Specification
 
-Version: v0.3.8
-Phase: Pine Track - Modules 1, 2, 4, Structure, CISD, Displacement, Entry FVG, Risk / Entry, Manual/Automatic Score, Alert JSON, HTF Order Block, and Breaker baselines
+Version: v0.3.9
+Phase: Pine Track - Modules 1, 2, 4, Internal/Swing Structure, chart Order Blocks, CISD, Displacement, Entry FVG, Risk / Entry, Manual/Automatic Score, Alert JSON, HTF Order Block, and Breaker baselines
 
 ## Purpose
 
@@ -244,7 +244,7 @@ Current limitation:
 
 ## Module 5 - Structure
 
-Implementation status: `Pine v0.4.0-alpha - execution-chart BOS/CHOCH/MSS baseline`
+Implementation status: `Pine v0.15.0-alpha - Internal/Swing BOS/CHoCH/MSS and chart Order Block visual layer`
 
 Input:
 
@@ -252,7 +252,10 @@ Input:
 - Current and previous closes
 - Prior execution structure direction
 - Recent confirmed PDH or PDL sweep
-- Configurable swing length and context window
+- Configurable Internal and Swing pivot lengths
+- Structure display filter and context window
+- Independent Internal and Swing Order Block display limits
+- Configurable Order Block source search and invalidation mode
 
 Process:
 
@@ -263,6 +266,13 @@ Process:
 - Upgrade CHOCH to MSS when the matching confirmed PDH/PDL sweep occurred within the context window.
 - Keep the latest event active in the Dashboard for the configured number of chart bars.
 - Compare the event direction with combined HTF Bias for display context only.
+- Run a separate larger Swing structure on the same chart timeframe.
+- Draw Internal events with dashed lines and Swing events with solid lines.
+- Center BOS, CHoCH, and MSS labels between source pivots and confirming bars.
+- On a confirmed structure break, select the extreme source candle between the
+  pivot and confirming close as a chart Order Block.
+- Retain multiple Internal and Swing Order Blocks independently.
+- Fade mitigated zones and remove invalidated zones on confirmed bars.
 
 Output:
 
@@ -274,6 +284,9 @@ Output:
 - latest_confirmed_swing_high
 - latest_confirmed_swing_low
 - structure_aligned_with_htf: true or false
+- internal_structure_drawings: dashed BOS, CHoCH, or MSS
+- swing_structure_drawings: solid BOS or CHoCH
+- chart_order_blocks: active Internal and Swing zones
 
 Current limitation:
 
@@ -286,6 +299,9 @@ Current limitation:
   their source bars.
 - Each Structure event label is centered between its source swing and
   confirmed break bar to reduce endpoint congestion.
+- Swing Structure and chart Order Blocks are visual context only. Dashboard
+  scoring, POI selection, and Alerts continue to use the existing execution
+  structure baseline.
 
 ## Module 6 - CISD
 
@@ -568,7 +584,7 @@ Current limitation:
 
 ## Module 11 - Alert System
 
-Implementation status: `Pine v0.14.1-alpha - confirmed-bar Alert System with Trading Companion JSON contract`
+Implementation status: `Pine v0.15.0-alpha - confirmed-bar Alert System with Trading Companion JSON contract`
 
 Input:
 
@@ -618,8 +634,10 @@ Current limitation:
   authenticated remote Inbox.
 - The Cloudflare Worker, D1, Secrets, Companion Sync, and running TradingView
   alert are configured in production.
-- TradingView Webhook delivery remains inactive until 2FA is enabled and the
-  protected Worker URL is added to the running alert.
+- TradingView 2FA, the protected Worker URL, and live Webhook delivery are
+  verified in production.
+- The existing v0.14.1 production alert remains active while v0.15.0 is
+  validated as the private chart version.
 
 ## Current Checklist Mapping
 

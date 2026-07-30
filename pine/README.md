@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.14.1-alpha
+Version: v0.15.0-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -11,7 +11,7 @@ The Pine track automates selected Trading OS context checks without replacing tr
 - Module 1: HTF Bias baseline
 - Module 2 baseline: aligned HTF FVG candidate plus latest HTF Order Block and Breaker chart context
 - Module 4 baseline: Previous Day High/Low liquidity
-- Module 5 baseline: execution-chart BOS/CHOCH/MSS
+- Module 5 baseline: Internal/Swing BOS/CHoCH/MSS and chart Order Blocks
 - Module 6 baseline: strict execution-chart CISD
 - Module 7 baseline: execution-chart Displacement and follow-through
 - Module 8 baseline: Displacement-linked Entry FVG and retracement
@@ -29,6 +29,12 @@ Defaults:
 - Confirmed swing length: 3
 - Execution swing length: 3
 - Structure context window: 20 chart bars
+- Swing structure length: 50
+- Structure event filter: All
+- Internal Order Blocks: enabled, latest 5
+- Swing Order Blocks: disabled, latest 5 when enabled
+- Chart Order Block source search: maximum 100 bars
+- Chart Order Block invalidation: High/Low
 - CISD delivery candles: minimum 3, maximum 8
 - CISD minimum delivery leg: 0.8 ATR using ATR 14
 - CISD confirmation window: 8 chart bars
@@ -127,6 +133,31 @@ events:
 
 Breaker boxes are chart context only. They do not replace the selected FVG
 POI, affect the Dashboard, score, Grade, or Alerts, or create Buy/Sell orders.
+
+## Chart Structure and Order Blocks
+
+Pine v0.15.0 adds a chart-timeframe visual layer inspired by common SMC
+workflows while using original Trading OS logic:
+
+- Internal Structure uses the existing execution swing length and dashed lines.
+- Swing Structure uses a separate confirmed pivot length and solid lines.
+- BOS is a confirmed close through an unbroken pivot in the current direction.
+- CHoCH is the first confirmed break against the prior direction.
+- A matching recent PDH/PDL sweep upgrades Internal CHoCH to MSS.
+- Every event label is centered between the source pivot and confirming bar.
+- Internal labels are `Tiny`; Swing labels are `Small`.
+- The display filter supports All, BOS only, or CHoCH/MSS only.
+- A Bullish structure break selects the lowest source candle between the pivot
+  and confirming close as its chart OB.
+- A Bearish structure break selects the highest source candle in that range.
+- Internal and Swing OB histories have independent display switches and limits.
+- Fresh zones extend right from their source candle.
+- First overlap fades a zone to show mitigation.
+- High/Low invalidation removes a zone after a confirmed bar trades through its
+  far edge; Close mode waits for a confirmed close beyond that edge.
+
+This visual layer runs on the current chart timeframe. It does not change the
+HTF POI selection, Dashboard, Score, Grade, Alert gates, or order execution.
 
 ## Compact Dashboard
 
@@ -480,8 +511,15 @@ Compile status:
   `Trading OS HTF Context v0.14.1`, and was not published.
 - Confirmed `Any alert() function call` appears in the TradingView condition
   list and created a running XAUUSD 15M alert with app notifications enabled.
-- Webhook delivery remains pending because TradingView requires account 2FA
-  before the Webhook URL option can be enabled.
+- Enabled TradingView 2FA, attached the protected Worker URL, and verified live
+  TradingView-to-Worker delivery.
+- Pine v0.15.0 added separate Internal and Swing Structure drawings, centered
+  BOS/CHoCH/MSS labels, and multi-zone chart Order Blocks.
+- Pine v0.15.0 compiled successfully and was saved privately as
+  `Trading OS HTF Context v0.15.0` without publishing.
+- Confirmed no compile or runtime errors on XAUUSD at 5M, 15M, and 1H.
+- Removed the duplicate development instance, kept v0.15.0 visible, hid the
+  old v0.14.1 chart instance, and preserved its running production alert.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.
@@ -497,22 +535,24 @@ Compile status:
 8. Compare PDH and PDL with the previous completed Daily candle.
 9. Confirm sweep state only after a candle crosses a level and closes back inside.
 10. Compare BOS, CHOCH, and MSS with manually marked execution structure.
-11. Compare Bullish and Bearish CISD with manually marked delivery changes.
-12. Confirm CISD recalculates from the current chart after every timeframe change.
-13. Confirm CISD and Structure drawings use only the current chart timeframe.
-14. Compare Watch, Medium, and Strong Displacement states with manually marked expansion and follow-through.
-15. Confirm each Entry FVG uses a confirmed Displacement candle as the middle candle of its three-candle pattern.
-16. Confirm Fresh, Partial, and Filled Entry FVG transitions against manual markup.
-17. Confirm all drawings remain anchored to their source bar time and price while scrolling or zooming.
-18. Compare the locked Entry midpoint, swing invalidation, PDH/PDL Target, and
+11. Compare Internal dashed events and Swing solid events with manual markup.
+12. Compare chart OB source candles, mitigation fades, and invalidation.
+13. Compare Bullish and Bearish CISD with manually marked delivery changes.
+14. Confirm CISD recalculates from the current chart after every timeframe change.
+15. Confirm CISD and Structure drawings use only the current chart timeframe.
+16. Compare Watch, Medium, and Strong Displacement states with manually marked expansion and follow-through.
+17. Confirm each Entry FVG uses a confirmed Displacement candle as the middle candle of its three-candle pattern.
+18. Confirm Fresh, Partial, and Filled Entry FVG transitions against manual markup.
+19. Confirm all drawings remain anchored to their source bar time and price while scrolling or zooming.
+20. Compare the locked Entry midpoint, swing invalidation, PDH/PDL Target, and
     planned RR against manual plans.
-19. Create a temporary `Any alert() function call` alert and confirm each
+21. Create a temporary `Any alert() function call` alert and confirm each
     enabled event group on realtime candles before relying on notifications.
-20. Compare 4H and 1H OB source candles, mitigation, and invalidation against
+22. Compare 4H and 1H OB source candles, mitigation, and invalidation against
     manual markup.
-21. Compare 4H and 1H Breaker activation, mitigation, and invalidation against
+23. Compare 4H and 1H Breaker activation, mitigation, and invalidation against
     manual markup.
-22. Record disagreements before changing the Structure, CISD, Displacement, FVG, OB, Breaker, Liquidity, Risk, or Alert rules.
+24. Record disagreements before changing the Structure, CISD, Displacement, FVG, OB, Breaker, Liquidity, Risk, or Alert rules.
 
 ## Current Limits
 
@@ -525,6 +565,8 @@ Compile status:
 - Liquidity currently supports PDH and PDL only.
 - No Asia High/Low, Equal High/Low, or Internal/External Liquidity.
 - Structure is a baseline without automated setup type, POI proximity, or a complete setup window.
+- Swing Structure and chart Order Blocks are visual context only and do not
+  enter Dashboard scoring or Alerts.
 - CISD and Displacement remain separate conservative baselines without a complete setup-window state machine.
 - Displacement has not been calibrated against a manual sample.
 - Entry FVG tracks the latest confirmed zone only and has not been calibrated against a manual sample.

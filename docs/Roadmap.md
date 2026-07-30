@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.13.0 / Pine v0.14.1-alpha
+Version: v0.13.0 / Pine v0.15.0-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -719,9 +719,8 @@ First milestone:
 - [x] Compile, load, smoke-test, and save Pine v0.10.0 privately in TradingView.
 - [x] Create a running TradingView alert using
   `Any alert() function call` with app notification enabled.
-- [ ] Enable TradingView 2FA, add the Webhook URL, and validate delivery from
-  a realtime confirmed candle. The production receiver and Companion Sync
-  path are already validated.
+- [x] Enable TradingView 2FA, add the protected Webhook URL, and validate live
+  TradingView-to-Worker delivery.
 - [x] Detect the latest 4H and 1H Order Block from a qualified HTF departure.
 - [x] Track Fresh, Mitigated, and Invalid Order Block states.
 - [x] Draw aligned 4H and 1H Order Blocks at actual source time and price.
@@ -755,6 +754,14 @@ First milestone:
   Dashboard snapshot payload.
 - [x] Compile and save Pine v0.14.1 privately without publishing.
 - [x] Confirm `Any alert() function call` appears and create the running alert.
+- [x] Add separate Internal and Swing BOS/CHoCH/MSS chart structure.
+- [x] Draw Internal events with dashed lines, Swing events with solid lines,
+  and keep all event labels centered.
+- [x] Add multi-zone Internal and Swing chart Order Blocks with mitigation and
+  High/Low or Close invalidation.
+- [x] Compile Pine v0.15.0 on 5M, 15M, and 1H without runtime errors.
+- [x] Save Pine v0.15.0 privately without publishing and preserve the existing
+  v0.14.1 production alert.
 - [ ] Compare Order Block source, mitigation, and invalidation against manual
   4H/1H markup.
 - [ ] Compare Breaker activation, mitigation, and invalidation against manual
@@ -846,4 +853,5 @@ Expected outputs:
 | Pine v0.13.0-alpha | Manual Narrative, weighted checklist Score, Grade, and Setup Status |
 | Pine v0.14.0-alpha | Versioned Trading Companion Alert JSON payload |
 | Pine v0.14.1-alpha | Compact fallback trigger and running private TradingView alert |
+| Pine v0.15.0-alpha | Internal/Swing Structure and multi-zone chart Order Blocks |
 | v1.0.0 | Trading OS MVP |

@@ -8,14 +8,14 @@ indicator(
     max_labels_count = 300
 )
 
-// Trading OS Pine Track v0.14.1-alpha
+// Trading OS Pine Track v0.15.0-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG, latest Order Block and
-// Breaker context, daily liquidity, confirmed execution-chart BOS/CHOCH/MSS,
-// strict CISD context, execution-chart displacement with follow-through,
-// Entry FVG confirmation, manual and automated assessment modes, a locked
-// Entry/Risk planning baseline, and confirmed-bar event alerts. Full chart
-// context is enabled by default. This indicator remains decision support and
-// does not generate Buy/Sell signals.
+// Breaker context, daily liquidity, Internal/Swing BOS/CHoCH/MSS, chart
+// Order Blocks, strict CISD context, execution-chart displacement with
+// follow-through, Entry FVG confirmation, manual and automated assessment
+// modes, a locked Entry/Risk planning baseline, and confirmed-bar event
+// alerts. Full chart context is enabled by default. This indicator remains
+// decision support and does not generate Buy/Sell signals.
 
 string assessmentModeInput = input.string(
     "Manual",
@@ -139,9 +139,71 @@ bool showStructureLevels = input.bool(
 )
 bool showStructureEvents = input.bool(
     true,
-    "Show BOS / CHOCH / MSS",
-    tooltip = "Draws the broken swing segment and an event label on the execution chart.",
+    "Show Internal BOS / CHoCH / MSS",
+    tooltip = "Draws confirmed internal structure breaks from the pivot to the confirming close.",
     group = "Market Structure"
+)
+int swingStructureLength = input.int(
+    50,
+    "Swing structure length",
+    minval = 5,
+    maxval = 200,
+    tooltip = "Confirms the larger chart-timeframe swing structure. A higher value produces fewer major BOS and CHoCH events.",
+    group = "Market Structure"
+)
+bool showSwingStructureEvents = input.bool(
+    true,
+    "Show Swing BOS / CHoCH",
+    tooltip = "Draws larger chart-timeframe structure with solid lines and larger labels.",
+    group = "Market Structure"
+)
+string structureEventFilterInput = input.string(
+    "All",
+    "Structure event filter",
+    options = ["All", "BOS", "CHoCH"],
+    tooltip = "CHoCH includes liquidity-backed MSS events. This filter changes drawings only; Dashboard and Alert logic remain unchanged.",
+    group = "Market Structure"
+)
+bool showInternalOrderBlocks = input.bool(
+    true,
+    "Internal Order Blocks",
+    tooltip = "Keeps recent chart-timeframe Order Blocks created by confirmed Internal BOS, CHoCH, or MSS events.",
+    group = "Chart Order Block"
+)
+int internalOrderBlockCount = input.int(
+    5,
+    "Internal OB count",
+    minval = 1,
+    maxval = 20,
+    group = "Chart Order Block"
+)
+bool showSwingOrderBlocks = input.bool(
+    false,
+    "Swing Order Blocks",
+    tooltip = "Keeps recent chart-timeframe Order Blocks created by confirmed Swing BOS or CHoCH events.",
+    group = "Chart Order Block"
+)
+int swingOrderBlockCount = input.int(
+    5,
+    "Swing OB count",
+    minval = 1,
+    maxval = 20,
+    group = "Chart Order Block"
+)
+int chartOrderBlockSearchBars = input.int(
+    100,
+    "OB source search",
+    minval = 5,
+    maxval = 300,
+    tooltip = "Maximum bars searched between the broken pivot and confirming close. Bullish breaks use the lowest-range source candle; bearish breaks use the highest-range source candle.",
+    group = "Chart Order Block"
+)
+string chartOrderBlockMitigationInput = input.string(
+    "High/Low",
+    "OB invalidation",
+    options = ["High/Low", "Close"],
+    tooltip = "High/Low removes a zone when price trades through its far edge. Close waits for a confirmed candle close beyond that edge.",
+    group = "Chart Order Block"
 )
 int cisdMinimumDeliveryCandles = input.int(
     3,
@@ -719,6 +781,296 @@ f_execution_structure(int length, bool recentPdhSweep, bool recentPdlSweep) =>
         latestLowBroken := false
 
     [eventPulse, latestEvent, latestDirection, trendState, latestBreakLevel, latestEventBar, latestBreakOriginBar, latestSwingHigh, latestSwingLow, latestSwingHighBar, latestSwingLowBar, latestHighBroken, latestLowBroken]
+
+f_structure_event_visible(int eventPulse) =>
+    structureEventFilterInput == "All" or
+     (
+        structureEventFilterInput == "BOS" and
+        eventPulse == 1
+     ) or
+     (
+        structureEventFilterInput == "CHoCH" and
+        (eventPulse == 2 or eventPulse == 3)
+     )
+
+f_draw_structure_event(
+    bool enabled,
+    int eventPulse,
+    int direction,
+    float level,
+    int originBar,
+    int eventBar,
+    bool swingEvent
+) =>
+    bool drawn = false
+    bool canDraw = (
+        enabled and
+        eventPulse != 0 and
+        direction != 0 and
+        not na(level) and
+        not na(originBar) and
+        not na(eventBar) and
+        f_structure_event_visible(eventPulse)
+    )
+
+    if canDraw
+        color eventColor = (
+            eventPulse == 3 ?
+            warningColor :
+            f_state_color(direction)
+        )
+        int midpointBar = int(
+            math.round((originBar + eventBar) / 2.0)
+        )
+        line.new(
+            x1 = originBar,
+            y1 = level,
+            x2 = eventBar,
+            y2 = level,
+            xloc = xloc.bar_index,
+            extend = extend.none,
+            color = eventColor,
+            style = swingEvent ?
+                line.style_solid :
+                line.style_dashed,
+            width = eventPulse == 3 ? 2 : 1
+        )
+        label.new(
+            x = midpointBar,
+            y = level,
+            text = f_structure_event_text(eventPulse),
+            xloc = xloc.bar_index,
+            style = direction == 1 ?
+                label.style_label_down :
+                label.style_label_up,
+            color = color.new(eventColor, 100),
+            textcolor = eventColor,
+            size = swingEvent ? size.small : size.tiny
+        )
+        drawn := true
+
+    drawn
+
+f_find_chart_order_block(
+    int direction,
+    int originBar,
+    int searchBars
+) =>
+    int sourceTime = na
+    float sourceTop = na
+    float sourceBottom = na
+    int availableBars = (
+        not na(originBar) ?
+        math.min(
+            searchBars,
+            math.max(bar_index - originBar, 0)
+        ) :
+        0
+    )
+
+    if direction != 0 and availableBars > 0
+        for offset = 1 to availableBars
+            bool betterSource = (
+                direction == 1 ?
+                (
+                    na(sourceBottom) or
+                    low[offset] < sourceBottom
+                ) :
+                (
+                    na(sourceTop) or
+                    high[offset] > sourceTop
+                )
+            )
+            if betterSource
+                sourceTime := time[offset]
+                sourceTop := high[offset]
+                sourceBottom := low[offset]
+
+    [sourceTime, sourceTop, sourceBottom]
+
+f_clear_chart_order_blocks(
+    array<box> boxes,
+    array<int> directions,
+    array<float> tops,
+    array<float> bottoms,
+    array<bool> mitigated,
+    array<int> createdBars
+) =>
+    int blockCount = array.size(boxes)
+    if blockCount > 0
+        for index = 0 to blockCount - 1
+            box.delete(array.get(boxes, index))
+    array.clear(boxes)
+    array.clear(directions)
+    array.clear(tops)
+    array.clear(bottoms)
+    array.clear(mitigated)
+    array.clear(createdBars)
+    true
+
+f_add_chart_order_block(
+    array<box> boxes,
+    array<int> directions,
+    array<float> tops,
+    array<float> bottoms,
+    array<bool> mitigated,
+    array<int> createdBars,
+    int eventPulse,
+    int direction,
+    int originBar,
+    int maximumBlocks,
+    bool swingBlock
+) =>
+    bool added = false
+    if eventPulse != 0 and direction != 0 and not na(originBar)
+        [sourceTime, sourceTop, sourceBottom] = f_find_chart_order_block(
+            direction,
+            originBar,
+            chartOrderBlockSearchBars
+        )
+        if (
+            not na(sourceTime) and
+            not na(sourceTop) and
+            not na(sourceBottom)
+        )
+            color zoneColor = f_state_color(direction)
+            box zone = box.new(
+                left = sourceTime,
+                top = sourceTop,
+                right = time,
+                bottom = sourceBottom,
+                xloc = xloc.bar_time,
+                extend = extend.right,
+                border_color = swingBlock ?
+                    color.new(zoneColor, 20) :
+                    color.new(zoneColor, 100),
+                border_width = 1,
+                border_style = swingBlock ?
+                    line.style_solid :
+                    line.style_dotted,
+                bgcolor = color.new(
+                    zoneColor,
+                    swingBlock ? 87 : 91
+                )
+            )
+            array.push(boxes, zone)
+            array.push(directions, direction)
+            array.push(tops, sourceTop)
+            array.push(bottoms, sourceBottom)
+            array.push(mitigated, false)
+            array.push(createdBars, bar_index)
+            added := true
+
+            if array.size(boxes) > maximumBlocks
+                box oldest = array.shift(boxes)
+                box.delete(oldest)
+                array.shift(directions)
+                array.shift(tops)
+                array.shift(bottoms)
+                array.shift(mitigated)
+                array.shift(createdBars)
+
+    added
+
+f_update_chart_order_blocks(
+    array<box> boxes,
+    array<int> directions,
+    array<float> tops,
+    array<float> bottoms,
+    array<bool> mitigated,
+    array<int> createdBars,
+    bool enabled,
+    bool swingBlock
+) =>
+    if not enabled
+        f_clear_chart_order_blocks(
+            boxes,
+            directions,
+            tops,
+            bottoms,
+            mitigated,
+            createdBars
+        )
+    else
+        int blockCount = array.size(boxes)
+        if blockCount > 0
+            for reverseOffset = 0 to blockCount - 1
+                int index = blockCount - 1 - reverseOffset
+                box zone = array.get(boxes, index)
+                int direction = array.get(directions, index)
+                float zoneTop = array.get(tops, index)
+                float zoneBottom = array.get(bottoms, index)
+                bool wasMitigated = array.get(mitigated, index)
+                int createdBar = array.get(createdBars, index)
+                float bullishInvalidationSource = (
+                    chartOrderBlockMitigationInput == "Close" ?
+                    close :
+                    low
+                )
+                float bearishInvalidationSource = (
+                    chartOrderBlockMitigationInput == "Close" ?
+                    close :
+                    high
+                )
+                bool invalidated = (
+                    barstate.isconfirmed and
+                    (
+                        (
+                            direction == 1 and
+                            bullishInvalidationSource < zoneBottom
+                        ) or
+                        (
+                            direction == -1 and
+                            bearishInvalidationSource > zoneTop
+                        )
+                    )
+                )
+
+                if invalidated
+                    box.delete(zone)
+                    array.remove(boxes, index)
+                    array.remove(directions, index)
+                    array.remove(tops, index)
+                    array.remove(bottoms, index)
+                    array.remove(mitigated, index)
+                    array.remove(createdBars, index)
+                else
+                    bool touched = (
+                        bar_index > createdBar and
+                        (
+                            (
+                                direction == 1 and
+                                low <= zoneTop
+                            ) or
+                            (
+                                direction == -1 and
+                                high >= zoneBottom
+                            )
+                        )
+                    )
+                    bool isMitigated = wasMitigated or touched
+                    color zoneColor = f_state_color(direction)
+                    array.set(mitigated, index, isMitigated)
+                    box.set_bgcolor(
+                        zone,
+                        color.new(
+                            zoneColor,
+                            swingBlock ?
+                                (isMitigated ? 92 : 87) :
+                                (isMitigated ? 95 : 91)
+                        )
+                    )
+                    box.set_border_color(
+                        zone,
+                        swingBlock ?
+                            color.new(
+                                zoneColor,
+                                isMitigated ? 52 : 20
+                            ) :
+                            color.new(zoneColor, 100)
+                    )
+
+    true
 
 f_cisd_state(
     int minimumDeliveryCandles,
@@ -1535,6 +1887,75 @@ bool recentPdlSweep = (
     recentPdhSweep,
     recentPdlSweep
 )
+[swingStructureEventPulse, latestSwingStructureEvent, latestSwingStructureDirection, swingTrendState, latestSwingStructureLevel, latestSwingStructureEventBar, latestSwingStructureOriginBar, latestMajorSwingHigh, latestMajorSwingLow, latestMajorSwingHighBar, latestMajorSwingLowBar, latestMajorHighBroken, latestMajorLowBroken] = f_execution_structure(
+    swingStructureLength,
+    false,
+    false
+)
+
+var array<box> internalOrderBlockBoxes = array.new_box()
+var array<int> internalOrderBlockDirections = array.new_int()
+var array<float> internalOrderBlockTops = array.new_float()
+var array<float> internalOrderBlockBottoms = array.new_float()
+var array<bool> internalOrderBlockMitigated = array.new_bool()
+var array<int> internalOrderBlockCreatedBars = array.new_int()
+var array<box> swingOrderBlockBoxes = array.new_box()
+var array<int> swingOrderBlockDirections = array.new_int()
+var array<float> swingOrderBlockTops = array.new_float()
+var array<float> swingOrderBlockBottoms = array.new_float()
+var array<bool> swingOrderBlockMitigated = array.new_bool()
+var array<int> swingOrderBlockCreatedBars = array.new_int()
+
+f_update_chart_order_blocks(
+    internalOrderBlockBoxes,
+    internalOrderBlockDirections,
+    internalOrderBlockTops,
+    internalOrderBlockBottoms,
+    internalOrderBlockMitigated,
+    internalOrderBlockCreatedBars,
+    showInternalOrderBlocks,
+    false
+)
+f_update_chart_order_blocks(
+    swingOrderBlockBoxes,
+    swingOrderBlockDirections,
+    swingOrderBlockTops,
+    swingOrderBlockBottoms,
+    swingOrderBlockMitigated,
+    swingOrderBlockCreatedBars,
+    showSwingOrderBlocks,
+    true
+)
+
+if showInternalOrderBlocks and structureEventPulse != 0
+    f_add_chart_order_block(
+        internalOrderBlockBoxes,
+        internalOrderBlockDirections,
+        internalOrderBlockTops,
+        internalOrderBlockBottoms,
+        internalOrderBlockMitigated,
+        internalOrderBlockCreatedBars,
+        structureEventPulse,
+        latestStructureDirection,
+        latestStructureOriginBar,
+        internalOrderBlockCount,
+        false
+    )
+
+if showSwingOrderBlocks and swingStructureEventPulse != 0
+    f_add_chart_order_block(
+        swingOrderBlockBoxes,
+        swingOrderBlockDirections,
+        swingOrderBlockTops,
+        swingOrderBlockBottoms,
+        swingOrderBlockMitigated,
+        swingOrderBlockCreatedBars,
+        swingStructureEventPulse,
+        latestSwingStructureDirection,
+        latestSwingStructureOriginBar,
+        swingOrderBlockCount,
+        true
+    )
 
 bool structureEventActive = (
     latestStructureEvent != 0 and
@@ -2450,7 +2871,7 @@ if enableAlerts and barstate.isconfirmed
             "\"schema\":\"trading-companion.alert.v1\"," +
             "\"source\":\"tradingview\"," +
             "\"indicator\":\"trading-os\"," +
-            "\"indicatorVersion\":\"0.14.1\"," +
+            "\"indicatorVersion\":\"0.15.0\"," +
             "\"event\":\"" + barAlertEvents + "\"," +
             "\"symbol\":\"" + syminfo.tickerid + "\"," +
             "\"ticker\":\"" + syminfo.ticker + "\"," +
@@ -2489,7 +2910,7 @@ if enableAlerts and barstate.isconfirmed
 alertcondition(
     tradingCompanionAlertPulse,
     title = "Trading Companion Sync",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.14.1\",\"event\":\"TRADING OS UPDATE\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.15.0\",\"event\":\"TRADING OS UPDATE\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 string liquidityState = (
@@ -2895,52 +3316,24 @@ if barstate.islast
             label.delete(swingLowLabel)
             swingLowLabel := na
 
-if (
-    showStructureEvents and
-    structureEventPulse != 0 and
-    not na(latestStructureOriginBar) and
-    not na(latestStructureLevel)
+f_draw_structure_event(
+    showStructureEvents,
+    structureEventPulse,
+    latestStructureDirection,
+    latestStructureLevel,
+    latestStructureOriginBar,
+    latestStructureEventBar,
+    false
 )
-    color structureEventColor = (
-        structureEventPulse == 2 ?
-        warningColor :
-        f_state_color(latestStructureDirection)
-    )
-    string structureEventLabel = (
-        f_structure_event_text(structureEventPulse) + " " +
-        f_state_short(latestStructureDirection)
-    )
-    int structureEventMidpointBar = int(
-        math.round(
-            (
-                latestStructureOriginBar +
-                latestStructureEventBar
-            ) / 2.0
-        )
-    )
-    line.new(
-        x1 = latestStructureOriginBar,
-        y1 = latestStructureLevel,
-        x2 = latestStructureEventBar,
-        y2 = latestStructureLevel,
-        xloc = xloc.bar_index,
-        extend = extend.none,
-        color = structureEventColor,
-        style = line.style_solid,
-        width = structureEventPulse == 3 ? 2 : 1
-    )
-    label.new(
-        x = structureEventMidpointBar,
-        y = latestStructureLevel,
-        text = structureEventLabel,
-        xloc = xloc.bar_index,
-        style = latestStructureDirection == 1 ?
-            label.style_label_down :
-            label.style_label_up,
-        color = color.new(structureEventColor, 12),
-        textcolor = panelColor,
-        size = size.tiny
-    )
+f_draw_structure_event(
+    showSwingStructureEvents,
+    swingStructureEventPulse,
+    latestSwingStructureDirection,
+    latestSwingStructureLevel,
+    latestSwingStructureOriginBar,
+    latestSwingStructureEventBar,
+    true
+)
 
 var line bullishCisdCandidateLine = na
 var line bearishCisdCandidateLine = na
@@ -3709,7 +4102,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.14.1",
+        "TRADING OS · HTF v0.15.0",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,

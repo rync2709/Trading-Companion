@@ -17,7 +17,7 @@ synchronize the same payload from a private Webhook Worker.
   "schema": "trading-companion.alert.v1",
   "source": "tradingview",
   "indicator": "trading-os",
-  "indicatorVersion": "0.14.1",
+  "indicatorVersion": "0.15.0",
   "event": "ENTRY FVG RETRACE BULL",
   "symbol": "FOREXCOM:XAUUSD",
   "ticker": "XAUUSD",
@@ -86,6 +86,10 @@ enabling TradingView two-factor authentication and attaching the protected
 Worker URL, a live TradingView price alert reached the production Worker. The
 temporary TradingView alert and remote test record were deleted after
 verification.
+
+Pine v0.15.0 is the current private chart version. Its Structure and chart
+Order Block changes do not alter this contract. The existing v0.14.1 production
+alert remains active until a deliberate alert migration is completed.
 
 ## Compact Fallback
 

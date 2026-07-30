@@ -2,6 +2,33 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.15.0-alpha - 2026-07-30
+
+### Added
+
+- Added separate Internal and Swing chart-timeframe Structure engines.
+- Added dashed Internal and solid Swing BOS/CHoCH/MSS drawings with centered,
+  transparent event labels.
+- Added All, BOS-only, and CHoCH/MSS-only drawing filters.
+- Added independent Internal and Swing chart Order Block histories.
+- Added configurable OB source search, mitigation fade, and confirmed High/Low
+  or Close invalidation.
+
+### Kept
+
+- Kept the compact Dashboard at `Small` size.
+- Kept HTF POI, Score, Grade, Risk, and Alert gates unchanged.
+- Kept the existing v0.14.1 production alert active while v0.15.0 is validated.
+- Kept the Pine script private and unpublished.
+
+### Validated
+
+- Compiled Pine v0.15.0 successfully in TradingView.
+- Saved the private script as `Trading OS HTF Context v0.15.0`.
+- Confirmed no compile or runtime errors on XAUUSD at 5M, 15M, and 1H.
+- Removed the duplicate development instance, kept v0.15.0 visible, hid the
+  old v0.14.1 chart instance, and saved the TradingView layout.
+
 ## Pine v0.14.1-alpha / Worker v0.1.1 - 2026-07-30
 
 ### Added
