@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.13.0 / Pine v0.17.2-alpha
+Version: v0.13.0 / Pine v0.17.3-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -788,6 +788,10 @@ First milestone:
   mixing them with Session Sweep or other Setup/Entry alerts.
 - [x] Compile and save Pine v0.17.2 privately and verify all three named CISD
   conditions in TradingView without creating a new live alert.
+- [x] Increase HTF Order Block label contrast without changing detection or
+  Dashboard dimensions.
+- [x] Compile, save, and add Pine v0.17.3 privately without changing live
+  alerts.
 - [ ] Compare Order Block source, mitigation, and invalidation against manual
   4H/1H markup.
 - [ ] Compare Breaker activation, mitigation, and invalidation against manual
@@ -885,4 +889,5 @@ Expected outputs:
 | Pine v0.16.2-alpha | Opposite-direction evidence-lock invalidation |
 | Pine v0.17.1-alpha | Separate Asia/London Session Sweep WATCH alerts |
 | Pine v0.17.2-alpha | Separate valid CISD alert conditions |
+| Pine v0.17.3-alpha | Higher-contrast HTF Order Block labels |
 | v1.0.0 | Trading OS MVP |

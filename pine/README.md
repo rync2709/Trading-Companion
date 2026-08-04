@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.17.2-alpha
+Version: v0.17.3-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -612,6 +612,11 @@ Compile status:
   CISD conditions in Create Alert, and was saved privately as
   `Trading OS HTF Context v0.17.2` without publishing or creating a new live
   alert.
+- Pine v0.17.3 uses darker, fully opaque labels for aligned and unaligned HTF
+  Order Blocks. Detection, borders, fills, label size, and Dashboard dimensions
+  are unchanged.
+- Pine v0.17.3 compiled successfully on XAUUSD 15M and was saved privately as
+  `Trading OS HTF Context v0.17.3` without publishing or changing live alerts.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.

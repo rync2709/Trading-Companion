@@ -622,7 +622,7 @@ Current limitation:
 
 ## Module 11 - Alert System
 
-Implementation status: `Pine v0.17.2-alpha - confirmed-bar Setup plus separate Session Sweep and CISD alerts`
+Implementation status: `Pine v0.17.3-alpha - confirmed-bar Setup plus separate Session Sweep and CISD alerts`
 
 Input:
 
@@ -682,7 +682,7 @@ Current limitation:
   alert are configured in production.
 - TradingView 2FA, the protected Worker URL, and live Webhook delivery are
   verified in production.
-- The existing v0.14.1 production alert remains active while v0.17.2 is
+- The existing v0.14.1 production alert remains active while v0.17.3 is
   validated as the private chart version.
 
 ## Current Checklist Mapping

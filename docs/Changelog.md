@@ -2,6 +2,24 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.17.3-alpha - 2026-08-04
+
+### Changed
+
+- Changed aligned Bullish and Bearish HTF Order Block labels to darker,
+  fully opaque directional colors.
+- Changed unaligned HTF Order Block labels to a darker, fully opaque neutral
+  color.
+- Preserved Order Block detection, borders, backgrounds, text size, and
+  Dashboard dimensions.
+
+### Validated
+
+- Compiled Pine v0.17.3 successfully in TradingView without runtime errors on
+  XAUUSD 15M.
+- Saved the private script as `Trading OS HTF Context v0.17.3`, added it to the
+  chart, and preserved the existing live alerts without publishing.
+
 ## Pine v0.17.2-alpha - 2026-08-04
 
 ### Added

@@ -17,7 +17,7 @@ synchronize the same payload from a private Webhook Worker.
   "schema": "trading-companion.alert.v1",
   "source": "tradingview",
   "indicator": "trading-os",
-  "indicatorVersion": "0.17.2",
+  "indicatorVersion": "0.17.3",
   "event": "ENTRY FVG RETRACE BULL",
   "symbol": "FOREXCOM:XAUUSD",
   "ticker": "XAUUSD",
@@ -87,7 +87,7 @@ Worker URL, a live TradingView price alert reached the production Worker. The
 temporary TradingView alert and remote test record were deleted after
 verification.
 
-Pine v0.17.2 is the current private chart version. In addition to the named
+Pine v0.17.3 is the current private chart version. In addition to the named
 Session Sweep conditions, it exposes `CISD Confirmed`, `CISD - Bullish`, and
 `CISD - Bearish`. All named conditions use this same contract. The existing
 v0.14.1 production alert remains active until a deliberate alert migration is

@@ -8,7 +8,7 @@ indicator(
     max_labels_count = 300
 )
 
-// Trading OS Pine Track v0.17.2-alpha
+// Trading OS Pine Track v0.17.3-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG, latest Order Block and
 // Breaker context, daily and Session liquidity, Internal/Swing
 // BOS/CHoCH/MSS, chart Order Blocks, setup-aware CISD/displacement context,
@@ -493,6 +493,9 @@ string dashboardTextSize = (
 color bullishColor = color.rgb(82, 212, 147)
 color bearishColor = color.rgb(239, 105, 118)
 color neutralColor = color.rgb(142, 151, 154)
+color bullishObTextColor = color.rgb(20, 112, 75)
+color bearishObTextColor = color.rgb(160, 36, 53)
+color neutralObTextColor = color.rgb(55, 64, 66)
 color warningColor = color.rgb(237, 189, 91)
 color panelColor = color.rgb(18, 23, 24)
 color panelBorderColor = color.rgb(55, 64, 66)
@@ -542,6 +545,10 @@ f_state_short(int state) =>
 
 f_state_color(int state) =>
     state == 1 ? bullishColor : state == -1 ? bearishColor : neutralColor
+
+f_ob_text_color(int direction, bool aligned) =>
+    not aligned ? neutralObTextColor :
+     direction == 1 ? bullishObTextColor : bearishObTextColor
 
 f_fvg_status_text(int status) =>
     status == 1 ? "FRESH" :
@@ -3334,7 +3341,7 @@ if enableAlerts and barstate.isconfirmed
             "\"schema\":\"trading-companion.alert.v1\"," +
             "\"source\":\"tradingview\"," +
             "\"indicator\":\"trading-os\"," +
-            "\"indicatorVersion\":\"0.17.2\"," +
+            "\"indicatorVersion\":\"0.17.3\"," +
             "\"event\":\"" + barAlertEvents + "\"," +
             "\"symbol\":\"" + syminfo.tickerid + "\"," +
             "\"ticker\":\"" + syminfo.ticker + "\"," +
@@ -3373,55 +3380,55 @@ if enableAlerts and barstate.isconfirmed
 alertcondition(
     tradingCompanionAlertPulse,
     title = "Trading Companion Sync",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"TRADING OS UPDATE\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.3\",\"event\":\"TRADING OS UPDATE\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 alertcondition(
     enableAlerts and alertSessionLiquiditySweep and sessionSweepEvent,
     title = "Session Sweep Watch",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"SESSION SWEEP WATCH\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.3\",\"event\":\"SESSION SWEEP WATCH\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 alertcondition(
     enableAlerts and alertSessionLiquiditySweep and asiaHighSweepEvent,
     title = "Session Sweep - Asia High",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"ASIA HIGH SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.3\",\"event\":\"ASIA HIGH SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 alertcondition(
     enableAlerts and alertSessionLiquiditySweep and asiaLowSweepEvent,
     title = "Session Sweep - Asia Low",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"ASIA LOW SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.3\",\"event\":\"ASIA LOW SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 alertcondition(
     enableAlerts and alertSessionLiquiditySweep and londonHighSweepEvent,
     title = "Session Sweep - London High",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"LONDON HIGH SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.3\",\"event\":\"LONDON HIGH SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 alertcondition(
     enableAlerts and alertSessionLiquiditySweep and londonLowSweepEvent,
     title = "Session Sweep - London Low",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"LONDON LOW SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.3\",\"event\":\"LONDON LOW SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 alertcondition(
     enableAlerts and alertCisdConfirmation and cisdValidAlertPulse,
     title = "CISD Confirmed",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"CISD CONFIRMED\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.3\",\"event\":\"CISD CONFIRMED\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 alertcondition(
     enableAlerts and alertCisdConfirmation and bullishCisdAlertPulse,
     title = "CISD - Bullish",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"CISD BULL CONFIRMED\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.3\",\"event\":\"CISD BULL CONFIRMED\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 alertcondition(
     enableAlerts and alertCisdConfirmation and bearishCisdAlertPulse,
     title = "CISD - Bearish",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"CISD BEAR CONFIRMED\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.3\",\"event\":\"CISD BEAR CONFIRMED\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 string liquidityState = (
@@ -3522,6 +3529,10 @@ if barstate.islast
             f_state_color(primaryObDirection) :
             neutralColor
         )
+        color primaryObTextColor = f_ob_text_color(
+            primaryObDirection,
+            primaryObAligned
+        )
         string primaryObText = (
             f_timeframe_label(primaryTimeframe) + " " +
             f_state_short(primaryObDirection) + " OB · " +
@@ -3541,7 +3552,7 @@ if barstate.islast
                 border_style = line.style_dashed,
                 bgcolor = color.new(primaryObColor, 91),
                 text = primaryObText,
-                text_color = color.new(primaryObColor, 2),
+                text_color = primaryObTextColor,
                 text_size = size.tiny,
                 text_halign = text.align_left,
                 text_valign = text.align_bottom
@@ -3563,7 +3574,7 @@ if barstate.islast
             box.set_text(primaryObBox, primaryObText)
             box.set_text_color(
                 primaryObBox,
-                color.new(primaryObColor, 2)
+                primaryObTextColor
             )
     else if not na(primaryObBox)
         box.delete(primaryObBox)
@@ -3578,6 +3589,10 @@ if barstate.islast
             secondaryObAligned ?
             f_state_color(secondaryObDirection) :
             neutralColor
+        )
+        color secondaryObTextColor = f_ob_text_color(
+            secondaryObDirection,
+            secondaryObAligned
         )
         string secondaryObText = (
             f_timeframe_label(secondaryTimeframe) + " " +
@@ -3598,7 +3613,7 @@ if barstate.islast
                 border_style = line.style_dashed,
                 bgcolor = color.new(secondaryObColor, 94),
                 text = secondaryObText,
-                text_color = color.new(secondaryObColor, 18),
+                text_color = secondaryObTextColor,
                 text_size = size.tiny,
                 text_halign = text.align_left,
                 text_valign = text.align_bottom
@@ -3620,7 +3635,7 @@ if barstate.islast
             box.set_text(secondaryObBox, secondaryObText)
             box.set_text_color(
                 secondaryObBox,
-                color.new(secondaryObColor, 18)
+                secondaryObTextColor
             )
     else if not na(secondaryObBox)
         box.delete(secondaryObBox)
@@ -4581,7 +4596,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.17.2",
+        "TRADING OS · HTF v0.17.3",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,
