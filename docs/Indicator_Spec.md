@@ -222,7 +222,7 @@ Output:
 - liquidity_type: INTERNAL, EXTERNAL, SESSION, DAILY, EQUAL_LEVEL, or NONE
 - sweep_direction: BULLISH, BEARISH, or NEUTRAL
 
-Initial Previous Day Liquidity heuristic:
+Previous Day Liquidity heuristic:
 
 - Request PDH and PDL from the previous completed Daily candle.
 - Use a one-bar offset with `lookahead_on` so historical and realtime levels use confirmed values.
@@ -234,10 +234,28 @@ Initial Previous Day Liquidity heuristic:
 - Both levels swept in one day produce mixed context and must not imply a direction.
 - PDH/PDL values remain in the Data Window while sweep calculations use the confirmed historical series.
 
+Session Liquidity WATCH heuristic:
+
+- Track Asia `20:00-00:00` and London `02:00-05:00` in the configurable
+  Session timezone; default to `America/New_York` for DST-aware ICT-style
+  ranges.
+- Freeze each Session High/Low only after its range closes.
+- Session High sweep: a confirmed chart candle trades above the finalized High
+  and closes back below it.
+- Session Low sweep: a confirmed chart candle trades below the finalized Low
+  and closes back above it.
+- Record only the first confirmed sweep of each finalized Session level.
+- Emit independent WATCH events for Asia High, Asia Low, London High, and
+  London Low.
+- Do not add Session Sweep WATCH to Liquidity Score, MSS, or READY in the
+  initial baseline.
+
 Current limitation:
 
 - Sweep detection uses the chart timeframe candle.
-- Asia High/Low, Equal High/Low, and Internal/External classification are not automated.
+- Equal High/Low and Internal/External classification are not automated.
+- Asia/London Session ranges require manual comparison against the separate
+  Session indicator before they can influence scoring.
 - Liquidity is not yet linked to a setup window, POI proximity, or Structure confirmation.
 - The output is context only and cannot mark an Entry ready.
 - Historical PDH/PDL steplines and confirmed sweep markers can be enabled independently.
@@ -251,7 +269,7 @@ Input:
 - Confirmed execution-chart swing highs and lows
 - Current and previous closes
 - Prior execution structure direction
-- Recent confirmed PDH or PDL sweep
+- Recent confirmed PDH or PDL sweep; Session Sweep remains WATCH-only
 - Configurable Internal and Swing pivot lengths
 - Structure display filter and context window
 - Independent Internal and Swing Order Block display limits
@@ -291,7 +309,8 @@ Output:
 Current limitation:
 
 - The baseline runs on the current chart timeframe and should be used on the intended execution chart.
-- MSS context currently recognizes PDH/PDL sweeps only.
+- MSS context currently recognizes PDH/PDL sweeps only; Session Sweep alerts
+  do not upgrade CHoCH to MSS.
 - Setup type, POI proximity, and a complete setup-window state machine are not automated.
 - A Structure event is decision-support context, not an Entry Signal.
 - Manual comparison against marked BOS/CHOCH/MSS examples remains required.
@@ -603,12 +622,13 @@ Current limitation:
 
 ## Module 11 - Alert System
 
-Implementation status: `Pine v0.15.0-alpha - confirmed-bar Alert System with Trading Companion JSON contract`
+Implementation status: `Pine v0.17.1-alpha - confirmed-bar Setup and separate Session Sweep WATCH alerts`
 
 Input:
 
 - Selected HTF POI interaction
 - PDH and PDL sweep pulses
+- Asia High/Low and London High/Low sweep pulses
 - BOS, CHOCH, and MSS pulses
 - Valid CISD event pulse
 - Confirmed Displacement pulse
@@ -632,6 +652,8 @@ Process:
 - Expose a named `Trading Companion Sync` fallback condition with one compact
   snapshot code for TradingView clients that do not register the dynamic
   `alert()` option.
+- Expose one combined `Session Sweep Watch` condition and four independent
+  Asia/London High/Low conditions using the same compact snapshot contract.
 
 Output:
 
@@ -641,12 +663,14 @@ Output:
 - alert_frequency: once per bar close
 - fallback_snapshot: one integer encoding mode, Narrative, State, Score, Grade,
   blocked state, and all eight checklist values
+- named_session_conditions: combined WATCH plus Asia High, Asia Low, London
+  High, and London Low
 
 Current limitation:
 
 - The script does not create a running TradingView alert automatically.
 - Notifications begin only after the trader creates an alert using
-  `Any alert() function call`.
+  `Any alert() function call` or one of the named Session Sweep conditions.
 - Alert execution is realtime only; historical bars do not deliver
   notifications.
 - Trading Companion supports validated manual JSON import and an optional
@@ -655,7 +679,7 @@ Current limitation:
   alert are configured in production.
 - TradingView 2FA, the protected Worker URL, and live Webhook delivery are
   verified in production.
-- The existing v0.14.1 production alert remains active while v0.16.2 is
+- The existing v0.14.1 production alert remains active while v0.17.1 is
   validated as the private chart version.
 
 ## Current Checklist Mapping

@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.13.0 / Pine v0.16.2-alpha
+Version: v0.13.0 / Pine v0.17.1-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -778,6 +778,12 @@ First milestone:
   CISD, or Displacement confirms the opposite direction in Pine v0.16.2.
 - [x] Compile and save Pine v0.16.2 privately without migrating the production
   alert.
+- [x] Track finalized Asia and London Session High/Low using a configurable,
+  DST-aware timezone.
+- [x] Add one combined Session Sweep WATCH condition and four direction-specific
+  TradingView alert conditions without changing Score, MSS, or READY.
+- [x] Compile Pine v0.17.1 on 5M, 15M, and 1H without runtime errors and save it
+  privately without migrating the production alert.
 - [ ] Compare Order Block source, mitigation, and invalidation against manual
   4H/1H markup.
 - [ ] Compare Breaker activation, mitigation, and invalidation against manual
@@ -873,4 +879,5 @@ Expected outputs:
 | Pine v0.16.0-alpha | Balanced/Strict setup profiles and Entry FVG evidence locking |
 | Pine v0.16.1-alpha | Current-HTF and filled-FVG evidence-lock safeguards |
 | Pine v0.16.2-alpha | Opposite-direction evidence-lock invalidation |
+| Pine v0.17.1-alpha | Separate Asia/London Session Sweep WATCH alerts |
 | v1.0.0 | Trading OS MVP |

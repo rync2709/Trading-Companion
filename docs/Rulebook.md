@@ -144,6 +144,12 @@ Liquidity examples:
 
 A sweep or raid has more value when it occurs near the POI and inside the same setup window.
 
+The first automated Session Liquidity baseline tracks finalized Asia and
+London High/Low ranges. A confirmed candle must trade through a finalized
+level and close back inside the range to create a Session Sweep WATCH event.
+Session Sweep WATCH remains separate from Score, MSS classification, and READY
+until manual validation confirms how it should enter the setup engine.
+
 ## Rule 5 - Structure Confirmation
 
 The structure confirmation depends on setup type.

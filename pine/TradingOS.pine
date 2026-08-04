@@ -8,15 +8,15 @@ indicator(
     max_labels_count = 300
 )
 
-// Trading OS Pine Track v0.16.2-alpha
+// Trading OS Pine Track v0.17.1-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG, latest Order Block and
-// Breaker context, daily liquidity, Internal/Swing BOS/CHoCH/MSS, chart
-// Order Blocks, setup-aware CISD/displacement context, execution-chart
-// displacement with follow-through, Entry FVG confirmation, manual and
-// Balanced/Strict automated assessment modes, a locked Entry/Risk planning
-// baseline, and confirmed-bar event alerts. Full chart context is enabled by
-// default. This indicator remains decision support and does not generate
-// Buy/Sell signals.
+// Breaker context, daily and Session liquidity, Internal/Swing
+// BOS/CHoCH/MSS, chart Order Blocks, setup-aware CISD/displacement context,
+// execution-chart displacement with follow-through, Entry FVG confirmation,
+// manual and Balanced/Strict automated assessment modes, a locked Entry/Risk
+// planning baseline, and confirmed-bar event alerts. Full chart context is
+// enabled by default. This indicator remains decision support and does not
+// generate Buy/Sell signals.
 
 string assessmentModeInput = input.string(
     "Manual",
@@ -94,6 +94,30 @@ int balancedMinimumEvidenceScore = input.int(
     group = "Automatic Assessment"
 )
 
+string sessionTimezoneInput = input.string(
+    "America/New_York",
+    "Session timezone",
+    options = [
+        "America/New_York",
+        "Etc/UTC",
+        "Europe/London",
+        "Asia/Bangkok"
+    ],
+    tooltip = "Uses an IANA timezone so Session ranges follow daylight-saving changes where applicable. This setting is independent of the chart display timezone.",
+    group = "Session Liquidity"
+)
+string asiaSessionInput = input.session(
+    "2000-0000",
+    "Asia range",
+    tooltip = "Default ICT-style Asia range expressed in the selected Session timezone.",
+    group = "Session Liquidity"
+)
+string londonSessionInput = input.session(
+    "0200-0500",
+    "London range",
+    tooltip = "Default ICT-style London range expressed in the selected Session timezone.",
+    group = "Session Liquidity"
+)
 string primaryTimeframe = input.timeframe("240", "Primary HTF", group = "HTF Bias")
 string secondaryTimeframe = input.timeframe("60", "Secondary HTF", group = "HTF Bias")
 int swingLength = input.int(
@@ -389,6 +413,12 @@ bool alertPoiTouch = input.bool(
 bool alertLiquiditySweep = input.bool(
     true,
     "Alert: PDH / PDL sweep",
+    group = "Alerts"
+)
+bool alertSessionLiquiditySweep = input.bool(
+    true,
+    "Alert: Asia / London sweep",
+    tooltip = "Adds Session Sweep WATCH events to Any alert() and enables the named Session Sweep alert conditions. Session sweeps do not change Score or READY in this version.",
     group = "Alerts"
 )
 bool alertStructureConfirmation = input.bool(
@@ -1899,6 +1929,126 @@ bool recentPdlSweep = (
     barsSincePdlSweep <= structureContextBars
 )
 
+// Session liquidity remains a separate WATCH layer in v0.17.1. It does not
+// upgrade CHoCH to MSS or contribute to Dashboard scoring until manual
+// validation establishes which Session sweeps belong in the setup engine.
+int asiaSessionTime = time(
+    timeframe.period,
+    asiaSessionInput,
+    sessionTimezoneInput
+)
+int londonSessionTime = time(
+    timeframe.period,
+    londonSessionInput,
+    sessionTimezoneInput
+)
+bool asiaSessionActive = timeframe.isintraday and not na(asiaSessionTime)
+bool londonSessionActive = timeframe.isintraday and not na(londonSessionTime)
+bool asiaSessionStart = asiaSessionActive and not asiaSessionActive[1]
+bool asiaSessionEnd = not asiaSessionActive and asiaSessionActive[1]
+bool londonSessionStart = londonSessionActive and not londonSessionActive[1]
+bool londonSessionEnd = not londonSessionActive and londonSessionActive[1]
+
+var float asiaDevelopingHigh = na
+var float asiaDevelopingLow = na
+var float asiaSessionHigh = na
+var float asiaSessionLow = na
+var bool asiaRangeReady = false
+var bool asiaHighSwept = false
+var bool asiaLowSwept = false
+
+if asiaSessionStart
+    asiaDevelopingHigh := high
+    asiaDevelopingLow := low
+    asiaRangeReady := false
+    asiaHighSwept := false
+    asiaLowSwept := false
+else if asiaSessionActive
+    asiaDevelopingHigh := math.max(nz(asiaDevelopingHigh, high), high)
+    asiaDevelopingLow := math.min(nz(asiaDevelopingLow, low), low)
+
+if asiaSessionEnd
+    asiaSessionHigh := asiaDevelopingHigh
+    asiaSessionLow := asiaDevelopingLow
+    asiaRangeReady := not na(asiaSessionHigh) and not na(asiaSessionLow)
+
+var float londonDevelopingHigh = na
+var float londonDevelopingLow = na
+var float londonSessionHigh = na
+var float londonSessionLow = na
+var bool londonRangeReady = false
+var bool londonHighSwept = false
+var bool londonLowSwept = false
+
+if londonSessionStart
+    londonDevelopingHigh := high
+    londonDevelopingLow := low
+    londonRangeReady := false
+    londonHighSwept := false
+    londonLowSwept := false
+else if londonSessionActive
+    londonDevelopingHigh := math.max(
+        nz(londonDevelopingHigh, high),
+        high
+    )
+    londonDevelopingLow := math.min(
+        nz(londonDevelopingLow, low),
+        low
+    )
+
+if londonSessionEnd
+    londonSessionHigh := londonDevelopingHigh
+    londonSessionLow := londonDevelopingLow
+    londonRangeReady := (
+        not na(londonSessionHigh) and
+        not na(londonSessionLow)
+    )
+
+bool asiaHighSweepEvent = (
+    barstate.isconfirmed and
+    asiaRangeReady and
+    not asiaHighSwept and
+    high > asiaSessionHigh and
+    close < asiaSessionHigh
+)
+bool asiaLowSweepEvent = (
+    barstate.isconfirmed and
+    asiaRangeReady and
+    not asiaLowSwept and
+    low < asiaSessionLow and
+    close > asiaSessionLow
+)
+bool londonHighSweepEvent = (
+    barstate.isconfirmed and
+    londonRangeReady and
+    not londonHighSwept and
+    high > londonSessionHigh and
+    close < londonSessionHigh
+)
+bool londonLowSweepEvent = (
+    barstate.isconfirmed and
+    londonRangeReady and
+    not londonLowSwept and
+    low < londonSessionLow and
+    close > londonSessionLow
+)
+
+if asiaHighSweepEvent
+    asiaHighSwept := true
+if asiaLowSweepEvent
+    asiaLowSwept := true
+if londonHighSweepEvent
+    londonHighSwept := true
+if londonLowSweepEvent
+    londonLowSwept := true
+
+bool sessionSweepEvent = (
+    asiaHighSweepEvent or
+    asiaLowSweepEvent or
+    londonHighSweepEvent or
+    londonLowSweepEvent
+)
+
 [structureEventPulse, latestStructureEvent, latestStructureDirection, executionTrendState, latestStructureLevel, latestStructureEventBar, latestStructureOriginBar, latestExecutionSwingHigh, latestExecutionSwingLow, latestExecutionSwingHighBar, latestExecutionSwingLowBar, latestExecutionHighBroken, latestExecutionLowBroken] = f_execution_structure(
     structureSwingLength,
     recentPdhSweep,
@@ -2999,6 +3149,7 @@ bool tradingCompanionAlertPulse = (
             alertLiquiditySweep and
             (pdhSweepEvent or pdlSweepEvent)
         ) or
+        (alertSessionLiquiditySweep and sessionSweepEvent) or
         (alertStructureConfirmation and structureEventPulse != 0) or
         (alertCisdConfirmation and cisdValidAlertPulse) or
         (
@@ -3043,6 +3194,30 @@ if enableAlerts and barstate.isconfirmed
         barAlertEvents := f_append_alert_event(
             barAlertEvents,
             "PDL SWEPT"
+        )
+
+    if alertSessionLiquiditySweep and asiaHighSweepEvent
+        barAlertEvents := f_append_alert_event(
+            barAlertEvents,
+            "ASIA HIGH SWEPT"
+        )
+
+    if alertSessionLiquiditySweep and asiaLowSweepEvent
+        barAlertEvents := f_append_alert_event(
+            barAlertEvents,
+            "ASIA LOW SWEPT"
+        )
+
+    if alertSessionLiquiditySweep and londonHighSweepEvent
+        barAlertEvents := f_append_alert_event(
+            barAlertEvents,
+            "LONDON HIGH SWEPT"
+        )
+
+    if alertSessionLiquiditySweep and londonLowSweepEvent
+        barAlertEvents := f_append_alert_event(
+            barAlertEvents,
+            "LONDON LOW SWEPT"
         )
 
     if alertStructureConfirmation and structureEventPulse != 0
@@ -3151,7 +3326,7 @@ if enableAlerts and barstate.isconfirmed
             "\"schema\":\"trading-companion.alert.v1\"," +
             "\"source\":\"tradingview\"," +
             "\"indicator\":\"trading-os\"," +
-            "\"indicatorVersion\":\"0.16.2\"," +
+            "\"indicatorVersion\":\"0.17.1\"," +
             "\"event\":\"" + barAlertEvents + "\"," +
             "\"symbol\":\"" + syminfo.tickerid + "\"," +
             "\"ticker\":\"" + syminfo.ticker + "\"," +
@@ -3190,7 +3365,37 @@ if enableAlerts and barstate.isconfirmed
 alertcondition(
     tradingCompanionAlertPulse,
     title = "Trading Companion Sync",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.16.2\",\"event\":\"TRADING OS UPDATE\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.1\",\"event\":\"TRADING OS UPDATE\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+)
+
+alertcondition(
+    enableAlerts and alertSessionLiquiditySweep and sessionSweepEvent,
+    title = "Session Sweep Watch",
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.1\",\"event\":\"SESSION SWEEP WATCH\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+)
+
+alertcondition(
+    enableAlerts and alertSessionLiquiditySweep and asiaHighSweepEvent,
+    title = "Session Sweep - Asia High",
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.1\",\"event\":\"ASIA HIGH SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+)
+
+alertcondition(
+    enableAlerts and alertSessionLiquiditySweep and asiaLowSweepEvent,
+    title = "Session Sweep - Asia Low",
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.1\",\"event\":\"ASIA LOW SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+)
+
+alertcondition(
+    enableAlerts and alertSessionLiquiditySweep and londonHighSweepEvent,
+    title = "Session Sweep - London High",
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.1\",\"event\":\"LONDON HIGH SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+)
+
+alertcondition(
+    enableAlerts and alertSessionLiquiditySweep and londonLowSweepEvent,
+    title = "Session Sweep - London Low",
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.1\",\"event\":\"LONDON LOW SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 string liquidityState = (
@@ -4177,16 +4382,6 @@ plot(
     display = display.data_window
 )
 plot(
-    cisdEventActive ? latestCisdLegCount : 0,
-    title = "Active CISD delivery candle count",
-    display = display.data_window
-)
-plot(
-    cisdEventActive ? latestCisdLegRange : na,
-    title = "Active CISD delivery leg range",
-    display = display.data_window
-)
-plot(
     cisdQuality,
     title = "Active CISD quality",
     display = display.data_window
@@ -4229,21 +4424,6 @@ plot(
 plot(
     displacementEventActive ? latestDisplacementStructureLevel : na,
     title = "Active displacement structure level",
-    display = display.data_window
-)
-plot(
-    displacementEventActive ? latestDisplacementBodyMultiple : na,
-    title = "Active displacement body / average body",
-    display = display.data_window
-)
-plot(
-    displacementEventActive ? latestDisplacementRangeAtr : na,
-    title = "Active displacement range / ATR",
-    display = display.data_window
-)
-plot(
-    displacementEventActive ? latestDisplacementBodyShare : na,
-    title = "Active displacement body share",
     display = display.data_window
 )
 plot(
@@ -4390,7 +4570,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.16.2",
+        "TRADING OS · HTF v0.17.1",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,

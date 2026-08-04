@@ -2,6 +2,35 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.17.1-alpha - 2026-08-04
+
+### Added
+
+- Added configurable, DST-aware Asia and London Session range tracking.
+- Added confirmed Session High/Low sweep detection after each range closes.
+- Added one combined `Session Sweep Watch` TradingView condition.
+- Added separate Asia High, Asia Low, London High, and London Low alert
+  conditions.
+- Added Session Sweep events to the dynamic Trading Companion payload when the
+  Session alert group is enabled.
+
+### Safety
+
+- Kept Session Sweep WATCH separate from Liquidity Score, MSS classification,
+  and READY.
+- Kept Session visuals delegated to the existing Session indicator to avoid
+  duplicate chart ranges.
+- Preserved the existing v0.14.1 production alert; no alert migration or new
+  live alert was performed.
+
+### Validated
+
+- Compiled Pine v0.17.1 successfully in TradingView.
+- Confirmed no runtime errors on XAUUSD at 5M, 15M, and 1H.
+- Confirmed all five named Session Sweep conditions appear in TradingView.
+- Saved the private script as `Trading OS HTF Context v0.17.1` without
+  publishing.
+
 ## Pine v0.16.2-alpha - 2026-07-30
 
 ### Fixed

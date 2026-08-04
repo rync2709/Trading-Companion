@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.16.2-alpha
+Version: v0.17.1-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -24,6 +24,9 @@ Defaults:
 - Dashboard assessment mode: Manual
 - Automatic setup profile: Balanced
 - Balanced minimum evidence score before Risk / RR: 65
+- Session timezone: America/New_York
+- Asia range: 20:00-00:00
+- London range: 02:00-05:00
 - Manual Narrative: Neutral
 - Manual checklist: all eight items unchecked
 - Primary HTF: 4H
@@ -189,6 +192,20 @@ The first Liquidity module uses the confirmed Previous Day High (`PDH`) and Prev
 - A PDL sweep requires a confirmed chart candle to trade below PDL and close back above it.
 - Only the first confirmed sweep of each level is recorded per exchange day.
 - PDH and PDL remain available in the Data Window and can be drawn as historical chart levels.
+
+The Session Liquidity WATCH layer tracks finalized Asia and London ranges:
+
+- Session times use a configurable IANA timezone and default to
+  `America/New_York`, so the default ranges follow DST.
+- Asia defaults to `20:00-00:00`; London defaults to `02:00-05:00`.
+- A Session High/Low becomes eligible only after the range closes.
+- A confirmed candle must trade through the finalized level and close back
+  inside it to create a sweep.
+- Only the first High and first Low sweep are retained for each finalized
+  range.
+- Session Sweep is WATCH-only and does not change Score, MSS, or READY.
+- The separate Session indicator remains the visual source; Trading OS does
+  not duplicate its range boxes or lines.
 - The dashboard remains neutral while waiting and colors the Liquidity row after a sweep.
 
 ## Chart Presentation
@@ -365,6 +382,7 @@ The Alert System runs only on confirmed chart candles and supports:
 
 - First interaction with the selected HTF POI
 - Confirmed PDH or PDL sweep
+- Confirmed Asia or London High/Low sweep as a separate WATCH alert
 - Confirmed BOS, CHOCH, or MSS
 - Valid Bullish or Bearish CISD
 - Confirmed Bullish or Bearish Displacement
@@ -382,8 +400,17 @@ all eight checklist values, available Entry/Stop/Target/RR, and close price.
 Manual mode exports the selected Manual Assessment; Automatic mode exports the
 confirmed indicator state.
 
-The Pine script exposes one `alert()` call with once-per-bar-close frequency
-and one named `Trading Companion Sync` fallback condition. The dynamic
+The Pine script exposes one `alert()` call with once-per-bar-close frequency,
+one named `Trading Companion Sync` fallback condition, and these separate
+Session conditions:
+
+- `Session Sweep Watch`
+- `Session Sweep - Asia High`
+- `Session Sweep - Asia Low`
+- `Session Sweep - London High`
+- `Session Sweep - London Low`
+
+The dynamic
 `alert()` condition remains preferred because it includes the full event list
 and available Risk Plan. The fallback sends a compact Dashboard snapshot that
 the Worker decodes into the same contract.
@@ -398,6 +425,12 @@ notifications:
 6. Choose the required notification channel and create the alert.
 7. Recreate the alert after changing the symbol, timeframe, or indicator
    settings that the running alert must use.
+
+To keep Session Sweep separate from Setup/Entry notifications, select
+`Session Sweep Watch` instead of `Any alert() function call`. Select one of the
+four direction-specific conditions when each level needs its own TradingView
+alert. Do not enable both the combined and direction-specific conditions unless
+duplicate notifications are intentional.
 
 ## Non-Repainting Baseline
 
@@ -555,6 +588,12 @@ Compile status:
   `Trading OS HTF Context v0.16.2` without publishing.
 - Kept v0.16.2 visible in Automatic Balanced mode, removed the v0.16.1 chart
   instance, and preserved the hidden v0.14.1 production-alert instance.
+- Pine v0.17.1 added finalized Asia/London Session ranges and five named
+  Session Sweep WATCH conditions without changing Score, MSS, or READY.
+- Pine v0.17.1 compiled successfully on XAUUSD 5M, 15M, and 1H and was saved
+  privately as `Trading OS HTF Context v0.17.1` without publishing.
+- Kept v0.17.1 visible in Manual mode and preserved the hidden v0.14.1
+  production-alert instance. No new TradingView alert was created.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.
@@ -597,8 +636,9 @@ Compile status:
 - Breaker is chart context only and is not yet part of POI selection, scoring,
   or Alerts.
 - No mitigation block or liquidity POI.
-- Liquidity currently supports PDH and PDL only.
-- No Asia High/Low, Equal High/Low, or Internal/External Liquidity.
+- Scored Liquidity and MSS currently support PDH and PDL only.
+- Asia/London High/Low are WATCH-only; Equal High/Low and Internal/External
+  Liquidity are not automated.
 - Structure now distinguishes MSS Reversal, BOS Continuation, and CHoCH Watch
   paths for automated completion, but setup classification remains a
   mechanical baseline that requires manual validation.

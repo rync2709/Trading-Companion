@@ -60,6 +60,33 @@ test("parses the named TradingView alertcondition payload", () => {
   assert.equal(alert.occurredAt, "2026-07-30T14:30:00.000Z");
 });
 
+test("preserves a separate Session Sweep WATCH event", () => {
+  const alert = parseIndicatorAlert({
+    schema: "trading-companion.alert.v1",
+    source: "tradingview",
+    indicator: "trading-os",
+    indicatorVersion: "0.17.1",
+    event: "ASIA HIGH SWEPT",
+    symbol: "FOREXCOM:XAUUSD",
+    ticker: "XAUUSD",
+    timeframe: "15",
+    time: "2026-08-04T12:00:00Z",
+    snapshotCode: MANUAL_BULLISH_DEVELOPING_A_PLUS,
+    risk: {
+      entry: null,
+      stop: null,
+      target: null,
+      rr: null
+    },
+    close: 4100.5
+  });
+
+  assert.equal(alert.event, "ASIA HIGH SWEPT");
+  assert.equal(alert.indicatorVersion, "0.17.1");
+  assert.equal(alert.mode, "manual");
+  assert.equal(alert.state, "developing");
+});
+
 test("rejects malformed compact snapshots", () => {
   assert.throws(
     () => decodeAlertSnapshotCode(33554432),
