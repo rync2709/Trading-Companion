@@ -1,6 +1,6 @@
 # Trading OS Master Roadmap
 
-Version: v0.13.0 / Pine v0.17.1-alpha
+Version: v0.13.0 / Pine v0.17.2-alpha
 Status: Master product roadmap
 
 ## Product Direction
@@ -784,6 +784,10 @@ First milestone:
   TradingView alert conditions without changing Score, MSS, or READY.
 - [x] Compile Pine v0.17.1 on 5M, 15M, and 1H without runtime errors and save it
   privately without migrating the production alert.
+- [x] Add combined, Bullish, and Bearish named CISD alert conditions without
+  mixing them with Session Sweep or other Setup/Entry alerts.
+- [x] Compile and save Pine v0.17.2 privately and verify all three named CISD
+  conditions in TradingView without creating a new live alert.
 - [ ] Compare Order Block source, mitigation, and invalidation against manual
   4H/1H markup.
 - [ ] Compare Breaker activation, mitigation, and invalidation against manual
@@ -880,4 +884,5 @@ Expected outputs:
 | Pine v0.16.1-alpha | Current-HTF and filled-FVG evidence-lock safeguards |
 | Pine v0.16.2-alpha | Opposite-direction evidence-lock invalidation |
 | Pine v0.17.1-alpha | Separate Asia/London Session Sweep WATCH alerts |
+| Pine v0.17.2-alpha | Separate valid CISD alert conditions |
 | v1.0.0 | Trading OS MVP |

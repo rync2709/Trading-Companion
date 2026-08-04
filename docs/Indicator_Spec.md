@@ -622,7 +622,7 @@ Current limitation:
 
 ## Module 11 - Alert System
 
-Implementation status: `Pine v0.17.1-alpha - confirmed-bar Setup and separate Session Sweep WATCH alerts`
+Implementation status: `Pine v0.17.2-alpha - confirmed-bar Setup plus separate Session Sweep and CISD alerts`
 
 Input:
 
@@ -654,6 +654,8 @@ Process:
   `alert()` option.
 - Expose one combined `Session Sweep Watch` condition and four independent
   Asia/London High/Low conditions using the same compact snapshot contract.
+- Expose one combined `CISD Confirmed` condition and independent Bullish and
+  Bearish conditions. These named conditions fire only for valid CISD events.
 
 Output:
 
@@ -665,6 +667,7 @@ Output:
   blocked state, and all eight checklist values
 - named_session_conditions: combined WATCH plus Asia High, Asia Low, London
   High, and London Low
+- named_cisd_conditions: combined valid CISD plus Bullish and Bearish CISD
 
 Current limitation:
 
@@ -679,7 +682,7 @@ Current limitation:
   alert are configured in production.
 - TradingView 2FA, the protected Worker URL, and live Webhook delivery are
   verified in production.
-- The existing v0.14.1 production alert remains active while v0.17.1 is
+- The existing v0.14.1 production alert remains active while v0.17.2 is
   validated as the private chart version.
 
 ## Current Checklist Mapping

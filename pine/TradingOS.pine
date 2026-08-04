@@ -8,7 +8,7 @@ indicator(
     max_labels_count = 300
 )
 
-// Trading OS Pine Track v0.17.1-alpha
+// Trading OS Pine Track v0.17.2-alpha
 // Modules: confirmed 4H/1H Bias, aligned HTF FVG, latest Order Block and
 // Breaker context, daily and Session liquidity, Internal/Swing
 // BOS/CHoCH/MSS, chart Order Blocks, setup-aware CISD/displacement context,
@@ -3028,6 +3028,14 @@ bool cisdValidAlertPulse = (
         not cisdValid[1]
     )
 )
+bool bullishCisdAlertPulse = (
+    cisdValidAlertPulse and
+    latestCisdDirection == 1
+)
+bool bearishCisdAlertPulse = (
+    cisdValidAlertPulse and
+    latestCisdDirection == -1
+)
 bool riskReviewAlertPulse = (
     barstate.isconfirmed and
     setupStateCode == 2 and
@@ -3326,7 +3334,7 @@ if enableAlerts and barstate.isconfirmed
             "\"schema\":\"trading-companion.alert.v1\"," +
             "\"source\":\"tradingview\"," +
             "\"indicator\":\"trading-os\"," +
-            "\"indicatorVersion\":\"0.17.1\"," +
+            "\"indicatorVersion\":\"0.17.2\"," +
             "\"event\":\"" + barAlertEvents + "\"," +
             "\"symbol\":\"" + syminfo.tickerid + "\"," +
             "\"ticker\":\"" + syminfo.ticker + "\"," +
@@ -3365,37 +3373,55 @@ if enableAlerts and barstate.isconfirmed
 alertcondition(
     tradingCompanionAlertPulse,
     title = "Trading Companion Sync",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.1\",\"event\":\"TRADING OS UPDATE\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"TRADING OS UPDATE\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 alertcondition(
     enableAlerts and alertSessionLiquiditySweep and sessionSweepEvent,
     title = "Session Sweep Watch",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.1\",\"event\":\"SESSION SWEEP WATCH\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"SESSION SWEEP WATCH\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 alertcondition(
     enableAlerts and alertSessionLiquiditySweep and asiaHighSweepEvent,
     title = "Session Sweep - Asia High",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.1\",\"event\":\"ASIA HIGH SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"ASIA HIGH SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 alertcondition(
     enableAlerts and alertSessionLiquiditySweep and asiaLowSweepEvent,
     title = "Session Sweep - Asia Low",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.1\",\"event\":\"ASIA LOW SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"ASIA LOW SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 alertcondition(
     enableAlerts and alertSessionLiquiditySweep and londonHighSweepEvent,
     title = "Session Sweep - London High",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.1\",\"event\":\"LONDON HIGH SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"LONDON HIGH SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 alertcondition(
     enableAlerts and alertSessionLiquiditySweep and londonLowSweepEvent,
     title = "Session Sweep - London Low",
-    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.1\",\"event\":\"LONDON LOW SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"LONDON LOW SWEPT\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+)
+
+alertcondition(
+    enableAlerts and alertCisdConfirmation and cisdValidAlertPulse,
+    title = "CISD Confirmed",
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"CISD CONFIRMED\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+)
+
+alertcondition(
+    enableAlerts and alertCisdConfirmation and bullishCisdAlertPulse,
+    title = "CISD - Bullish",
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"CISD BULL CONFIRMED\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
+)
+
+alertcondition(
+    enableAlerts and alertCisdConfirmation and bearishCisdAlertPulse,
+    title = "CISD - Bearish",
+    message = "{\"schema\":\"trading-companion.alert.v1\",\"source\":\"tradingview\",\"indicator\":\"trading-os\",\"indicatorVersion\":\"0.17.2\",\"event\":\"CISD BEAR CONFIRMED\",\"symbol\":\"{{exchange}}:{{ticker}}\",\"ticker\":\"{{ticker}}\",\"timeframe\":\"{{interval}}\",\"time\":\"{{time}}\",\"snapshotCode\":{{plot(\"Trading Companion snapshot code\")}},\"risk\":{\"entry\":null,\"stop\":null,\"target\":null,\"rr\":null},\"close\":{{close}}}"
 )
 
 string liquidityState = (
@@ -4392,16 +4418,6 @@ plot(
     display = display.data_window
 )
 plot(
-    bullishCisdCandidateLevel,
-    title = "Armed bullish CISD level",
-    display = display.data_window
-)
-plot(
-    bearishCisdCandidateLevel,
-    title = "Armed bearish CISD level",
-    display = display.data_window
-)
-plot(
     displacementEventPulse,
     title = "Displacement event pulse",
     display = display.data_window
@@ -4429,11 +4445,6 @@ plot(
 plot(
     displacementCandidateActive ? displacementCandidateDirection : 0,
     title = "Displacement candidate direction",
-    display = display.data_window
-)
-plot(
-    displacementEventActive ? latestDisplacementExpansionBar : na,
-    title = "Active displacement expansion bar",
     display = display.data_window
 )
 plot(
@@ -4570,7 +4581,7 @@ if barstate.islast
         biasPanel,
         0,
         0,
-        "TRADING OS · HTF v0.17.1",
+        "TRADING OS · HTF v0.17.2",
         bgcolor = panelColor,
         text_color = textColor,
         text_halign = text.align_left,

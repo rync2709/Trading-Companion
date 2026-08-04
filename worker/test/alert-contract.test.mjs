@@ -87,6 +87,33 @@ test("preserves a separate Session Sweep WATCH event", () => {
   assert.equal(alert.state, "developing");
 });
 
+test("preserves a direction-specific CISD event", () => {
+  const alert = parseIndicatorAlert({
+    schema: "trading-companion.alert.v1",
+    source: "tradingview",
+    indicator: "trading-os",
+    indicatorVersion: "0.17.2",
+    event: "CISD BULL CONFIRMED",
+    symbol: "FOREXCOM:XAUUSD",
+    ticker: "XAUUSD",
+    timeframe: "5",
+    time: "2026-08-04T12:05:00Z",
+    snapshotCode: MANUAL_BULLISH_DEVELOPING_A_PLUS,
+    risk: {
+      entry: null,
+      stop: null,
+      target: null,
+      rr: null
+    },
+    close: 4101.25
+  });
+
+  assert.equal(alert.event, "CISD BULL CONFIRMED");
+  assert.equal(alert.indicatorVersion, "0.17.2");
+  assert.equal(alert.timeframe, "5");
+  assert.equal(alert.mode, "manual");
+});
+
 test("rejects malformed compact snapshots", () => {
   assert.throws(
     () => decodeAlertSnapshotCode(33554432),

@@ -1,6 +1,6 @@
 # Trading OS Pine Indicator
 
-Version: v0.17.1-alpha
+Version: v0.17.2-alpha
 
 The Pine track automates selected Trading OS context checks without replacing trader judgment.
 
@@ -401,14 +401,20 @@ Manual mode exports the selected Manual Assessment; Automatic mode exports the
 confirmed indicator state.
 
 The Pine script exposes one `alert()` call with once-per-bar-close frequency,
-one named `Trading Companion Sync` fallback condition, and these separate
-Session conditions:
+one named `Trading Companion Sync` fallback condition, these separate Session
+conditions:
 
 - `Session Sweep Watch`
 - `Session Sweep - Asia High`
 - `Session Sweep - Asia Low`
 - `Session Sweep - London High`
 - `Session Sweep - London Low`
+
+and these separate valid CISD conditions:
+
+- `CISD Confirmed`
+- `CISD - Bullish`
+- `CISD - Bearish`
 
 The dynamic
 `alert()` condition remains preferred because it includes the full event list
@@ -431,6 +437,12 @@ To keep Session Sweep separate from Setup/Entry notifications, select
 four direction-specific conditions when each level needs its own TradingView
 alert. Do not enable both the combined and direction-specific conditions unless
 duplicate notifications are intentional.
+
+To receive only CISD notifications, select `CISD Confirmed`. Select
+`CISD - Bullish` or `CISD - Bearish` when direction-specific alerts are needed.
+The named CISD conditions require a confirmed valid CISD and therefore do not
+fire for weak, unaligned CISD events. Do not enable the combined and directional
+CISD conditions together unless duplicate notifications are intentional.
 
 ## Non-Repainting Baseline
 
@@ -594,6 +606,12 @@ Compile status:
   privately as `Trading OS HTF Context v0.17.1` without publishing.
 - Kept v0.17.1 visible in Manual mode and preserved the hidden v0.14.1
   production-alert instance. No new TradingView alert was created.
+- Pine v0.17.2 added combined, Bullish, and Bearish valid CISD alert conditions
+  without changing CISD scoring or setup logic.
+- Pine v0.17.2 compiled successfully on XAUUSD 15M, exposed all three named
+  CISD conditions in Create Alert, and was saved privately as
+  `Trading OS HTF Context v0.17.2` without publishing or creating a new live
+  alert.
 - Manual structure and FVG comparison remains pending and must not be inferred from the smoke test.
 - Manual PDH/PDL and sweep-event comparison remains pending.
 - Manual Displacement candidate and follow-through comparison remains pending.

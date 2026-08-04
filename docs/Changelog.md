@@ -2,6 +2,32 @@
 
 All notable changes to Trading OS will be documented in this file.
 
+## Pine v0.17.2-alpha - 2026-08-04
+
+### Added
+
+- Added a combined `CISD Confirmed` TradingView alert condition.
+- Added independent `CISD - Bullish` and `CISD - Bearish` conditions.
+- Kept named CISD alerts limited to confirmed valid CISD events: HTF-aligned
+  CISD with supporting Sweep, Structure, or POI context.
+- Added compact Trading Companion payloads for all three named conditions.
+
+### Safety
+
+- Kept CISD alerts separate from Session Sweep and other Setup/Entry alerts.
+- Preserved the existing v0.14.1 production alert; no alert migration or new
+  live alert was performed.
+- Replaced three nonessential Data Window debug plots with the three named CISD
+  conditions to remain within TradingView's 64-plot limit.
+
+### Validated
+
+- Compiled Pine v0.17.2 successfully in TradingView without runtime errors on
+  XAUUSD 15M.
+- Confirmed all three named CISD conditions appear in Create Alert.
+- Saved the private script as `Trading OS HTF Context v0.17.2` without
+  publishing or creating a new live alert.
+
 ## Pine v0.17.1-alpha - 2026-08-04
 
 ### Added
